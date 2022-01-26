@@ -8,6 +8,14 @@ const RootComponent = {
       "worker": "",
       "tag_map_1": ['难以判断', '不成立', '成立', '', '勉强成立'],
       "tag_map_2": ['难以判断', '搭配不当', '意义冲突', '语义变化不大', '语义变化大', '', '', '', '', ''],
+      "index1":0,
+      "index2":0,
+      "sites": [
+        { text: '无法搭配' },
+        { text: '语义冲突' },
+        { text: '在常识严重相悖' },
+        { text: '在上下文严重相悖' }
+      ],
       "showLoadLocalStorage": false,
       "documentId": -1,
       "desc": "空间关系认知语料标注",
@@ -144,7 +152,48 @@ const RootComponent = {
       changes_obj.formFilled = true;
       changes_obj.finished = true;
     },
-
+    mouse1: function(changes_obj){
+      if (changes_obj.judgeCorrection == 1 && changes_obj.judgeType==-1){
+        if (this.index2==0){
+          this.word1=''
+          let text = window.getSelection().toString();
+          if (this.index1==0){
+            changes_obj.whyNot.text_1_1=text
+          }
+          else if (this.index1==1){
+            changes_obj.whyNot.text_2_1=text
+          }
+          else if (this.index1==2){
+            changes_obj.whyNot.text_4_1=text
+          }
+          else{
+            changes_obj.whyNot.text_5_1=text
+          }
+          this.index2=1
+        }
+        else{
+          this.word2=''
+          let text = window.getSelection().toString();
+          if (this.index1==0){
+            changes_obj.whyNot.text_1_2=text
+          }
+          else if (this.index1==1){
+            changes_obj.whyNot.text_2_2=text
+          }
+          else if (this.index1==2){
+            changes_obj.whyNot.text_4_2=text
+          }
+          else{
+            changes_obj.whyNot.text_5_2=text
+          }
+          this.index2=0
+        }
+      }
+    },
+    opt1(){
+      let obj1 = document.getElementById("pid1");
+      this.index1 = obj1.options[obj1.selectedIndex].value;
+    },
     onImport: function() {
       let self = this;
       let fileList = document.forms["file-form"]["file-input"].files;

@@ -312,7 +312,7 @@
                 <div class="row my-1">
                   <div class="col col-12 col-lg-6">
                     <div>
-                      <p>【{{ changes_obj.docIdx+1 }}】<span v-for="frag in changes_obj.sentence" class="frag right-space"
+                      <p>【{{ changes_obj.docIdx+1 }}】<span @mouseup="mouse1(changes_obj)" v-for="frag in changes_obj.sentence" class="frag right-space"
                           :class="{'frag-substitutable': frag.substitutable, 'frag-isEntity': frag.isEntity, 'frag-notSpatial': frag.notSpatial, 'frag-changed': frag.changed, 'frag-bert': frag.bert}"
                           :data-pos="frag.POSTag"
                           :title="frag.changed?'原词：'+frag.word_origin+' '+frag.POSTag:frag.POSTag">{{frag.word}}</span>
@@ -358,6 +358,56 @@
                       <div
                         v-if="(changes_obj.judgeCorrection==1||changes_obj.judgeCorrection==4)&&changes_obj.judgeType==-1">
                         <form @submit.prevent="judge_2(changes_obj)">
+                          <div class="input-group my-1">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text"><input type="checkbox"
+                                  v-model="changes_obj.whyNot.isDaPeiBuDang"></span>
+                            </div>
+                            <input type="text" class="form-control" v-if="index1==0" :class="{'disabled-input': !changes_obj.whyNot.isDaPeiBuDang}"
+                            :disabled="!changes_obj.whyNot.isDaPeiBuDang" :required="changes_obj.whyNot.isDaPeiBuDang"  
+                              v-model="changes_obj.whyNot.text_1_1">
+                            <input type="text" class="form-control" v-if="index1==1"  :class="{'disabled-input': !changes_obj.whyNot.isYuYiChongTu}"
+                            :disabled="!changes_obj.whyNot.isYuYiChongTu"
+                              v-model="changes_obj.whyNot.text_2_1">
+                            <input type="text" class="form-control" v-if="index1==2" :class="{'disabled-input': !changes_obj.whyNot.isChangShiError}"
+                            :disabled="!changes_obj.whyNot.isChangShiError"
+                              v-model="changes_obj.whyNot.text_4_1">
+                            <input type="text" class="form-control" v-if="index1==3" :class="{'disabled-input': !changes_obj.whyNot.isYuJingError}"
+                            :disabled="!changes_obj.whyNot.isYuJingError"
+                              v-model="changes_obj.whyNot.text_5_1">
+                            <div class="input-group-prepend input-group-append">
+                              <span class="input-group-text">与</span>
+                            </div>
+                            <input type="text" class="form-control" v-if="index1==0"  :class="{'disabled-input': !changes_obj.whyNot.isDaPeiBuDang}"
+                            :disabled="!changes_obj.whyNot.isDaPeiBuDang" :required="changes_obj.whyNot.isDaPeiBuDang" 
+                              v-model="changes_obj.whyNot.text_1_2">
+                            <input type="text" class="form-control" v-if="index1==1"  :class="{'disabled-input': !changes_obj.whyNot.isYuYiChongTu}"
+                            :disabled="!changes_obj.whyNot.isYuYiChongTu"
+                              v-model="changes_obj.whyNot.text_2_2">
+                            <input type="text" class="form-control" v-if="index1==2" :class="{'disabled-input': !changes_obj.whyNot.isChangShiError}"
+                            :disabled="!changes_obj.whyNot.isChangShiError"
+                              v-model="changes_obj.whyNot.text_4_2">
+                            <input type="text" class="form-control" v-if="index1==3" :class="{'disabled-input': !changes_obj.whyNot.isYuJingError}"
+                            :disabled="!changes_obj.whyNot.isYuJingError"
+                              v-model="changes_obj.whyNot.text_5_2">
+                            <select id="pid1" @change="opt1()" class="input-group-append">
+                                <option  v-for="(site,index) in sites" :value="index">{{ site.text }}</option>
+                            </select>    
+                          </div>
+                          <div class="input-group my-1">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text"><input type="checkbox"
+                                  v-model="changes_obj.whyNot.isQiTa">其他：</span>
+                            </div>
+                            <input type="text" class="form-control"
+                              :class="{'disabled-input': !changes_obj.whyNot.isQiTa}"
+                              :disabled="!changes_obj.whyNot.isQiTa" v-model="changes_obj.whyNot.text_3">
+                          </div>
+                          <!-- <p>{{changes_obj.whyNot.text_1_1}}</p> -->
+                          <p><button type="submit" class="btn btn-sm btn-light">保存</button>
+                          </p>
+                        </form>
+                        <!-- <form @submit.prevent="judge_2(changes_obj)">
                           <div class="input-group my-1">
                             <div class="input-group-prepend">
                               <span class="input-group-text"><input type="checkbox"
@@ -443,7 +493,7 @@
                           </div>
                           <p><button type="submit" class="btn btn-sm btn-light">保存</button>
                           </p>
-                        </form>
+                        </form> -->
                       </div>
                       <button type="button" v-if="changes_obj.judgeCorrection==2&&changes_obj.judgeType==-1"
                         v-on:click="judge(changes_obj, [2, 3])" class="btn btn-sm btn-success">语义变化不大</button>
