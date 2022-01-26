@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>空间关系理解数据标注</title>
+  <!-- <link href="dist/bootstrap_5.1.3_.min.css" rel="stylesheet"> -->
+  <link href="dist/bootstrap_4.3.1_.min.css" rel="stylesheet">
+  <style type="text/css">
+    .right-space {
+      margin-right: 5px;
+    }
+
+    body {
+      background: #eee;
+    }
+
+    .bodywrap {
+      min-height: 100vh;
+    }
+
+    .container.page {
+      background: #fff;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .m0 {
+      margin: 0;
+    }
+
+    .form-control {
+      border: 1px solid #eee;
+    }
+
+    .progress-bar {
+      transition: all 0.5s;
+    }
+
+    .btn {
+      transition: all 0.5s;
+      margin: 1px;
+    }
+
+    /*#footer{padding-bottom: 5rem;}*/
+    .container {
+      transition: max-width 1s, width 1s;
+    }
+  </style>
+  <style type="text/css">
+    .card-wrap {
+      margin: 1rem 0;
+      padding: 1rem 1rem;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      transition: all 0.5s;
+    }
+
+    .card {
+      margin: 1rem 0;
+      padding: 0.4rem 1rem;
+      border: 1px solid #f6f6f6;
+      border-radius: 6px;
+    }
+
+    .card p {
+      margin-bottom: 0;
+    }
+
+    /*.card-wrap.done{color: #6c757d; background: #fff; opacity: 0.5;}*/
+    .cluster-box {
+      margin: 1rem 0;
+      border: 1px solid #eee;
+      border-radius: 6px;
+    }
+
+    .cluster-wrap {
+      margin: 1rem 0;
+      padding: 0.01rem 1rem;
+      max-height: 46vh;
+      overflow-y: auto;
+      background: #fefefe;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) inset;
+      transition: max-height 1s;
+    }
+
+    .cluster-wrap>.card {
+      border: 1px solid #666;
+    }
+  </style>
+  <style type="text/css">
+    @media print {
+      body {
+        background: #fff;
+        min-width: 0 !important;
+      }
+
+      .container {
+        min-width: 0 !important;
+      }
+
+      .bodywrap {
+        max-width: 100%;
+      }
+
+      .page {
+        max-width: 100%;
+      }
+
+      blockquote,
+      pre {
+        page-break-inside: initial;
+      }
+
+      .navbar {
+        display: none;
+      }
+
+      #page-import {
+        display: none;
+      }
+
+      #page-stage {
+        display: none;
+      }
+
+      #page-items-1 {
+        display: none;
+      }
+
+      #page-items-2 {
+        display: none;
+      }
+    }
+  </style>
+  <style type="text/css">
+    .text-example {
+      /*max-height: 60vh; min-height: 60vh; */
+      margin: 0.5em 0;
+      padding: 0.5em 1em;
+      font-size: inherit;
+      background: #fafafa;
+      color: inherit;
+      white-space: pre-wrap;
+      overflow: auto;
+      border: 1px solid #eee;
+      border-radius: 6px;
+    }
+
+    .quotation {
+      text-decoration: underline;
+      color: #006;
+    }
+
+    .frag-input {
+      border-radius: 3px;
+      border: 1px solid #eee;
+      padding: 0 1px;
+      margin: 0 1px;
+      max-width: 4em;
+      min-width: 1em;
+    }
+
+    .frag-isEntity {
+      color: steelblue;
+    }
+
+    .frag-substitutable {
+      color: #fa0;
+    }
+
+    .frag-substitutable.frag-notSpatial {
+      color: #666;
+    }
+
+    .frag-changed {
+      color: red;
+    }
+
+    .frag-changed.frag-bert {
+      color: red;
+      background: yellow;
+    }
+
+    .close-word {
+      margin: 0 2px;
+      padding: 0 2px;
+      background: #eee;
+      border-radius: 3px;
+    }
+
+    .my-1 .disabled-input {
+      cursor: not-allowed;
+      border: 1px solid #f3f3f3;
+      border-top: 1px solid #ced4da;
+      border-bottom: 1px solid #ced4da;
+      background-color: #f3f3f3;
+    }
+
+    mark.new {
+      background: #ffc;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bodywrap" id="bodywrap">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="#">空间关系理解数据标注</a>
+    </nav>
+    <div class="container page my-4 hiddent" id="page-import">
+      <form name="file-form" class="container py-2">
+        <div class="row" id="filePicker">
+          <!-- <label for="file-input" class="col-md-2 my-2 col-form-label text-md-right">选择文件：</label> -->
+          <div class="col-md-8 my-2">
+            <input type="file" class="form-control" name="file-input" id="file-input" multiple="multiple"
+              accept=".json, .md, .txt" />
+          </div>
+          <div class="btn-group col-md-4 my-2">
+            <button type="button" name="do_import" id="do_import" @click="onImport" class="btn btn-primary">导入</button>
+            <button type="button" name="do_export" id="do_export" @click="onExport" class="btn btn-info">导出</button>
+            <button v-if="showLoadLocalStorage" type="button" name="do_localStorage" id="do_localStorage"
+              v-on:click="readDataFromLocalStorage" class="btn btn-success">加载缓存数据</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="container page my-4 hiddent" id="page-stage">
+      <div class="container py-2">
+        <div class="row">
+          <div class="col-md-12 my-2">
+            <input class="form-control form-control-sm" type="text" v-model="worker" placeholder="请在此输入姓名">
+          </div>
+          <!-- <div class="btn-group col-12 my-2">
+              <button type="button" v-on:click="stage(1)" class="btn" :class="meta.stage==1?'btn-primary':'btn-light'">标注</button>
+              <button type="button" v-on:click="stage(2)" class="btn" :class="meta.stage==2?'btn-primary':'btn-light'">出题</button>
+            </div> -->
+          <div class="col">
+          </div>
+        </div>
+        <div class="row" :class="{'hidden': meta.stage!=1}">
+          <div class="col">
+            <div class="progress">
+              <div class="progress-bar bg-success" role="progressbar" :style="`width: ${done_pct};`"
+                :aria-valuenow="done_num" aria-valuemin="0" :aria-valuemax="total_num">{{ done_num }}/{{
+                total_num }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 文档开始 -->
+    <div class="container page my-4 py-2" id="page-items-1" :class="{'hidden': meta.stage!=1}">
+      <div v-for="dataItem in data" class="container card-wrap py-1">
+        <div class="container card">
+          <div class="row my-1">
+            <div class="col col-12 col-md-8">
+              <div v-if="!dataItem.isCorrecting">
+                <p>【原句】【编号{{ dataItem.itemId+1 }}】<span v-for="frag in dataItem.originalSentence"
+                    class="frag right-space"
+                    :class="{'frag-substitutable': frag.substitutable, 'frag-isEntity': frag.isEntity, 'frag-notSpatial': frag.notSpatial}"
+                    v-on:click="changeSpatial(frag, dataItem)" :data-pos="frag.POSTag">{{frag.word}}</span></p>
+              </div>
+              <div v-if="dataItem.isCorrecting">
+                <p><input v-for="frag in dataItem.originalSentence" type="text" class="frag-input" v-model="frag.word">
+                </p>
+              </div>
+              <!--
+                <div><p v-for="cluster in dataItem.clusters">【{{cluster.id}}】<span v-for="changed in cluster.changed">（{{changed.idx}}, {{changed.from}}）</span></p></div> -->
+            </div>
+            <div class="col col-12 col-md-4">
+              <div>
+                <p><button type="button"
+                    v-on:click="dataItem.originalError = !dataItem.originalError; if(dataItem.originalError){dataItem.showSentences=false;};"
+                    class="btn btn-sm" :class="dataItem.originalError? 'btn-danger':'btn-light'">{{
+                    dataItem.originalError? '状态：弃用':'状态：正常' }}</button>
+                  <!-- <button type="button" v-on:click="dataItem.isCorrecting = !dataItem.isCorrecting" class="btn btn-sm btn-light" :class="{'hidden':dataItem.originalError}">{{ dataItem.isCorrecting? '结束勘误':'开始勘误' }}</button></p><p> --><button
+                    type="button" v-on:click="dataItem.showSentences = !dataItem.showSentences" class="btn btn-sm"
+                    :class="{'hidden':dataItem.originalError, 'btn-primary':dataItem.showSentences, 'btn-info':!dataItem.showSentences}">{{
+                    dataItem.showSentences? '收起替换句':'列出替换句'
+                    }}({{dataItem.sentencesLength}})</button></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <template v-for="cluster in dataItem.clusters">
+          <div v-if="!cluster.dropped" class="container cluster-box"
+            :class="{'hidden':dataItem.originalError||!dataItem.showSentences}">
+            <div class="container card">
+              <div class="row my-1">
+                <div class="col col-12">
+                  <div>
+                    <p>以下是【第{{+cluster.id+1}}个被替换词 <span v-for="changed in cluster.changed">“{{changed.from}}”
+                      </span>】对应的替换句。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="container cluster-wrap">
+              <template v-for="changes_obj in dataItem.changesObjects">
+              <div
+                v-if="changes_obj.clusterId==cluster.id&&!changes_obj.dropped" class="container card"
+                :class="{'hidden':dataItem.originalError||!dataItem.showSentences}">
+                <div class="row my-1">
+                  <div class="col col-12 col-lg-6">
+                    <div>
+                      <p>【{{ changes_obj.docIdx+1 }}】<span v-for="frag in changes_obj.sentence" class="frag right-space"
+                          :class="{'frag-substitutable': frag.substitutable, 'frag-isEntity': frag.isEntity, 'frag-notSpatial': frag.notSpatial, 'frag-changed': frag.changed, 'frag-bert': frag.bert}"
+                          :data-pos="frag.POSTag"
+                          :title="frag.changed?'原词：'+frag.word_origin+' '+frag.POSTag:frag.POSTag">{{frag.word}}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col col-12 col-lg-6">
+                    <div>
+                      <p v-if="changes_obj.judgeCorrection!=-1">
+                        {{tag_map_1[+changes_obj.judgeCorrection]}}<span
+                          v-if="changes_obj.judgeType!=-1&&changes_obj.judgeType!=6&&changes_obj.judgeType!=7">，{{tag_map_2[+changes_obj.judgeType]}}
+                        </span><span v-if="changes_obj.judgeType==6">，原因是：<span
+                            v-if="changes_obj.whyNot.isDaPeiBuDang"><br>“{{changes_obj.whyNot.text_1_1}}”与“{{changes_obj.whyNot.text_1_2}}”无法搭配</span>
+                          <span
+                            v-if="changes_obj.whyNot.isYuYiChongTu"><br>“{{changes_obj.whyNot.text_2_1}}”与“{{changes_obj.whyNot.text_2_2}}”语义冲突</span>
+                          <span
+                            v-if="changes_obj.whyNot.isChangShiError"><br>“{{changes_obj.whyNot.text_4_1}}”与常识“{{changes_obj.whyNot.text_4_2}}”严重相悖</span>
+                          <span
+                            v-if="changes_obj.whyNot.isYuJingError"><br>“{{changes_obj.whyNot.text_5_1}}”与上下文中的描述“{{changes_obj.whyNot.text_5_2}}”严重相悖</span>
+                          <span v-if="changes_obj.whyNot.isQiTa"><br>{{changes_obj.whyNot.text_3}}</span></span><span
+                          v-if="changes_obj.judgeType==7">，原因是：<span
+                            v-if="changes_obj.whyNot.isDaPeiBuDang"><br>“{{changes_obj.whyNot.text_1_1}}”与“{{changes_obj.whyNot.text_1_2}}”不宜搭配</span>
+                          <span
+                            v-if="changes_obj.whyNot.isYuYiChongTu"><br>“{{changes_obj.whyNot.text_2_1}}”与“{{changes_obj.whyNot.text_2_2}}”语义不和谐</span>
+                          <span
+                            v-if="changes_obj.whyNot.isChangShiError"><br>“{{changes_obj.whyNot.text_4_1}}”与常识“{{changes_obj.whyNot.text_4_2}}”有一定冲突</span>
+                          <span
+                            v-if="changes_obj.whyNot.isYuJingError"><br>“{{changes_obj.whyNot.text_5_1}}”与上下文中的描述“{{changes_obj.whyNot.text_5_2}}”不和谐</span>
+                          <span v-if="changes_obj.whyNot.isQiTa"><br>{{changes_obj.whyNot.text_3}}</span></span>
+                      </p>
+                      <p>
+                        <button type="button" v-if="changes_obj.judgeCorrection==-1"
+                          v-on:click="judge(changes_obj, [1, -1])" class="btn btn-sm btn-danger">不成立</button>
+                        <button type="button" v-if="changes_obj.judgeCorrection==-1"
+                          v-on:click="judge(changes_obj, [4, -1])" class="btn btn-sm btn-warning">勉强成立</button>
+                        <button type="button" v-if="changes_obj.judgeCorrection==-1"
+                          v-on:click="judge(changes_obj, [2, -1])" class="btn btn-sm btn-success">成立</button>
+                        <!--
+                        <button type="button" v-if="changes_obj.judgeCorrection==-1" v-on:click="judge(changes_obj, [0, 0])" class="btn btn-sm btn-secondary">难以判断</button> -->
+                        <!--
+                        <button type="button" v-if="changes_obj.judgeCorrection==1&&changes_obj.judgeType==-1" v-on:click="judge(changes_obj, [1, 1])" class="btn btn-sm btn-danger">搭配不合适</button>
+                        <button type="button" v-if="changes_obj.judgeCorrection==1&&changes_obj.judgeType==-1" v-on:click="judge(changes_obj, [1, 2])" class="btn btn-sm btn-danger">意义冲突</button> -->
+                      <div
+                        v-if="(changes_obj.judgeCorrection==1||changes_obj.judgeCorrection==4)&&changes_obj.judgeType==-1">
+                        <form @submit.prevent="judge_2(changes_obj)">
+                          <div class="input-group my-1">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text"><input type="checkbox"
+                                  v-model="changes_obj.whyNot.isDaPeiBuDang"></span>
+                            </div>
+                            <input type="text" class="form-control"
+                              :class="{'disabled-input': !changes_obj.whyNot.isDaPeiBuDang}"
+                              :disabled="!changes_obj.whyNot.isDaPeiBuDang" :required="changes_obj.whyNot.isDaPeiBuDang"
+                              v-model="changes_obj.whyNot.text_1_1">
+                            <div class="input-group-prepend input-group-append">
+                              <span class="input-group-text">与</span>
+                            </div>
+                            <input type="text" class="form-control"
+                              :class="{'disabled-input': !changes_obj.whyNot.isDaPeiBuDang}"
+                              :disabled="!changes_obj.whyNot.isDaPeiBuDang" :required="changes_obj.whyNot.isDaPeiBuDang"
+                              v-model="changes_obj.whyNot.text_1_2">
+                            <div class="input-group-append">
+                              <span class="input-group-text">{{changes_obj.judgeCorrection==1?"无法搭配":"不宜搭配"}}</span>
+                            </div>
+                          </div>
+                          <div class="input-group my-1">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text"><input type="checkbox"
+                                  v-model="changes_obj.whyNot.isYuYiChongTu"></span>
+                            </div>
+                            <input type="text" class="form-control"
+                              :class="{'disabled-input': !changes_obj.whyNot.isYuYiChongTu}"
+                              :disabled="!changes_obj.whyNot.isYuYiChongTu" v-model="changes_obj.whyNot.text_2_1">
+                            <div class="input-group-prepend input-group-append">
+                              <span class="input-group-text">与</span>
+                            </div>
+                            <input type="text" class="form-control"
+                              :class="{'disabled-input': !changes_obj.whyNot.isYuYiChongTu}"
+                              :disabled="!changes_obj.whyNot.isYuYiChongTu" v-model="changes_obj.whyNot.text_2_2">
+                            <div class="input-group-append">
+                              <span class="input-group-text">{{changes_obj.judgeCorrection==1?"语义冲突":"语义不和谐"}}</span>
+                            </div>
+                          </div>
+                          <div class="input-group my-1">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text"><input type="checkbox"
+                                  v-model="changes_obj.whyNot.isChangShiError"></span>
+                            </div>
+                            <input type="text" class="form-control"
+                              :class="{'disabled-input': !changes_obj.whyNot.isChangShiError}"
+                              :disabled="!changes_obj.whyNot.isChangShiError" v-model="changes_obj.whyNot.text_4_1">
+                            <div class="input-group-prepend input-group-append">
+                              <span class="input-group-text">与常识</span>
+                            </div>
+                            <input type="text" class="form-control"
+                              :class="{'disabled-input': !changes_obj.whyNot.isChangShiError}"
+                              :disabled="!changes_obj.whyNot.isChangShiError" v-model="changes_obj.whyNot.text_4_2">
+                            <div class="input-group-append">
+                              <span class="input-group-text">{{changes_obj.judgeCorrection==1?"严重相悖":"有一定冲突"}}</span>
+                            </div>
+                          </div>
+                          <div class="input-group my-1">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text"><input type="checkbox"
+                                  v-model="changes_obj.whyNot.isYuJingError"></span>
+                            </div>
+                            <input type="text" class="form-control"
+                              :class="{'disabled-input': !changes_obj.whyNot.isYuJingError}"
+                              :disabled="!changes_obj.whyNot.isYuJingError" v-model="changes_obj.whyNot.text_5_1">
+                            <div class="input-group-prepend input-group-append">
+                              <span class="input-group-text">与上下文中的描述</span>
+                            </div>
+                            <input type="text" class="form-control"
+                              :class="{'disabled-input': !changes_obj.whyNot.isYuJingError}"
+                              :disabled="!changes_obj.whyNot.isYuJingError" v-model="changes_obj.whyNot.text_5_2">
+                            <div class="input-group-append">
+                              <span class="input-group-text">{{changes_obj.judgeCorrection==1?"严重相悖":"不和谐"}}</span>
+                            </div>
+                          </div>
+                          <div class="input-group my-1">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text"><input type="checkbox"
+                                  v-model="changes_obj.whyNot.isQiTa">其他：</span>
+                            </div>
+                            <input type="text" class="form-control"
+                              :class="{'disabled-input': !changes_obj.whyNot.isQiTa}"
+                              :disabled="!changes_obj.whyNot.isQiTa" v-model="changes_obj.whyNot.text_3">
+                          </div>
+                          <p><button type="submit" class="btn btn-sm btn-light">保存</button>
+                          </p>
+                        </form>
+                      </div>
+                      <button type="button" v-if="changes_obj.judgeCorrection==2&&changes_obj.judgeType==-1"
+                        v-on:click="judge(changes_obj, [2, 3])" class="btn btn-sm btn-success">语义变化不大</button>
+                      <button type="button" v-if="changes_obj.judgeCorrection==2&&changes_obj.judgeType==-1"
+                        v-on:click="judge(changes_obj, [2, 4])" class="btn btn-sm btn-success">语义变化大</button>
+                      <button type="button" v-if="changes_obj.judgeCorrection!=-1"
+                        v-on:click="judge(changes_obj, [-1, -1])" class="btn btn-sm btn-light">重置</button>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              </template>
+            </div>
+          </div>
+        </template>
+        <div class="row">
+          <div class="col">
+            <textarea class="form-control form-control-sm mb-4" rows="2" v-model="dataItem.feedback1"
+              placeholder="您可在此备注信息或记录反馈意见"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- <script type="text/javascript" src="dist/vue_2.6.10_.min.js"></script> -->
+  <script type="text/javascript" src="dist/vue_3.2.26_.global.prod.min.js"></script>
+  <script type="text/javascript" src="dist/FileSaver.js"></script>
+  <script type="text/javascript" src="js/main.js"></script>
+</body>
+
+</html>
