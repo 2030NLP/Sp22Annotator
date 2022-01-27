@@ -1,0 +1,97 @@
+{
+  "version": "1",
+  "menu": {
+    "语料检查": [
+      {
+        "label": "错别字",
+        "mode": "modify"
+      },
+      {
+        "label": "多余内容（符号或字词）",
+        "mode": "delete"
+      },
+      {
+        "label": "语病",
+        "mode": "text"
+      }
+    ],
+    "语料编辑": [
+      {
+        "label": "增加",
+        "mode": "add"
+      },
+      {
+        "label": "删除",
+        "mode": "delete"
+      },
+      {
+        "label": "修改",
+        "mode": "modify"
+      }
+    ],
+    "不成立": [
+      {
+        "label": "不宜搭配",
+        "mode": "multiSpans"
+      },
+      {
+        "label": "语义冲突",
+        "mode": "multiSpans"
+      },
+      {
+        "label": "不符合常识（选择）",
+        "mode": "choose",
+        "choices": [
+          "物体模型常识",
+          "行为常识",
+          "场景常识"
+        ]
+      },
+      {
+        "label": "不符合常识（自填）",
+        "mode": "text"
+      }
+    ],
+    "勉强成立": [
+      {
+        "label": "搭配不自然",
+        "mode": "multiSpans"
+      },
+      {
+        "label": "语义不协调",
+        "mode": "multiSpans"
+      },
+      {
+        "label": "不太符合常识（选择）",
+        "mode": "choose",
+        "choices": [
+          "物体模型常识",
+          "行为常识",
+          "场景常识"
+        ]
+      },
+      {
+        "label": "不太符合常识（自填）",
+        "mode": "text"
+      }
+    ],
+    "空间角色标注": [
+      {
+        "label": "参照物",
+        "mode": "selectSpan"
+      },
+      {
+        "label": "目标物",
+        "mode": "selectSpan"
+      },
+      {
+        "label": "观察点",
+        "mode": "selectSpan"
+      },
+      {
+        "label": "参照物",
+        "mode": "selectSpan"
+      }
+    ]
+  }
+}

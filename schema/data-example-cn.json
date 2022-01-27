@@ -1,0 +1,116 @@
+{
+  "分发文件ID": 77,
+  "内容描述": "SpaCE2022标注",
+  "API版本": "22-0126-00",
+  "创建时间": "220126-160439",
+  "最后修改时间": "220126-160439",
+  "经手记录": [
+    {
+      "时间": "220126-160439",
+      "人员": "孙春晖",
+      "处理": "创建"
+    }
+  ],
+  "标注人员": [],
+  "数据清单": [
+    {
+      "原句总ID": "1-77-34",
+      "标注批次": 1,
+      "分发文件ID": 77,
+      "原句ID": 34,
+
+      "是替换句": true,
+      "替换句总ID": "1-77-34-5",
+      "替换句序号": 5,
+
+      "语料对象": {
+        "语料内容": "桌上有碗汤",
+        "分词信息清单": [
+          {
+            "word": "桌",
+            "pos": "n",
+            "autoEntity": true,
+            "autoSpatial": false
+          },
+          {
+            "word": "上",
+            "pos": "f",
+            "autoEntity": false,
+            "autoSpatial": true
+          },
+          {
+            "word": "有",
+            "pos": "v",
+            "autoEntity": false,
+            "autoSpatial": false
+          },
+          {
+            "word": "碗",
+            "pos": "q",
+            "autoEntity": false,
+            "autoSpatial": false
+          },
+          {
+            "word": "汤",
+            "pos": "n",
+            "autoEntity": true,
+            "autoSpatial": false
+          },
+          {
+            "word": "。",
+            "pos": "w",
+            "autoEntity": false,
+            "autoSpatial": false
+          }
+        ]
+      },
+
+      "替换内容": [
+        {
+          "替换词位置": 1,
+          "替换词": {
+            "word": "下",
+            "pos": "f",
+            "class": "上下左右类",
+          }
+        },
+        {
+          "替换词位置": 3,
+          "替换词": {
+            "word": "杯",
+            "pos": "q",
+            "class": "容器量词",
+          }
+        },
+        {
+          "替换词位置": 4,
+          "替换词": {
+            "word": "铁",
+            "pos": "n",
+            "class": "物质名词",
+          }
+        }
+      ],
+
+      "标注内容": [
+        {
+          "idx": 0,
+          "环节": "不成立",
+          "label": "搭配不当",
+          "mode": "multiSpans",
+          "selectedSpans": [[3], [4]]  // [ 杯, 铁 ]
+        },
+        {
+          "idx": 1,
+          "环节": "不成立改正",
+          "toSolve": 0,  // 针对哪一个标注内容进行的进一步改正
+          "label": "修改",
+          "mode": "modify",
+          "source": 3,  // 杯
+          "target": "块"
+        }
+      ]
+
+    }
+  ]
+}
