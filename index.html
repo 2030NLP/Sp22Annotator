@@ -5,69 +5,50 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+  <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+  <META HTTP-EQUIV="Expires" CONTENT="0">
+  <!-- 如何禁止浏览器缓存 https://www.zhihu.com/question/27565755 -->
+  <!-- 使用HTML meta no-cache标签来禁用缓存 https://www.cnblogs.com/zdz8207/p/vue-meta-no-cache.html -->
+  <!-- axios禁止请求缓存 https://blog.csdn.net/u010238381/article/details/84304968 -->
+
   <title>空间关系理解数据标注 2022</title>
+
   <link href="lib/bootstrap_5.1.3_.min.css" rel="stylesheet">
-  <!-- <link href="lib/bootstrap_4.6.1_.min.css" rel="stylesheet"> -->
+
+  <link href="css/style.css" rel="stylesheet">
+
   <style type="text/css">
-    .right-space {
-      margin-right: 5px;
+    .container {
+      transition: max-width 0.5s, width 0.5s;
     }
-  </style>
-  <style type="text/css">
-    .page-ctrl {
-      background: #e9ecef;  /*#f8f9fa;*/
-      border-radius: 8px;
-    }
-    #page-main-editor--main {
-      min-height: 35vh;
-    }
-    #page-main-editor p {
-      margin-top: 0.25rem;
-      margin-bottom: 0.25rem;
-    }
-
-    .material-area {
-      user-select: none;
-    }
-    .material-area span {
-      cursor: pointer;
-    }
-    .material-area span:hover {
-      background: #fee;
-    }
-    .material-area span[data-auto-entity=true] {
-      color: steelblue;
-    }
-    .material-area span[data-auto-spatial=true] {
-      color: #fa0;
-    }
-    .material-area span[data-replaced=true] {
-      color: #f00;
-    }
-    .material-area span[data-have-replace=true] {
-      border: 1px dotted #faa;
-    }
-    .material-area span[data-selecting=true] {
-      background: #eef;
-    }
-    .material-area span[data-selected=true] {
-      background: #ff0;
-    }
-
-    .bodywrap {
-      min-height: 120vh;
-    }
-
-    .container.page {
-      background: #fff;
-      border-radius: 8px;
+    .progress-bar {
       transition: all 0.5s;
     }
-    @media screen and (max-width: 576.5px) {
-      .container.page {
-        background: #fff;
-        border-radius: 0;
-      }
+    .btn {
+      transition: all 0.2s;
+    }
+    .btn-info {
+      color: #fff;
+      background-color: #17a2b8;
+      border-color: #17a2b8;
+    }
+    .btn-info:hover {
+      color: #fff;
+      background-color: #138496;
+      border-color: #117a8b;
+    }
+    .btn-info.focus, .btn-info:focus {
+      color: #fff;
+      background-color: #138496;
+      border-color: #117a8b;
+      box-shadow: 0 0 0 .2rem rgba(58,176,195,.5);
+    }
+    .btn-info:active {
+      color: #fff;
+      background-color: #138496;
+      border-color: #117a8b;
     }
   </style>
   <style type="text/css">
@@ -86,20 +67,6 @@
     /*.form-control {
       border: 1px solid #eee;
     }*/
-
-    .progress-bar {
-      transition: all 0.5s;
-    }
-
-    .btn {
-      transition: all 0.5s;
-      /*margin: 1px;*/
-    }
-
-    /*#footer{padding-bottom: 5rem;}*/
-    .container {
-      transition: max-width 1s, width 1s;
-    }
   </style>
   <style type="text/css">
     /*.card-wrap {
@@ -264,29 +231,27 @@
   <div class="bodywrap" id="bodywrap">
     <!-- navbar start -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand" href="#">空间关系理解数据标注 2022</a>
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">空间关系理解数据标注 2022</a>
+      </div>
     </nav>
     <!-- navbar end -->
-    <!-- fileCtrl start -->
     <div class="container page my-4 hiddent" id="page-import">
-      <form name="file-form" class="container py-2">
-        <div class="row" id="filePicker">
+      <div class="container py-2">
+        <!-- fileCtrl start -->
+        <form name="file-form" class="row" id="filePicker">
           <div class="col-md-8 my-2">
-            <input type="file" class="form-control" name="file-input" id="file-input" accept=".json, .txt" />
+            <input type="file" class="form-control form-control-sm" name="file-input" id="file-input" accept=".json, .txt" />
           </div>
-          <div class="btn-group col-md-4 my-2">
+          <div class="btn-group btn-group-sm col-md-4 my-2">
             <button type="button" name="do_import" id="do_import" @click="onImport" class="btn btn-primary">导入</button>
             <button type="button" name="do_export" id="do_export" @click="onExport" class="btn btn-info">导出</button>
             <button v-if="showLoadLocalStorage" type="button" name="do_localStorage" id="do_localStorage"
               v-on:click="readDataFromLocalStorage" class="btn btn-success">加载缓存数据</button>
           </div>
-        </div>
-      </form>
-    </div>
-    <!-- fileCtrl end -->
-    <!-- progressCtrl start -->
-    <div class="container page my-4 hiddent" id="page-stage">
-      <div class="container py-2">
+        </form>
+        <!-- fileCtrl end -->
+        <!-- progressCtrl start -->
         <div class="row align-items-center">
           <div class="col col-12 col-lg-2 my-2">
             <input class="form-control form-control-sm" type="text" v-model="worker" placeholder="请在此输入姓名">
@@ -299,6 +264,197 @@
             </div>
           </div>
         </div>
+        <!-- progressCtrl end -->
+      </div>
+    </div>
+
+    <div class="container page my-4 hiddent" id="page-stage">
+      <div class="container py-2">
+        <!-- 页码操作区 开始 -->
+        <!-- 页码操作区 结束 -->
+      </div>
+    </div>
+
+
+
+
+    <!-- 新版编辑区 开始 -->
+    <div class="container page my-4 py-2" id="page-main-editor">
+      <div class="container">
+        <div class="row mt-2 mb-3 align-items-center" id="page-main-editor--main">
+          <!-- 内容区 开始 -->
+          <div class="col col-12 col-lg-7 my-2">
+            <!-- 替换后文本区 开始 -->
+            <div class="row my-2 material-area" id="material-replaced">
+              <p>
+                <span
+                  v-for="token in example.material.tokenList"
+                  :key="token.idx"
+                  class="token"
+                  :class="{'right-space': true}"
+                  :title="`${token.idx}, ${token.pos}`"
+                  :data-idx="token.idx"
+                  :data-pos="token.pos"
+                  :data-auto-entity="token.autoEntity"
+                  :data-auto-spatial="token.autoSpatial"
+                  :data-selecting="token?._ctrl?.selecting"
+                  :data-selected="token?._ctrl?.selected"
+                  :data-replaced="token?.replaced ?? false"
+                  @mousedown="onMouseDown(token)"
+                  @mouseenter="onMouseEnter(token)"
+                  @mouseout="onMouseOut(token)"
+                  @mouseup="onMouseUp(token)"
+                >{{ token?.replaced ? token?.to?.word : token.word }}<!-- <sub>{{ token.idx }}</sub> --></span>
+              </p>
+            </div>
+            <!-- 替换后文本区 结束 -->
+            <!-- 替换前原文区 开始 -->
+            <div class="row my-2 material-area" id="material-origin" :data-show="ctrl.showOrigin" v-show="ctrl.showOrigin">
+              <p>
+                <span
+                  v-for="token in example.material.tokenList"
+                  :key="token.idx"
+                  class="token"
+                  :class="{'right-space': true}"
+                  :title="`${token.idx}, ${token.pos}`"
+                  :data-idx="token.idx"
+                  :data-pos="token.pos"
+                  :data-auto-entity="token.autoEntity"
+                  :data-auto-spatial="token.autoSpatial"
+                  :data-selecting="token?._ctrl?.selecting"
+                  :data-selected="token?._ctrl?.selected"
+                  :data-have-replace="token?.replaced ?? false"
+                  @mousedown="onMouseDown(token)"
+                  @mouseenter="onMouseEnter(token)"
+                  @mouseout="onMouseOut(token)"
+                  @mouseup="onMouseUp(token)"
+                >{{ token.word }}<!-- <sub>{{ token.idx }}</sub> --></span>
+              </p>
+            </div>
+            <!-- 替换前原文区 结束 -->
+            <div class="row my-2" v-show="selection.array.length">
+              <div class="col col-12 col-lg-12">
+                <button v-if=" 'multiSpans' == (currentStep.mode) && currentStep?.props?.addBtn" type="button" v-on:click="currentStep?.props?.data.tokenarrays.push(selection.array)" class="btn btn-sm my-1 me-1" :class="`btn-outline-primary`">{{ currentStep.props.addBtn.text }}</button>
+                <button type="button" v-on:click="clearSelection" class="btn btn-sm my-1 me-1" :class="`btn-outline-info`">清除选区</button>
+              </div>
+            </div>
+          </div>
+          <!-- 内容区 结束 -->
+          <!-- 功能区 开始 -->
+          <div class="col col-12 col-lg-5 my-2" id="func-ctrl">
+
+            <!-- deBug用的 开始 -->
+            <!-- <div class="row mb-3">
+              <div class="col col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div>{{ stepRecords.list }}</div>
+                  </div>
+                </div>
+              </div>
+            </div> -->
+            <!-- deBug用的 结束 -->
+
+            <!-- 标注一般流程模块 开始 -->
+            <div class="row" v-if="['selectValue', 'interlude'].includes(currentStep.mode)" :data-mode="currentStep.mode">
+              <!-- 指导语 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.instruction">
+                <div>{{ currentStep?.props?.instruction }}</div>
+              </div>
+              <!-- 选项按钮 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.optionBtns">
+                <button v-for="btn in currentStep.props.optionBtns" :key="btn.text" type="button" v-on:click="goRefStep(btn.go, btn.value)" class="btn btn-sm my-1 me-1" :class="`btn-${btn.style}`">{{ btn.text }}</button>
+              </div>
+              <!-- 完成按钮 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.okBtn">
+                <button type="button" v-on:click="goRefStep(currentStep.props.okBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`">{{ currentStep.props.okBtn.text }}</button>
+              </div>
+              <!-- 重置按钮 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.canReset">
+                <button type="button" v-on:click="resetStep(currentStep.props.resetBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.resetBtn.style}`">{{ currentStep.props.resetBtn.text }}</button>
+              </div>
+            </div>
+            <!-- 标注一般流程模块 结束 -->
+
+
+            <!-- 标注结果展示模块 开始 -->
+            <div class="row" v-if=" 'finalResult' == (currentStep.mode)" :data-mode="currentStep.mode">
+              <!-- 指导语 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.instruction">
+                <div>{{ currentStep?.props?.instruction }}</div>
+              </div>
+              <!-- 标记区 开始 -->
+              <div class="row my-2" id="annotations-area">
+                <div class="col col-12 col-lg-12" v-for="anno in example.annotations" :key="anno.idx">
+                  <div class="btn-group btn-group-sm my-1 me-2 anno-entry" :data-deleted="anno.deleted??false" __v-if="!anno.deleted">
+
+                    <button type="button" class="btn btn-outline-primary" v-if="example.annotations.length>1">{{anno.idx}}</button>
+                    <button type="button" class="btn btn-outline-secondary" __class="getAnnoBtnClass(anno.label)">{{anno.label}}</button>
+
+                    <template v-if="anno.mode=='modify'">
+                      <button type="button" class="btn btn-outline-secondary" :title="example.material.tokenList[anno.source].idx"><span>{{example.material.tokenList[anno.source].word}}<sub>{{ example.material.tokenList[anno.source].idx }}</sub> → <span>{{anno.target}}</span></button>
+                    </template>
+
+                    <template v-if="anno.mode=='multiSpans'">
+                      <button v-for="tokenarray, kk in anno.tokenarrays" :key="kk" type="button" class="btn btn-outline-secondary">
+                        <span v-for="idx in tokenarray" :key="idx" :title="idx">{{example.material.tokenList[idx].word}}<sub>{{idx}}</sub></span>
+                      </button>
+                    </template>
+
+                    <button type="button" class="btn btn-outline-secondary" v-if="anno.toSolve!=null">以解决 {{example.annotations[anno.toSolve].label}}<sub>{{anno.toSolve}}</sub> 的问题</button>
+
+                    <!-- <button type="button" class="btn btn-outline-danger" @click="anno.deleted=true" title="删除" v-if="!anno.deleted">×</button> -->
+
+                    <!-- <button type="button" class="btn btn-outline-success no-delete" @click="anno.deleted=false" title="恢复" v-if="anno.deleted">恢复</button> -->
+                  </div>
+                </div>
+              </div>
+              <!-- 标记区 结束 -->
+              <!-- 重置按钮 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.canReset">
+                <button type="button" v-on:click="resetStep(currentStep.props.resetBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.resetBtn.style}`">{{ currentStep.props.resetBtn.text }}</button>
+              </div>
+            </div>
+            <!-- 标注结果展示模块 结束 -->
+
+
+
+            <!-- multiSpans 模式 开始 -->
+            <div class="row" v-if=" 'multiSpans' == (currentStep.mode)" :data-mode="currentStep.mode">
+              <!-- 指导语 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.instruction">
+                <div>{{ currentStep?.props?.instruction }}</div>
+              </div>
+              <!-- --- -->
+              <div class="col col-12 my-1">
+                <!-- addBtn -->
+                <button v-if="currentStep?.props?.addBtn" type="button" v-on:click="currentStep?.props?.data.tokenarrays.push(selection.array)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.addBtn.style}`">{{ currentStep.props.addBtn.text }}</button>
+                <!-- clearBtn -->
+                <button v-if="currentStep?.props?.clearBtn" type="button" v-on:click="clearSelection" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.clearBtn.style}`">{{ currentStep.props.clearBtn.text }}</button>
+                <!-- okBtn -->
+                <button v-if="currentStep?.props?.okBtn" type="button" v-on:click="goRefStep(currentStep.props.okBtn.go, currentStep.props.data)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`">{{ currentStep.props.okBtn.text }}</button>
+              </div>
+              <!-- 已选列表 开始 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.listTitle">
+                <div>{{ currentStep?.props?.listTitle }}</div>
+              </div>
+              <div class="col col-12 my-1" v-if="['multiSpans'].includes(currentStep.mode)">
+                <div class="card">
+                  <div class="card-body">
+                    <span class="badge rounded-pill bg-light text-dark m-1" v-for="tokenarray in currentStep.props.data.tokenarrays"><span v-for="tokenIdx in tokenarray">{{ example.material.tokenList[tokenIdx]?.replaced ? example.material.tokenList[tokenIdx]?.to?.word : example.material.tokenList[tokenIdx].word }}</span></span>
+                  </div>
+                </div>
+              </div>
+              <!-- 已选列表 结束 -->
+            </div>
+            <!-- multiSpans 模式 结束 -->
+          </div>
+          <!-- 功能区 结束 -->
+        </div>
+
+
+
+
         <!-- 页码操作区 开始 -->
         <div class="row page-ctrl">
           <div class="col col-12 col-md-4 my-1">
@@ -323,103 +479,21 @@
           </div> -->
         </div>
         <!-- 页码操作区 结束 -->
-      </div>
-    </div>
-    <!-- progressCtrl end -->
-    <!-- 新版编辑区 开始 -->
-    <div class="container page my-4 py-2" id="page-main-editor">
-      <div class="container">
-        <div class="row mt-2 mb-3 align-items-center" id="page-main-editor--main">
-          <!-- 内容区 开始 -->
-          <div class="col col-12 col-lg-8 my-2">
-            <!-- 替换后文本区 开始 -->
-            <div class="row my-2 material-area" id="material-replaced">
-              <p>
-                <span
-                  v-for="token in example.material.tokenList"
-                  :key="token.idx"
-                  class="frag"
-                  :class="{'right-space': true}"
-                  :data-pos="token.pos"
-                  :data-auto-entity="token.autoEntity"
-                  :data-auto-spatial="token.autoSpatial"
-                  :data-selecting="token?._ctrl?.selecting"
-                  :data-selected="token?._ctrl?.selected"
-                  :data-replaced="token?.replaced ?? false"
-                  @mousedown="onMouseDown(token)"
-                  @mouseenter="onMouseEnter(token)"
-                  @mouseout="onMouseOut(token)"
-                  @mouseup="onMouseUp(token)"
-                >{{ token?.replaced ? token?.to?.word : token.word }}</span>
-              </p>
-            </div>
-            <!-- 替换后文本区 结束 -->
-            <!-- 替换前原文区 开始 -->
-            <div class="row my-2 material-area" id="material-origin" :data-show="ctrl.showOrigin" v-show="ctrl.showOrigin">
-              <p>
-                <span
-                  v-for="token in example.material.tokenList"
-                  :key="token.idx"
-                  class="frag"
-                  :class="{'right-space': true}"
-                  :data-pos="token.pos"
-                  :data-auto-entity="token.autoEntity"
-                  :data-auto-spatial="token.autoSpatial"
-                  :data-selecting="token?._ctrl?.selecting"
-                  :data-selected="token?._ctrl?.selected"
-                  :data-have-replace="token?.replaced ?? false"
-                  @mousedown="onMouseDown(token)"
-                  @mouseenter="onMouseEnter(token)"
-                  @mouseout="onMouseOut(token)"
-                  @mouseup="onMouseUp(token)"
-                >{{ token.word }}</span>
-              </p>
-            </div>
-            <!-- 替换前原文区 结束 -->
-            <!-- 标记区 开始 -->
-            <div class="row my-2" id="annotations-area">
-              <!-- <div class="col col-12 col-lg-12"> -->
-              <div v-for="anno in example.annotations">
-                <div>
-                  <span>
-                    {{anno.idx}} ， {{anno.label}} ，
-                    <template v-if="anno.toSolve!=null">toSolve({{anno.toSolve}}) ，</template>
-                  </span>
-                  <template v-if="anno.mode=='multiSpans'">
-                    <template v-for="spans in anno.selectedSpans">
-                      <span v-for="idx in spans">[{{idx}}:{{example.material.tokenList[idx].word}}]</span>
-                    </template>
-                  </template>
-                </div>
-              </div>
-              <!-- </div> -->
-            </div>
-            <!-- 标记区 结束 -->
-          </div>
-          <!-- 内容区 结束 -->
-          <!-- 功能区 开始 -->
-          <div class="col col-12 col-lg-4 my-2" id="func-ctrl">
-            <div class="row">
-              <div class="col">
-                <button type="button" __v-on:click="step('成立')" class="btn btn-sm my-1 me-1 btn-success">成立</button>
-                <button type="button" __v-on:click="step('不成立')" class="btn btn-sm my-1 me-1 btn-danger">不成立</button>
-              </div>
-            </div>
-            <!-- 选区控件 开始 -->
-            <div class="row my-2" id="selection-ctrl">
-              <p>{{selection.array}}</p>
-              <p>
-                <button type="button" @click="clearSelection" class="btn btn-sm my-1 me-1 btn-info">清除选区</button>
-                <button type="button" @click="toogleShowOrigin" class="btn btn-sm my-1 me-1 btn-primary">切换原句显示</button>
-              </p>
-            </div>
-            <!-- 选区控件 结束 -->
-          </div>
-          <!-- 功能区 结束 -->
-        </div>
+
+
+
+
       </div>
     </div>
     <!-- 新版编辑区 结束 -->
+
+
+
+
+
+
+
+
     <!-- 旧版编辑区 开始 -->
     <div class="container page my-4 py-2" id="page-items-1" :class="{'hidden': meta.stage!=1}">
       <div v-for="dataItem in data" class="container card-wrap py-1">
@@ -596,7 +670,17 @@
       </div>
     </div>
     <!-- 旧版编辑区 结束 -->
+
+
+
+
+
+
+
+
   </div>
+  <!-- bodywrap end -->
+
   <!-- scripts start -->
   <script type="text/javascript" src="lib/store_2.0.9_.legacy.min.js"></script>
   <script type="text/javascript" src="lib/vue_3.2.26_.global.prod.min.js"></script>

@@ -1,4 +1,6 @@
 {
+  "filename": "modes.schema",
+  "version": "220129",
   "各个 mode 的含义": {
     "modify": {
       "描述": "对指定位置的token进行修改",
@@ -33,7 +35,7 @@
       "数据涉及的关键字段": [
         ["idx", "int", "标注序号，从0开始，限此条语料内部。"],
         ["label", "string", "事先选好的关系标签。"],
-        ["tokens", "array[ array[int] ]", "token串 构成的数组，token串 以串内 token 的序号构成的数组表示。如[ [0, 1, 2], [7, 8] ]，表示两个 token串 构成的数组，一个是从第 0 个 token 到第 2 个 token，另一个是从第 7 个 token 到第 8 个 token。"]
+        ["tokenarrays", "array[ array[int] ]", "token串 构成的数组，token串 以串内 token 的序号构成的数组表示。如[ [0, 1, 2], [7, 8] ]，表示两个 token串 构成的数组，一个是从第 0 个 token 到第 2 个 token，另一个是从第 7 个 token 到第 8 个 token。"]
       ]
     },
     "selectSpan": {

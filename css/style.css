@@ -1,0 +1,83 @@
+
+
+    .bodywrap {
+      min-height: 120vh;
+    }
+
+    .container.page {
+      background: #fff;
+      border-radius: 8px;
+      transition: all 0.5s;
+    }
+    @media screen and (max-width: 576.5px) {
+      .container.page {
+        background: #fff;
+        border-radius: 0;
+      }
+    }
+
+
+
+
+    .page-ctrl {
+      background: #e9ecef;  /*#f8f9fa;*/
+      border-radius: 8px;
+    }
+    #page-main-editor--main {
+      min-height: 35vh;
+    }
+    #page-main-editor p {
+      margin-top: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+
+
+    .material-area {
+      user-select: none;
+    }
+    .material-area span.token {
+      padding: 0 2px;
+      cursor: pointer;
+      border: 2px dotted transparent;
+      border-radius: 4px;
+    }
+    .material-area span.token.right-space {
+      /*margin-right: 3px;*/
+    }
+    .material-area span.token:hover {
+      background: #fee;
+    }
+    .material-area span.token[data-auto-entity=true] {
+      /*color: steelblue;*/
+      color: #056;
+    }
+    .material-area span.token[data-auto-spatial=true] {
+      /*color: #fa0;*/
+      color: #650;
+    }
+    .material-area span.token[data-replaced=true] {
+      color: #f00;
+    }
+    .material-area span.token[data-have-replace=true] {
+      border-bottom: 2px dotted #faa;
+      border-radius: 5px;
+    }
+    .material-area span.token[data-selecting=true] {
+      background: #eef;
+    }
+    .material-area span.token[data-selected=true] {
+      background: #ff0;
+    }
+
+    .anno-entry[data-deleted=true] .btn {
+      opacity: 0.5;
+      text-decoration: line-through #222;
+    }
+    .anno-entry[data-deleted=true] .btn.no-delete {
+      text-decoration: none;
+    }
+
+
+
+

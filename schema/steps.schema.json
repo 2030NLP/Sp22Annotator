@@ -1,0 +1,100 @@
+{
+  "filename": "steps.schema",
+  "version": "220129",
+  "粗标步骤": {
+    "startStep": "judgeSpConfig",
+    "endStep": "end",
+    "steps": {
+      "end": {
+        "ref": "end",
+        "name": "结束",
+        "style": "primary",
+        "": "",
+        "isEnd": true,
+        "instruction": "标注已完成",
+        "nextActions": [
+          {"text": "重置", "go": "reset"}
+        ],
+      },
+      "reset": {
+        "ref": "reset",
+        "name": "重置",
+        "style": "danger",
+        "isReset": true,
+        "instruction": "重新标注",
+        "autoAction": "judgeSpConfig",
+      },
+
+      "judgeSpConfig": {
+        "ref": "judgeSpConfig",
+        "name": "评估材料的空间关系",
+        "style": "primary",
+        "instruction": "这段材料中的空间关系____。",
+        "nextActions": [
+          {"text": "非常正常", "go": "fine"},
+          {"text": "尚能说通", "go": "someFine"},
+          {"text": "比较牵强", "go": "someBad"},
+          {"text": "根本不对", "go": "bad"}
+        ],
+      },
+
+      "fine": {
+        "ref": "fine",
+        "name": "非常正常",
+        "style": "primary",
+        "autoAction": "judgeSimilarity",
+      },
+      "someFine": {
+        "ref": "someFine",
+        "name": "尚能说通",
+        "style": "primary",
+        "autoAction": "judgeSimilarity",
+      },
+      "someBad": {
+        "ref": "someBad",
+        "name": "比较牵强",
+        "style": "primary",
+        "autoAction": "manageReasons",
+      },
+      "bad": {
+        "ref": "bad",
+        "name": "根本不对",
+        "style": "primary",
+        "autoAction": "manageReasons",
+      },
+
+      "judgeSimilarity": {
+        "ref": "judgeSimilarity",
+        "name": "判断相似性",
+        "instruction": "这两段材料中的空间关系____。",
+        "style": "primary",
+        "nextActions": [
+          {"text": "相同", "go": "same"},
+          {"text": "可能相同也可能不同", "go": "ambi"},
+          {"text": "不同", "go": "diff"}
+        ],
+      },
+
+      "manageReasons": {
+        "ref": "manageReasons",
+        "name": "管理归因",
+        "instruction": "这段材料中的空间关系存在的异常有____。",
+        "style": "primary",
+        "nextActions": [
+          {"text": "➕ 新增", "go": "addReason"},
+          {"text": "✔️ 完成", "go": "end"}
+        ],
+      },
+      "addReason": {
+        "ref": "addReason",
+        "name": "添加归因",
+        "instruction": "请选择要添加的异常",
+        "style": "primary",
+        "nextActions": [
+          {"text": "➕ 新增", "go": "addReason"},
+          {"text": "✔️ 完成", "go": "end"}
+        ],
+      },
+    }
+  }
+}

@@ -8,6 +8,7 @@ const TheSelector = (tokenList) => {
     end: null,
     array: [],
     again: false,
+    hasDown: false,
   });
 
 
@@ -20,6 +21,7 @@ const TheSelector = (tokenList) => {
         end: null,
         array: [],
         again: false,
+        hasDown: false,
       });
       for (let tkn of tokenList) {
         if (tkn._ctrl != null) {
@@ -33,12 +35,11 @@ const TheSelector = (tokenList) => {
     onMouseDown:  (token) => {
       // console.log(['mouseDown', token.word]);
       //
-      if (selection.isSelecting) {
-        selection.again = true;
+      if (selection.hasDown) {
         return;
       };
       //
-      selection.again = false;
+      selection.hasDown = true;
       for (let tkn of tokenList) {
         tkn._ctrl = tkn._ctrl ?? {};
         tkn._ctrl.selected = false;
@@ -71,6 +72,52 @@ const TheSelector = (tokenList) => {
       // console.log(['mouseOut', token.word]);
     },
     onMouseUp:    (token) => {
+      // console.log(['mouseUp', token.word]);
+      //
+      if (selection.start == null) {return;};
+      //
+      //
+      selection.end = token.idx;
+      let [aa, bb] = [selection.start, selection.end];
+      if (bb < aa) {
+        [bb, aa] = [aa, bb];
+      };
+      selection.isSelecting = false;
+      selection.array = [];
+      for (let idx = aa; idx<=bb; idx++) {
+        selection.array.push(idx);
+        for (let tkn of tokenList) {
+          if (selection.array.includes(tkn.idx)) {
+            // tkn._ctrl = tkn._ctrl ?? {};
+            tkn._ctrl.selecting = false;
+            tkn._ctrl.selected = true;
+          }
+        };
+      };
+      selection.hasDown = false;
+      // console.log(selection.array);
+    },
+    onMouseDown_Old:  (token) => {
+      // console.log(['mouseDown', token.word]);
+      //
+      if (selection.isSelecting) {
+        selection.again = true;
+        return;
+      };
+      //
+      selection.again = false;
+      for (let tkn of tokenList) {
+        tkn._ctrl = tkn._ctrl ?? {};
+        tkn._ctrl.selected = false;
+      };
+      token._ctrl.selecting = true;
+      //
+      selection.isSelecting = true;
+      selection.start = token.idx;
+      selection.current = token.idx;
+      selection.end = null;
+    },
+    onMouseUp_Old:    (token) => {
       // console.log(['mouseUp', token.word]);
       //
       if (selection.start == null) {return;};
