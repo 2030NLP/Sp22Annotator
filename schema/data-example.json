@@ -90,16 +90,16 @@
         ]
       },
 
-      "_schema": {
-        "name": "",
-        "version": ""
-      },
       "annotations": [
         {
           "idx": 0,
           "label": "搭配不当",
           "mode": "multiSpans",
-          "tokenarrays": [[3], [4]]
+          "tokenarrays": [[3], [4]],
+          "_schema": {
+            "name": "",
+            "version": ""
+          }
         },
         {
           "idx": 1,

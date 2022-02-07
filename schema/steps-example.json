@@ -1,11 +1,4 @@
-{
-  "name": "SpaCE2022",
-  "version": "220207",
-  "using": "众包粗标",
-  "众包粗标": {
-    "startStep": "start",
-    "endStep": "end",
-    "steps": {
+    {
       "start": {
         "ref": "start",
         "name": "评估材料的空间关系",
@@ -331,6 +324,3 @@
         }
       }
     }
-  },
-  "xx": {}
-}

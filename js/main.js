@@ -199,294 +199,48 @@ const RootComponent = {
     // const stepMethods = theSteps.stepMethods;
     // // ↑ 参看 js/components/TheSteps.js
 
-    const RootStep = {
-      ref: "root",
-      name: "评估材料的空间关系",
-      mode: "root",
-      props: {
-        startBtn: {
-          text: "开始标注", go:"start", style: "outline-dark",
-        },
-      },
+
+
+    const stepsDictWrap = reactive({
+      version: "00",
+    });
+    const stepsDict = reactive({});
+    const RootStep = reactive({});
+    const currentStep = reactive({});
+    // console.debug(currentStep);
+
+    const updateSteps = async () => {
+      let response = await axios.request({
+        url: "schema/steps.schema.json",
+        method: 'post',
+        headers: {'Catch-Cotrol': 'no-cache'},
+      });
+      let wrap = (response.data);
+      console.debug(wrap);
+      if (stepsDictWrap.name == wrap.name &&
+        stepsDictWrap.version == wrap.version &&
+        stepsDictWrap.using == wrap.using) {
+        return;
+      };
+      Object.assign(stepsDictWrap, wrap);
+      Object.assign(stepsDict, stepsDictWrap?.[stepsDictWrap?.using]?.steps??null);
+      Object.assign(RootStep, stepsDictWrap?.[stepsDictWrap?.using]?.steps?.[stepsDictWrap?.[stepsDictWrap?.using]?.startStep]??null);
+      Object.assign(currentStep, RootStep);
     };
 
-
-    const stepsDict = {
-      start: {
-        ref: "start",
-        name: "评估材料的空间关系",
-        mode: "selectValue",
-        props: {
-          instruction: "这段材料中的空间关系____。",
-          optionBtns: [
-            {text: "完全正常", value: "fine", go:"judgeSimilarity", style: "outline-primary", },
-            {text: "尚能说通", value: "someFine", go:"judgeSimilarity", style: "outline-primary", },
-            {text: "比较牵强", value: "someBad", go:"manageReasons", style: "outline-primary", },
-            {text: "根本不对", value: "bad", go:"manageReasons", style: "outline-primary", },
-          ],
-        },
-      },
-      judgeSimilarity: {
-        ref: "judgeSimilarity",
-        name: "评估材料的空间关系",
-        mode: "selectValue",
-        props: {
-          instruction: "这两段材料中的空间关系____。",
-          showOrigin: true,
-          optionBtns: [
-            {text: "相同", value: "same", go:"end", style: "outline-primary", },
-            {text: "可能相同也可能不同", value: "ambi", go:"end", style: "outline-primary", },
-            {text: "不同", value: "diff", go:"end", style: "outline-primary", },
-          ],
-          canReset: true,
-          resetBtn: {
-            text: "重置",
-            go:"start",
-            style: "outline-dark",
-          },
-        },
-      },
-      manageReasons: {
-        ref: "manageReasons",
-        name: "管理归因",
-        mode: "interlude",  // 幕间
-        props: {
-          data: {
-            annotations: [],
-          },
-          instruction: "这段材料中的空间关系存在的异常有____。",
-          showResults: true,
-          optionBtns: [
-            {text: "+ 搭配不当", go:"addDaPeiBuDang", style: "outline-primary", },
-            {text: "+ 语义冲突", go:"xxx", style: "outline-primary", },
-            {text: "+ 不符合常识（选择）", go:"addChangShi", style: "outline-primary", },
-            {text: "+ 不符合常识（文本）", go:"addChangShi1", style: "outline-primary", },
-            {text: "+ 其它", go:"addtext", style: "outline-primary", },
-            {text: "+ 增加字", go:"addword", style: "outline-primary", },
-            {text: "+ 删除字", go:"deleteword", style: "outline-primary", },
-            {text: "+ 修改字", go:"modifyword", style: "outline-primary", },
-          ],
-          okBtn: {
-            text: "✔️ 结束",
-            go:"end",
-            style: "outline-success",
-          },
-          canReset: true,
-          resetBtn: {
-            text: "重置",
-            go:"start",
-            style: "outline-dark",
-          },
-        },
-      },
-      end: {
-        ref: "end",
-        name: "标注结果",
-        mode: "finalResult",
-        props: {
-          instruction: "标注结果如下：",
-          canReset: true,
-          resetBtn: {
-            text: "清空并重新标注",
-            go:"start",
-            style: "outline-dark",
-          },
-          cancelBtn: {
-            text: "返回并继续标注",
-            go: "manageReasons",
-            style: "outline-dark",
-          },
-        },
-      },
-
-      addtext: {
-        ref: "addtext",
-        name: "其它",
-        mode: "text",
-        props: {
-          instruction: "请在文中写下你的意见。",
-          okBtn: {
-            text: "不再添加，完成",
-            go: "manageReasons",
-            style: "success",
-          },
-        },
-      },
-
-      addword: {
-        ref: "addword",
-        name: "增加字",
-        mode: "add",
-        props: {
-          instruction: "请选择token",
-          listTitle: "",
-          data: {
-            label: "增加字",
-            tokenarrays: [],
-          },
-          addBtn: {
-            text: "将所选片段加入列表",
-            style: "primary",
-          },
-          clearBtn: {
-            text: "清除选区",
-            style: "info",
-          },
-          okBtn: {
-            text: "不再添加，完成",
-            go: "manageReasons",
-            style: "success",
-          },
-        },
-      },
-
-      modifyword: {
-        ref: "modifyword",
-        name: "修改字",
-        mode: "modify",
-        props: {
-          instruction: "请选择token",
-          listTitle: "",
-          data: {
-            label: "修改字",
-            tokenarrays: [],
-          },
-          addBtn: {
-            text: "将所选片段加入列表",
-            style: "primary",
-          },
-          clearBtn: {
-            text: "清除选区",
-            style: "info",
-          },
-          okBtn: {
-            text: "不再添加，完成",
-            go: "manageReasons",
-            style: "success",
-          },
-        },
-      },
-
-      deleteword: {
-        ref: "deleteword",
-        name: "删除字",
-        mode: "delete",
-        props: {
-          instruction: "请选择token",
-          listTitle: "",
-          data: {
-            label: "删除字",
-            tokenarrays: [],
-          },
-          addBtn: {
-            text: "将所选片段加入列表",
-            style: "primary",
-          },
-          clearBtn: {
-            text: "清除选区",
-            style: "info",
-          },
-          okBtn: {
-            text: "不再添加，完成",
-            go: "manageReasons",
-            style: "success",
-          },
-        },
-      },
-
-      addDaPeiBuDang: {
-        ref: "addDaPeiBuDang",
-        name: "新增搭配不当",
-        mode: "multiSpans",
-        props: {
-          instruction: "请在文中依次划选造成搭配不当的全部文本片段。选择完成后，可将其加入列表。",
-          listTitle: "造成搭配不当的文本片段是：",
-          data: {
-            label: "搭配不当",
-            tokenarrays: [],
-          },
-          addBtn: {
-            text: "将所选片段加入列表",
-            style: "primary",
-          },
-          clearBtn: {
-            text: "清除选区",
-            style: "info",
-          },
-          okBtn: {
-            text: "不再添加，完成",
-            go: "manageReasons",
-            style: "success",
-          },
-        },
-      },
-
-      addChangShi: {
-        ref: "addChangShi",
-        name: "新增不符合常识",
-        mode: "choose",
-        props: {
-          selectInstruction: "请在文中划选不符合常识的文本片段",
-          selectedTitle: "当前选中的不符合常识的文本片段是：",
-          instruction: "请选择该片段所不符合的常识类型",
-          options: ["常识1", "常识2"],
-          data: {
-            label: "不符合常识",
-            on: [],
-            withText: "",
-          },
-          okBtn: {
-            text: "确定",
-            go: "manageReasons",
-            style: "success",
-          },
-          cancelBtn: {
-            text: "取消",
-            go: "manageReasons",
-            style: "light",
-          },
-        },
-      },
-
-      addChangShi1: {
-        ref: "addChangShi1",
-        name: "新增不符合常识1",
-        mode: "text",
-        props: {
-          selectInstruction: "请在文中划选不符合常识的文本片段",
-          selectedTitle: "当前选中的不符合常识的文本片段是：",
-          instruction: "请填写该片段所不符合的常识",
-          data: {
-            label: "不符合常识",
-            on: [],
-            withText: "",
-          },
-          okBtn: {
-            text: "确定",
-            go: "manageReasons",
-            style: "success",
-          },
-          cancelBtn: {
-            text: "取消",
-            go: "manageReasons",
-            style: "light",
-          },
-        },
-      },
-
-    };
-
+    onMounted(async ()=>{
+      await updateSteps();
+    });
 
 
     const stepRecords = {list:[]};
-    const currentStep = reactive(RootStep);
     const stepMethods = {
       resetStep: (ref) => {
         stepMethods.cancelStep(ref);
         exampleWrap.example.annotations = [];
       },
       cancelStep: (ref) => {
-        let stepObj = JSON.parse(JSON.stringify(stepsDict[ref]));
+        let stepObj = JSON.parse(JSON.stringify(stepsDict?.[ref]??null));
         stepMethods.goStep(stepObj);
         stepRecords.list = [];
         selectionMethods.clearSelection();
@@ -522,6 +276,12 @@ const RootComponent = {
 
         data = fn(data);
 
+        data._schema = {
+          name: stepsDictWrap.name ?? null,
+          version: stepsDictWrap.version ?? null,
+          using: stepsDictWrap.using ?? null,
+        };
+
         // 加入 annotations 清单
         exampleWrap.example.annotations.push(JSON.parse(JSON.stringify(data)));
 
@@ -541,9 +301,7 @@ const RootComponent = {
       },
 
       handleMultiSpans: (ref, data) => {
-
         let fn = (da)=>{
-          // TODO
           return da;
         };
         stepMethods.handleTemplate(ref, data, fn);
@@ -643,19 +401,6 @@ const RootComponent = {
 
 
 
-    const updateSteps = async () => {
-      let response = await axios.request({
-        url: "schema/steps.schema.json",
-        method: 'post',
-        headers: {'Catch-Cotrol': 'no-cache'},
-      });
-      let schemaWrap = (response.data);
-      console.debug(schemaWrap);
-    };
-
-    onMounted(async ()=>{
-      await updateSteps();
-    });
 
     return {
       //
@@ -671,9 +416,11 @@ const RootComponent = {
       //
       stepRecords,
       stepsDict,
+      RootStep,
       currentStep,
       ...stepMethods,
       //
+      stepsDictWrap,
       updateSteps,
       //
       // getAnnoBtnClass,
@@ -683,159 +430,7 @@ const RootComponent = {
 
 
 
-  ____data() {
-    return {
-      //
-      ctrl: {
-        currentIdx: 32345245,
-      },
 
-      //
-      //
-      //
-      "file_meta_list": [],
-      "current_file_meta": {},
-      "data": [],
-      "worker": "",
-      "tag_map_1": ['难以判断', '不成立', '成立', '', '勉强成立'],
-      "tag_map_2": ['难以判断', '搭配不当', '意义冲突', '语义变化不大', '语义变化大', '', '', '', '', ''],
-      "index1":0,
-      "index2":0,
-      "sites": [
-        { text: '无法搭配' },
-        { text: '语义冲突' },
-        { text: '在常识严重相悖' },
-        { text: '在上下文严重相悖' }
-      ],
-      "showLoadLocalStorage": false,
-      "documentId": -1,
-      // "desc": "空间关系认知语料标注",
-      // "apiVersion": "21-0131-00",
-      // "meta": {
-      //   "workers": [],
-      //   "createdTime": "2021-01-30",
-      //   "modifiedTime": "2021-01-30",
-      //   "stage": 1
-      // },
-    };
-  },
-  ____computed: {
-    question_done_num: function() {
-      let self = this;
-      let sum = 0;
-      for (let dataItem of self.data) {
-        for (let cluster of dataItem.clusters) {
-          if (!cluster.neglect && cluster.question.trim() != "") {
-            sum++;
-          }
-        }
-      }
-      return sum;
-    },
-    question_total_num: function() {
-      let self = this;
-      let sum = 0;
-      for (let dataItem of self.data) {
-        for (let cluster of dataItem.clusters) {
-          let judgeType4Num = 0;
-          for (let changes_obj of dataItem.changesObjects) {
-            if (changes_obj.clusterId == cluster.id) {
-              if (changes_obj.judgeType == 4) {
-                judgeType4Num += 1;
-              }
-            }
-          }
-          if (judgeType4Num <= 0) {
-            cluster.neglect = true;
-          } else {
-            cluster.neglect = false;
-            sum++;
-          }
-        }
-      }
-      return sum;
-    },
-
-    question_done_pct: function() {
-      let self = this;
-      if (self.question_total_num == 0)
-        return `${0}%`;
-      return `${self.question_done_num / self.question_total_num * 100}%`;
-    },
-
-    done_num: function() {
-      let self = this;
-      let sum = 0;
-      for (let dataItem of self.data) {
-        if (!dataItem.originalError) {
-          for (let changes_obj of dataItem.changesObjects) {
-            if (changes_obj.finished && !changes_obj.dropped) {
-              sum++;
-            };
-          };
-        };
-      };
-      return sum;
-    },
-    total_num: function() {
-      let self = this;
-      let sum = 0;
-      for (let dataItem of self.data) {
-        if (!dataItem.originalError) {
-          sum += dataItem.sentencesLength;
-        };
-      };
-      return sum;
-    },
-    done_pct: function() {
-      let self = this;
-      return `${self.done_num / self.total_num * 100}%`;
-    },
-
-    done_num1: function() {
-      let self = this;
-      let sum = 0;
-      for (let dataItem of self.data) {
-        if (!dataItem.originalError) {
-          for (let changes_obj of dataItem.changesObjects) {
-            if ((changes_obj.judgeCorrection == 2) && (changes_obj.judgeType == 4)) {
-              if (changes_obj.choicesMade == 2) {
-                sum++;
-              };
-            };
-          };
-          for (let changes_obj of dataItem.clusters) {
-            if (changes_obj.originObject.choicesMade == 2) {
-              sum++;
-            };
-          };
-        };
-      };
-      return sum;
-    },
-    total_num1: function() {
-      let self = this;
-      let sum = 0;
-      for (let dataItem of self.data) {
-        if (!dataItem.originalError) {
-          for (let changes_obj of dataItem.changesObjects) {
-            if ((changes_obj.judgeCorrection == 2) && (changes_obj.judgeType == 4)) {
-              sum++;
-            };
-          };
-          for (let changes_obj of dataItem.clusters) {
-            sum++;
-          };
-        };
-      };
-      return sum;
-    },
-    done_pct1: function() {
-      let self = this;
-      return `${self.done_num1 / self.total_num1 * 100}%`;
-    },
-
-  },
   ____methods: {
 
     submit: function(changes_obj) {
