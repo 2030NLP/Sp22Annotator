@@ -1,4 +1,6 @@
 
+// updated: 2022-02-07
+
 const TheReader = (handleError=console.log) => {
 
   const {
@@ -32,7 +34,7 @@ const TheReader = (handleError=console.log) => {
         })
         .then((fileWrap) => {
           if (encoding==null) {
-            encoding = jschardet.detect(fileWrap.test).encoding;
+            encoding = encoding || jschardet.detect(fileWrap.test).encoding;
             encoding = encoding== "ascii" ? "utf-8" : encoding;
           };
           return [encoding, fileWrap];

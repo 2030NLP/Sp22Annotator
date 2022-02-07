@@ -1,6 +1,6 @@
 {
-  "filename": "steps.schema",
-  "version": "220129",
+  "version": "220207",
+  "using": "粗标步骤",
   "粗标步骤": {
     "startStep": "judgeSpConfig",
     "endStep": "end",
@@ -14,7 +14,7 @@
         "instruction": "标注已完成",
         "nextActions": [
           {"text": "重置", "go": "reset"}
-        ],
+        ]
       },
       "reset": {
         "ref": "reset",
@@ -22,7 +22,7 @@
         "style": "danger",
         "isReset": true,
         "instruction": "重新标注",
-        "autoAction": "judgeSpConfig",
+        "autoAction": "judgeSpConfig"
       },
 
       "judgeSpConfig": {
@@ -35,32 +35,32 @@
           {"text": "尚能说通", "go": "someFine"},
           {"text": "比较牵强", "go": "someBad"},
           {"text": "根本不对", "go": "bad"}
-        ],
+        ]
       },
 
       "fine": {
         "ref": "fine",
         "name": "非常正常",
         "style": "primary",
-        "autoAction": "judgeSimilarity",
+        "autoAction": "judgeSimilarity"
       },
       "someFine": {
         "ref": "someFine",
         "name": "尚能说通",
         "style": "primary",
-        "autoAction": "judgeSimilarity",
+        "autoAction": "judgeSimilarity"
       },
       "someBad": {
         "ref": "someBad",
         "name": "比较牵强",
         "style": "primary",
-        "autoAction": "manageReasons",
+        "autoAction": "manageReasons"
       },
       "bad": {
         "ref": "bad",
         "name": "根本不对",
         "style": "primary",
-        "autoAction": "manageReasons",
+        "autoAction": "manageReasons"
       },
 
       "judgeSimilarity": {
@@ -72,7 +72,7 @@
           {"text": "相同", "go": "same"},
           {"text": "可能相同也可能不同", "go": "ambi"},
           {"text": "不同", "go": "diff"}
-        ],
+        ]
       },
 
       "manageReasons": {
@@ -83,7 +83,7 @@
         "nextActions": [
           {"text": "➕ 新增", "go": "addReason"},
           {"text": "✔️ 完成", "go": "end"}
-        ],
+        ]
       },
       "addReason": {
         "ref": "addReason",
@@ -93,8 +93,9 @@
         "nextActions": [
           {"text": "➕ 新增", "go": "addReason"},
           {"text": "✔️ 完成", "go": "end"}
-        ],
-      },
+        ]
+      }
     }
-  }
+  },
+  "xx": {}
 }
