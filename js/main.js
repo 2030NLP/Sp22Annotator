@@ -1,8 +1,16 @@
 // import { reactive, readonly, ref, toRefs, computed, onMounted, onUpdated } from 'vue';
 const { reactive, readonly, ref, toRefs, computed, onMounted, onUpdated } = Vue;
 
+const APP_VERSION = "22-0207-00";
+
 const RootComponent = {
   setup() {
+
+    // ↓ 参看 js/components/TheReader.js
+    const theReader = TheReader();
+    // ↑ 参看 js/components/TheReader.js
+
+
     const exampleWrap = reactive({
       example: {
         "dbID": "1-77-34",
@@ -116,209 +124,99 @@ const RootComponent = {
     });
 
 
-    // const showOrigin = ref(false);
-    const ctrl = reactive({
-      showOrigin: false,
+    const appData = reactive({
+      fileWrapWrap: {
+        fileWrap: {},
+      },
+      fileError: false,
+      meta: {
+        currentWorker: "",
+        handleLogs: [],
+      },
+      dataWrap: {
+        dataItems: [],
+      },
+      ctrl: {
+        doneNum: 0,
+        totalNum: 0,
+        donePct: "0%",
+        currentIdx: 0,
+        showOrigin: false,
+      },
     });
+
+    const dataMethods = {
+      onImport: async () => {
+        let fileItem = document.forms["file-form"]["file-input"].files[0];
+        console.debug(fileItem);
+
+
+        let fileWrap = {};
+        fileWrap.file = fileItem;
+        fileWrap.name = fileItem.name;
+        fileWrap.isUsable = true;
+        fileWrap.readed = false;
+        fileWrap.readed2 = false;
+        fileWrap.tmp = false;
+        fileWrap.encodingGot = false;
+        fileWrap.encoding = null;
+
+        await theReader.readFileAsBinaryString(fileWrap, fileWrap.encoding);
+        await theReader.readFile(fileWrap);
+        Object.assign(appData.fileWrapWrap, {fileWrap: fileWrap});
+        console.debug(appData.fileWrapWrap.fileWrap);
+
+        dataMethods.readData();
+
+      },
+      readData: async () => {
+        let fileWrap = appData.fileWrapWrap.fileWrap;
+        let obj = JSON.parse(fileWrap.content);
+        // fileWrap.obj = obj;
+
+        if (obj?.desc != "SpaCE2022") {
+          appData.meta.fileError = true;
+          return;
+        };
+        appData.meta.fileError = false;
+
+        // TODO: 未来如果版本有大改，可能要针对 _appVersion 做某些判断和处理。
+
+        // ↓ 读取过往操作记录
+        Object.assign(appData.meta, {handleLogs: obj.handleLogs});
+        // appData.meta.handleLogs.push({});
+
+        // ↓ 读取数据条目
+        Object.assign(appData.dataWrap, {dataItems: obj.dataItems});
+        ctrlMethods.updateProgress();
+
+      },
+    };
     const ctrlMethods = {
       toogleShowOrigin: () => {
-        ctrl.showOrigin = !ctrl.showOrigin;
-        console.log(ctrl.showOrigin);
+        appData.ctrl.showOrigin = !appData.ctrl.showOrigin;
+        // console.debug(appData.ctrl.showOrigin);
       },
-    };
-
-
-    const stepsDict = reactive({
-      judgeSpConfig: {
-        ref: "judgeSpConfig",
-        name: "评估材料的空间关系",
-        mode: "selectValue",
-        props: {
-          instruction: "这段材料中的空间关系____。",
-          optionBtns: [
-            {text: "完全正常", value: "fine", go:"judgeSimilarity", style: "outline-primary", },
-            {text: "尚能说通", value: "someFine", go:"judgeSimilarity", style: "outline-primary", },
-            {text: "比较牵强", value: "someBad", go:"manageReasons", style: "outline-primary", },
-            {text: "根本不对", value: "bad", go:"manageReasons", style: "outline-primary", },
-          ],
-        },
-      },
-      judgeSimilarity: {
-        ref: "judgeSimilarity",
-        name: "评估材料的空间关系",
-        mode: "selectValue",
-        props: {
-          instruction: "这两段材料中的空间关系____。",
-          showOrigin: true,
-          optionBtns: [
-            {text: "相同", value: "same", go:"end", style: "outline-primary", },
-            {text: "可能相同也可能不同", value: "ambi", go:"end", style: "outline-primary", },
-            {text: "不同", value: "diff", go:"end", style: "outline-primary", },
-          ],
-          canReset: true,
-          resetBtn: {
-            text: "重置",
-            go:"judgeSpConfig",
-            style: "outline-dark",
-          },
-        },
-      },
-      manageReasons: {
-        ref: "manageReasons",
-        name: "管理归因",
-        mode: "interlude",  // 幕间
-        props: {
-          data: {
-            annotations: [],
-          },
-          instruction: "这段材料中的空间关系存在的异常有____。",
-          optionBtns: [
-            {text: "➕ 搭配不当", go:"addDaPeiBuDang", style: "outline-primary", },
-            {text: "➕ 语义冲突", go:"xxx", style: "outline-primary", },
-            {text: "➕ 不符合常识", go:"xxx", style: "outline-primary", },
-          ],
-          okBtn: {
-            text: "✔️ 结束",
-            go:"end",
-            style: "outline-success",
-          },
-          canReset: true,
-          resetBtn: {
-            text: "重置",
-            go:"judgeSpConfig",
-            style: "outline-dark",
-          },
-        },
-      },
-      end: {
-        ref: "end",
-        name: "标注结果",
-        mode: "finalResult",
-        props: {
-          instruction: "标注结果如下：",
-          canReset: true,
-          resetBtn: {
-            text: "清空并重新标注",
-            go:"judgeSpConfig",
-            style: "outline-dark",
-          },
-        },
-      },
-
-      addDaPeiBuDang: {
-        ref: "addDaPeiBuDang",
-        name: "新增搭配不当",
-        mode: "multiSpans",
-        props: {
-          instruction: "请在文中依次选择造成搭配不当的全部文本片段。选择完成后，可将其加入列表。",
-          listTitle: "造成搭配不当的文本片段是：",
-          data: {
-            label: "搭配不当",
-            tokenarrays: [],
-          },
-          addBtn: {
-            text: "将所选片段加入列表",
-            style: "primary",
-          },
-          clearBtn: {
-            text: "清除选区",
-            style: "info",
-          },
-          okBtn: {
-            text: "不再添加，完成",
-            go: "manageReasons",
-            style: "success",
-          },
-        },
-      },
-
-    });
-
-
-
-    const stepRecords = reactive({list:[]});
-    const currentStep = reactive({
-      ref: "judgeSpConfig",
-      name: "评估材料的空间关系",
-      mode: "selectValue",
-      props: {
-        instruction: "这段材料中的空间关系____。",
-        optionBtns: [
-          {text: "完全正常", value: "fine", go:"judgeSimilarity", style: "outline-primary", },
-          {text: "尚能说通", value: "someFine", go:"judgeSimilarity", style: "outline-primary", },
-          {text: "比较牵强", value: "someBad", go:"manageReasons", style: "outline-primary", },
-          {text: "根本不对", value: "bad", go:"manageReasons", style: "outline-primary", },
-        ],
-      },
-    });
-    const stepMethods = {
-      goStep: (stepObj_, value) => {
-        stepRecords.list.push(value);
-        let stepObj = {
-          ref: stepObj_?.ref ?? null,
-          name: stepObj_?.name ?? null,
-          mode: stepObj_?.mode ?? null,
-          props: stepObj_?.props ?? null,
-        };
-        ctrl.showOrigin = stepObj?.props?.showOrigin ?? false;
-        Object.assign(currentStep, stepObj);
-      },
-      goRefStep: (ref, value) => {
-        let stepObj = stepsDict[ref];
-        stepMethods.goStep(stepObj, value);
-      },
-      resetStep: (ref) => {
-        let stepObj = stepsDict[ref];
-        stepMethods.goStep(stepObj);
-        stepRecords.list = [];
+      updateProgress: () => {
+        appData.ctrl.totalNum = appData.dataWrap.dataItems.length;
+        appData.ctrl.doneNum = appData.dataWrap.dataItems.filter(it=>it?._ctrl?.done).length;
+        appData.ctrl.donePct = `${appData.ctrl.doneNum / appData.ctrl.totalNum * 100}%`;
       },
     };
 
 
 
-    const data = reactive({
-      //
-      "file_meta_list": [],
-      "current_file_meta": {},
-      //
-      "data": [],
-      //
-      "worker": "",
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      "tag_map_1": ['难以判断', '不成立', '成立', '', '勉强成立'],
-      "tag_map_2": ['难以判断', '搭配不当', '意义冲突', '语义变化不大', '语义变化大', '', '', '', '', ''],
-      "index1":0,
-      "index2":0,
-      "sites": [
-        { text: '无法搭配' },
-        { text: '语义冲突' },
-        { text: '在常识严重相悖' },
-        { text: '在上下文严重相悖' }
-      ],
-      "showLoadLocalStorage": false,
-      "documentId": -1,
-      "desc": "空间关系认知语料标注",
-      "apiVersion": "21-0131-00",
-      "meta": {
-        "workers": [],
-        "createdTime": "2021-01-30",
-        "modifiedTime": "2021-01-30",
-        "stage": 1
-      },
-    });
+    // ↓ 参看 js/components/TheSteps.js
+    const currentStep = reactive(RootStep);
+    const theSteps = TheSteps(appData.ctrl, currentStep);
+    const stepsDict = readonly(theSteps.stepsDict);
+    const stepRecords = reactive(theSteps.stepRecords);
+    const stepMethods = theSteps.stepMethods;
+    // ↑ 参看 js/components/TheSteps.js
 
 
-    const timeString = () => {
-      let the_date = new Date();
-      let str = `${(''+the_date.getFullYear()).slice(2,4)}${(''+(the_date.getMonth()+1)).length==1?'0':''}${the_date.getMonth()+1}${(''+the_date.getDate()).length==1?'0':''}${the_date.getDate()}-${(''+the_date.getHours()).length==1?'0':''}${the_date.getHours()}${(''+the_date.getMinutes()).length==1?'0':''}${the_date.getMinutes()}${(''+the_date.getSeconds()).length==1?'0':''}${the_date.getSeconds()}`;
-      return str;
-    };
+
+
 
 
     // ↓ 参看 js/components/TheSelector.js
@@ -327,17 +225,24 @@ const RootComponent = {
     const selectionMethods = theSelector.selectionMethods;
     // ↑ 参看 js/components/TheSelector.js
 
+
+
     // const getAnnoBtnClass(anno_label) {
     //   const map = {
     //     "搭配不当": "",
     //   };
     // };
 
+
+
+
+
     return {
       //
       ...toRefs(exampleWrap),
       //
-      ctrl,
+      ...toRefs(appData),
+      ...dataMethods,
       ...ctrlMethods,
       //
       selection,
@@ -355,7 +260,7 @@ const RootComponent = {
 
 
 
-  data() {
+  ____data() {
     return {
       //
       ctrl: {
@@ -381,17 +286,17 @@ const RootComponent = {
       ],
       "showLoadLocalStorage": false,
       "documentId": -1,
-      "desc": "空间关系认知语料标注",
-      "apiVersion": "21-0131-00",
-      "meta": {
-        "workers": [],
-        "createdTime": "2021-01-30",
-        "modifiedTime": "2021-01-30",
-        "stage": 1
-      },
+      // "desc": "空间关系认知语料标注",
+      // "apiVersion": "21-0131-00",
+      // "meta": {
+      //   "workers": [],
+      //   "createdTime": "2021-01-30",
+      //   "modifiedTime": "2021-01-30",
+      //   "stage": 1
+      // },
     };
   },
-  computed: {
+  ____computed: {
     question_done_num: function() {
       let self = this;
       let sum = 0;
@@ -508,7 +413,7 @@ const RootComponent = {
     },
 
   },
-  methods: {
+  ____methods: {
 
     submit: function(changes_obj) {
       let self = this;
@@ -557,27 +462,27 @@ const RootComponent = {
       let obj1 = document.getElementById("pid1");
       this.index1 = obj1.options[obj1.selectedIndex].value;
     },
-    onImport: function() {
-      let self = this;
-      let fileList = document.forms["file-form"]["file-input"].files;
-      // console.log(fileList);
-      let file_meta_list = [];
-      let idx = 0;
-      for (let file of fileList) {
-        file_meta_list.push({
-          "idx": idx,
-          "name": file.name,
-          "file": file,
-          "url": URL.createObjectURL(file),
-          // "content": "",
-        });
-        idx += 1;
-      }
-      self.file_meta_list = file_meta_list;
-      self.current_file_meta = file_meta_list[idx - 1];
-      // console.log(self.current_file_meta);
-      self.readData();
-    },
+    // onImport__: function() {
+    //   let self = this;
+    //   let fileList = document.forms["file-form"]["file-input"].files;
+    //   // console.log(fileList);
+    //   let file_meta_list = [];
+    //   let idx = 0;
+    //   for (let file of fileList) {
+    //     file_meta_list.push({
+    //       "idx": idx,
+    //       "name": file.name,
+    //       "file": file,
+    //       "url": URL.createObjectURL(file),
+    //       // "content": "",
+    //     });
+    //     idx += 1;
+    //   }
+    //   self.file_meta_list = file_meta_list;
+    //   self.current_file_meta = file_meta_list[idx - 1];
+    //   // console.log(self.current_file_meta);
+    //   self.readData();
+    // },
 
     onExport: function() {
       let self = this;

@@ -253,14 +253,14 @@
         <!-- fileCtrl end -->
         <!-- progressCtrl start -->
         <div class="row align-items-center">
-          <div class="col col-12 col-lg-2 my-2">
-            <input class="form-control form-control-sm" type="text" v-model="worker" placeholder="请在此输入姓名">
+          <div class="col col-12 col-md-3 col-lg-2 my-2">
+            <input class="form-control form-control-sm" type="text" v-model="meta.currentWorker" placeholder="请在此输入姓名">
           </div>
-          <div class="col col-12 col-lg-10 my-2">
+          <div class="col col-12 col-md-9 col-lg-10 my-2">
             <div class="progress">
-              <div class="progress-bar bg-success" role="progressbar" :style="`width: ${done_pct};`"
-                :aria-valuenow="done_num" aria-valuemin="0" :aria-valuemax="total_num">{{ done_num }}/{{
-                total_num }}</div>
+              <div class="progress-bar bg-success" role="progressbar" :style="`min-width: ${ctrl.donePct};`"
+                :aria-valuenow="ctrl.doneNum" aria-valuemin="0" :aria-valuemax="ctrl.totalNum">{{ ctrl.doneNum }}/{{
+                ctrl.totalNum }}</div>
             </div>
           </div>
         </div>
@@ -268,7 +268,7 @@
       </div>
     </div>
 
-    <div class="container page my-4 hiddent" id="page-stage">
+    <div class="container page my-4 hidden" id="page-stage">
       <div class="container py-2">
         <!-- 页码操作区 开始 -->
         <!-- 页码操作区 结束 -->
@@ -279,7 +279,7 @@
 
 
     <!-- 新版编辑区 开始 -->
-    <div class="container page my-4 py-2" id="page-main-editor">
+    <div class="container page my-4 py-2" id="page-main-editor" v-show="meta.currentWorker.length">
       <div class="container">
         <div class="row mt-2 mb-3 align-items-center" id="page-main-editor--main">
           <!-- 内容区 开始 -->
@@ -377,8 +377,22 @@
             <!-- 标注一般流程模块 结束 -->
 
 
+            <!-- 初始模块 开始 -->
+            <div class="row" v-if=" 'root'==(currentStep.mode)" :data-mode="currentStep.mode">
+              <!-- 指导语 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.instruction">
+                <div>{{ currentStep?.props?.instruction }}</div>
+              </div>
+              <!-- 重置按钮 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.startBtn">
+                <button type="button" v-on:click="resetStep(currentStep.props.startBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.startBtn.style}`">{{ currentStep.props.startBtn.text }}</button>
+              </div>
+            </div>
+            <!-- 初始模块 结束 -->
+
+
             <!-- 标注结果展示模块 开始 -->
-            <div class="row" v-if=" 'finalResult' == (currentStep.mode)" :data-mode="currentStep.mode">
+            <div class="row" v-if=" 'finalResult'==(currentStep.mode)" :data-mode="currentStep.mode">
               <!-- 指导语 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.instruction">
                 <div>{{ currentStep?.props?.instruction }}</div>
@@ -455,6 +469,16 @@
 
 
 
+
+
+
+
+      </div>
+    </div>
+    <!-- 新版编辑区 结束 -->
+
+    <div class="position-fixed bottom-0 w-100 p-2">
+      <div class="container">
         <!-- 页码操作区 开始 -->
         <div class="row page-ctrl">
           <div class="col col-12 col-md-4 my-1">
@@ -479,13 +503,9 @@
           </div> -->
         </div>
         <!-- 页码操作区 结束 -->
-
-
-
-
       </div>
     </div>
-    <!-- 新版编辑区 结束 -->
+
 
 
 
@@ -495,7 +515,7 @@
 
 
     <!-- 旧版编辑区 开始 -->
-    <div class="container page my-4 py-2" id="page-items-1" :class="{'hidden': meta.stage!=1}">
+    <div class="container page my-4 py-2 hidden" id="page-items-1" :class="{'hidden': meta.stage!=1}">
       <div v-for="dataItem in data" class="container card-wrap py-1">
         <div class="container card">
           <div class="row my-1">
@@ -685,6 +705,9 @@
   <script type="text/javascript" src="lib/store_2.0.9_.legacy.min.js"></script>
   <script type="text/javascript" src="lib/vue_3.2.26_.global.prod.min.js"></script>
   <script type="text/javascript" src="lib/FileSaver.js"></script>
+  <script type="text/javascript" src="js/components/BaseReader.js"></script>
+  <script type="text/javascript" src="js/components/TheReader.js"></script>
+  <script type="text/javascript" src="js/components/TheSteps.js"></script>
   <script type="text/javascript" src="js/components/TheSelector.js"></script>
   <script type="text/javascript" src="js/util.js"></script>
   <script type="text/javascript" src="js/main.js"></script>
