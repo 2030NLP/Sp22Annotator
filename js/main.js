@@ -1,5 +1,5 @@
-// import { reactive, readonly, ref, toRefs, computed, onMounted, onUpdated } from 'vue';
-const { reactive, readonly, ref, toRefs, computed, onMounted, onUpdated } = Vue;
+// import { reactive, readonly, ref, toRef, toRefs, computed, onMounted, onUpdated } from 'vue';
+const { reactive, readonly, ref, toRef, toRefs, computed, onMounted, onUpdated } = Vue;
 
 const APP_VERSION = "22-0207-00";
 
@@ -103,38 +103,6 @@ const RootComponent = {
             "mode": "modify",
             "source": 3,  // 杯
             "target": "块",
-          },
-          {
-            "idx": 2,
-            "label": "其它",
-            "mode": "text",
-            "text1": "",
-          },
-          {
-            "idx": 3,
-            "label": "选择",
-            "mode": "choose",
-            "withText": [],
-          },
-          {
-            "idx": 4,
-            "label": "增加字",
-            "mode": "add",
-            "source": [],
-            "target": [],
-          },
-          {
-            "idx": 5,
-            "label": "删除字",
-            "mode": "delete",
-            "source": [],
-          },
-          {
-            "idx": 6,
-            "label": "修改字",
-            "mode": "modify",
-            "source": [],
-            "target": [],
           },
         ]
       }
@@ -287,14 +255,16 @@ const RootComponent = {
             annotations: [],
           },
           instruction: "这段材料中的空间关系存在的异常有____。",
+          showResults: true,
           optionBtns: [
-            {text: "➕ 搭配不当", go:"addDaPeiBuDang", style: "outline-primary", },
-            {text: "➕ 语义冲突", go:"xxx", style: "outline-primary", },
-            {text: "➕ 不符合常识", go:"addchoose", style: "outline-primary", },
-            {text: "➕ 其它", go:"addtext", style: "outline-primary", },
-            {text: "➕ 增加字", go:"addword", style: "outline-primary", },
-            {text: "➕ 删除字", go:"deleteword", style: "outline-primary", },
-            {text: "➕ 修改字", go:"modifyword", style: "outline-primary", },
+            {text: "+ 搭配不当", go:"addDaPeiBuDang", style: "outline-primary", },
+            {text: "+ 语义冲突", go:"xxx", style: "outline-primary", },
+            {text: "+ 不符合常识（选择）", go:"addChangShi", style: "outline-primary", },
+            {text: "+ 不符合常识（文本）", go:"addChangShi1", style: "outline-primary", },
+            {text: "+ 其它", go:"addtext", style: "outline-primary", },
+            {text: "+ 增加字", go:"addword", style: "outline-primary", },
+            {text: "+ 删除字", go:"deleteword", style: "outline-primary", },
+            {text: "+ 修改字", go:"modifyword", style: "outline-primary", },
           ],
           okBtn: {
             text: "✔️ 结束",
@@ -319,6 +289,11 @@ const RootComponent = {
           resetBtn: {
             text: "清空并重新标注",
             go:"start",
+            style: "outline-dark",
+          },
+          cancelBtn: {
+            text: "返回并继续标注",
+            go: "manageReasons",
             style: "outline-dark",
           },
         },
@@ -424,7 +399,7 @@ const RootComponent = {
         name: "新增搭配不当",
         mode: "multiSpans",
         props: {
-          instruction: "请在文中依次选择造成搭配不当的全部文本片段。选择完成后，可将其加入列表。",
+          instruction: "请在文中依次划选造成搭配不当的全部文本片段。选择完成后，可将其加入列表。",
           listTitle: "造成搭配不当的文本片段是：",
           data: {
             label: "搭配不当",
@@ -446,29 +421,55 @@ const RootComponent = {
         },
       },
 
-      addchoose: {
-        ref: "addchoose",
-        name: "新增选项",
+      addChangShi: {
+        ref: "addChangShi",
+        name: "新增不符合常识",
         mode: "choose",
         props: {
-          instruction: "请依次选择",
-          listTitle: "造成搭配不当的文本片段是：",
+          selectInstruction: "请在文中划选不符合常识的文本片段",
+          selectedTitle: "当前选中的不符合常识的文本片段是：",
+          instruction: "请选择该片段所不符合的常识类型",
+          options: ["常识1", "常识2"],
           data: {
-            label: "新增选项",
-            tokenarrays: [],
-          },
-          addBtn: {
-            text: "将所选片段加入列表",
-            style: "primary",
-          },
-          clearBtn: {
-            text: "清除选区",
-            style: "info",
+            label: "不符合常识",
+            on: [],
+            withText: "",
           },
           okBtn: {
-            text: "不再添加，完成",
+            text: "确定",
             go: "manageReasons",
             style: "success",
+          },
+          cancelBtn: {
+            text: "取消",
+            go: "manageReasons",
+            style: "light",
+          },
+        },
+      },
+
+      addChangShi1: {
+        ref: "addChangShi1",
+        name: "新增不符合常识1",
+        mode: "text",
+        props: {
+          selectInstruction: "请在文中划选不符合常识的文本片段",
+          selectedTitle: "当前选中的不符合常识的文本片段是：",
+          instruction: "请填写该片段所不符合的常识",
+          data: {
+            label: "不符合常识",
+            on: [],
+            withText: "",
+          },
+          okBtn: {
+            text: "确定",
+            go: "manageReasons",
+            style: "success",
+          },
+          cancelBtn: {
+            text: "取消",
+            go: "manageReasons",
+            style: "light",
           },
         },
       },
@@ -480,34 +481,85 @@ const RootComponent = {
     const stepRecords = {list:[]};
     const currentStep = reactive(RootStep);
     const stepMethods = {
-      goStep: (stepObj_, value) => {
-        stepRecords.list.push(value);
+      resetStep: (ref) => {
+        stepMethods.cancelStep(ref);
+        exampleWrap.example.annotations = [];
+      },
+      cancelStep: (ref) => {
+        let stepObj = JSON.parse(JSON.stringify(stepsDict[ref]));
+        stepMethods.goStep(stepObj);
+        stepRecords.list = [];
+        selectionMethods.clearSelection();
+      },
+      goStep: (stepObj_, data) => {
+        // stepRecords.list.push(data);
+        // data 其实没用了
+
         let stepObj = {
           ref: stepObj_?.ref ?? null,
           name: stepObj_?.name ?? null,
           mode: stepObj_?.mode ?? null,
-          props: stepObj_?.props ?? null,
+          props: JSON.parse(JSON.stringify(stepObj_?.props ?? null)),
         };
         appData.ctrl.showOrigin = stepObj?.props?.showOrigin ?? false;
         Object.assign(currentStep, stepObj);
       },
-      goRefStep: (ref, value) => {
-        if(ref=="manageReasons"){
-          console.log("dsdsd");
-          // stepMethods.readdata1()
-        }
+      goRefStep: (ref, data) => {
+        // data 其实没用了
+
         let stepObj = stepsDict[ref];
-        stepMethods.goStep(stepObj, value);
+        stepMethods.goStep(stepObj, data);
       },
+
+      handleTemplate: (ref, data, fn) => {
+        // 这个函数是一个抽象出来的通用流程框架
+        // 之前的 value 改成了 data
+
+        // 按照 schema 补充必要的数据字段
+        let idx = exampleWrap.example.annotations.length;
+        data.idx = idx;
+        data.mode = currentStep.mode;
+
+        data = fn(data);
+
+        // 加入 annotations 清单
+        exampleWrap.example.annotations.push(JSON.parse(JSON.stringify(data)));
+
+        selectionMethods.clearSelection();
+        stepMethods.goRefStep(ref, data);  // data 其实没用了
+      },
+
+      handleChooseOrText: (ref, data) => {
+        // 这个函数就是之前的「goRefStepChoose」
+        // 之前的 value 改成了 data
+
+        let fn = (da)=>{
+          da.on = selection.array;
+          return da;
+        };
+        stepMethods.handleTemplate(ref, data, fn);
+      },
+
+      handleMultiSpans: (ref, data) => {
+
+        let fn = (da)=>{
+          // TODO
+          return da;
+        };
+        stepMethods.handleTemplate(ref, data, fn);
+      },
+
+
+
       readdata1: (ref, value) => {
         var file = document.getElementById("my_file").files[0];
         var reader=new FileReader();
-	      reader.readAsText(file);
-	      reader.onload = function (e)
-	      {
+        reader.readAsText(file);
+        reader.onload = function (e)
+        {
           var fileText = e.target.result;
-		      console.log(fileText);
-	      }
+          console.log(fileText);
+        }
       },
       onExport1:()=>{
         let jn = JSON.stringify(exampleWrap.example, null, 2);
@@ -518,43 +570,53 @@ const RootComponent = {
         saveAs(file);
       },
       goRefStep1: (ref, value) => {
+        // 搭配不当
         exampleWrap.example.annotations[0].tokenarrays.push(value.tokenarrays);
         console.log(exampleWrap.example.annotations[0].tokenarrays);
-        let stepObj = stepsDict[ref];
-        stepMethods.goStep(stepObj, value);
+
+        stepMethods.goRefStep(ref, value);
+
         value.tokenarrays=[];
         console.log(value)
       },
       goRefStep2: (ref, value) => {
+        // 常识
         var data1={}
         data1[data.modetype]=value.tokenarrays;
         console.log(data1)
         exampleWrap.example.annotations[3].withText.push(data1);
         console.log(exampleWrap.example.annotations[3].withText);
-        let stepObj = stepsDict[ref];
-        stepMethods.goStep(stepObj, value);
+
+        stepMethods.goRefStep(ref, value);
+
         value.tokenarrays=[];
         data.modetype="常识1";
       },
       goRefStep3: (ref, value) => {
+        // add
         exampleWrap.example.annotations[4].source.push(value.tokenarrays);
         exampleWrap.example.annotations[4].target.push(data.add_target);
-        let stepObj = stepsDict[ref];
-        stepMethods.goStep(stepObj, value);
+
+        stepMethods.goRefStep(ref, value);
+
         value.tokenarrays=[];
         data.add_target="";
       },
       goRefStep4: (ref, value) => {
+        // delete
         exampleWrap.example.annotations[5].source.push(value.tokenarrays);
-        let stepObj = stepsDict[ref];
-        stepMethods.goStep(stepObj, value);
+
+        stepMethods.goRefStep(ref, value);
+
         value.tokenarrays=[];
       },
       goRefStep5: (ref, value) => {
+        // modify
         exampleWrap.example.annotations[6].source.push(value.tokenarrays);
         exampleWrap.example.annotations[6].target.push(data.modify_target);
-        let stepObj = stepsDict[ref];
-        stepMethods.goStep(stepObj, value);
+
+        stepMethods.goRefStep(ref, value);
+
         value.tokenarrays=[];
         data.modify_target="";
       },
@@ -568,70 +630,8 @@ const RootComponent = {
         }
 
       },
-      resetStep: (ref) => {
-        let stepObj = stepsDict[ref];
-        stepMethods.goStep(stepObj);
-        stepRecords.list = [];
-      },
     };
 
-
-
-    const data = reactive({
-      //
-      "file_meta_list": [],
-      "current_file_meta": {},
-      //
-      "data": [],
-      //
-      "worker": "",
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      "tag_map_1": ['难以判断', '不成立', '成立', '', '勉强成立'],
-      "tag_map_2": ['难以判断', '搭配不当', '意义冲突', '语义变化不大', '语义变化大', '', '', '', '', ''],
-      "test1":"",
-      "modetype":"常识1",
-      "index1":0,
-      "index2":0,
-      "add_source":"",
-      "add_target":"",
-      "delete_source":"",
-      "modify_source":"",
-      "modify_target":"",
-      "indext1":0,
-      "sitest": [
-        { text: '常识1' },
-        { text: '常识2' }
-      ],
-      "sites": [
-        { text: '无法搭配' },
-        { text: '语义冲突' },
-        { text: '在常识严重相悖' },
-        { text: '在上下文严重相悖' }
-      ],
-      "showLoadLocalStorage": false,
-      "documentId": -1,
-      "desc": "空间关系认知语料标注",
-      "apiVersion": "21-0131-00",
-      "meta": {
-        "workers": [],
-        "createdTime": "2021-01-30",
-        "modifiedTime": "2021-01-30",
-        "stage": 1
-      },
-    });
-
-
-    const timeString = () => {
-      let the_date = new Date();
-      let str = `${(''+the_date.getFullYear()).slice(2,4)}${(''+(the_date.getMonth()+1)).length==1?'0':''}${the_date.getMonth()+1}${(''+the_date.getDate()).length==1?'0':''}${the_date.getDate()}-${(''+the_date.getHours()).length==1?'0':''}${the_date.getHours()}${(''+the_date.getMinutes()).length==1?'0':''}${the_date.getMinutes()}${(''+the_date.getSeconds()).length==1?'0':''}${the_date.getSeconds()}`;
-      return str;
-    };
 
 
     // ↓ 参看 js/components/TheSelector.js
@@ -642,11 +642,6 @@ const RootComponent = {
 
 
 
-    // const getAnnoBtnClass(anno_label) {
-    //   const map = {
-    //     "搭配不当": "",
-    //   };
-    // };
 
     const updateSteps = async () => {
       let response = await axios.request({
@@ -665,7 +660,7 @@ const RootComponent = {
     return {
       //
       ...toRefs(exampleWrap),
-      ...toRefs(data),
+      // ...toRefs(data),
       //
       ...toRefs(appData),
       ...dataMethods,
