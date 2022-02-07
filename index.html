@@ -412,7 +412,7 @@
                 <button
                   type="button"
                   v-if="'finalResult'==(currentStep.mode)&&currentStep?.props?.cancelBtn"
-                  v-on:click="resetStep(currentStep.props.cancelBtn.go)"
+                  v-on:click="cancelStep(currentStep.props.cancelBtn.go)"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-${currentStep.props.cancelBtn.style}`"
                 >{{ currentStep.props.cancelBtn.text }}</button>
