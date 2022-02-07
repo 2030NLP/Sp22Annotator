@@ -94,7 +94,7 @@ const RootComponent = {
             "idx": 0,
             "label": "搭配不当",
             "mode": "multiSpans",
-            "tokenarrays": [[3], [4]],  // [ 杯, 铁 ]
+            "tokenarrays": [],  // [ 杯, 铁 ]
           },
           {
             "idx": 1,
@@ -106,18 +106,35 @@ const RootComponent = {
           },
           {
             "idx": 2,
-            "label": "两段材料中的空间关系相同",
-            "mode": "choose",
+            "label": "其它",
+            "mode": "text",
+            "text1": "",
           },
           {
             "idx": 3,
-            "label": "两段材料中的空间关系不同",
+            "label": "选择",
             "mode": "choose",
+            "withText": [],
           },
           {
             "idx": 4,
-            "label": "两段材料中的空间关系可能相同也可能不同",
-            "mode": "choose",
+            "label": "增加字",
+            "mode": "add",
+            "source": [],
+            "target": [],
+          },
+          {
+            "idx": 5,
+            "label": "删除字",
+            "mode": "delete",
+            "source": [],
+          },
+          {
+            "idx": 6,
+            "label": "修改字",
+            "mode": "modify",
+            "source": [],
+            "target": [],
           },
         ]
       }
@@ -273,7 +290,11 @@ const RootComponent = {
           optionBtns: [
             {text: "➕ 搭配不当", go:"addDaPeiBuDang", style: "outline-primary", },
             {text: "➕ 语义冲突", go:"xxx", style: "outline-primary", },
-            {text: "➕ 不符合常识", go:"xxx", style: "outline-primary", },
+            {text: "➕ 不符合常识", go:"addchoose", style: "outline-primary", },
+            {text: "➕ 其它", go:"addtext", style: "outline-primary", },
+            {text: "➕ 增加字", go:"addword", style: "outline-primary", },
+            {text: "➕ 删除字", go:"deleteword", style: "outline-primary", },
+            {text: "➕ 修改字", go:"modifyword", style: "outline-primary", },
           ],
           okBtn: {
             text: "✔️ 结束",
@@ -299,6 +320,101 @@ const RootComponent = {
             text: "清空并重新标注",
             go:"start",
             style: "outline-dark",
+          },
+        },
+      },
+
+      addtext: {
+        ref: "addtext",
+        name: "其它",
+        mode: "text",
+        props: {
+          instruction: "请在文中写下你的意见。",
+          okBtn: {
+            text: "不再添加，完成",
+            go: "manageReasons",
+            style: "success",
+          },
+        },
+      },
+
+      addword: {
+        ref: "addword",
+        name: "增加字",
+        mode: "add",
+        props: {
+          instruction: "请选择token",
+          listTitle: "",
+          data: {
+            label: "增加字",
+            tokenarrays: [],
+          },
+          addBtn: {
+            text: "将所选片段加入列表",
+            style: "primary",
+          },
+          clearBtn: {
+            text: "清除选区",
+            style: "info",
+          },
+          okBtn: {
+            text: "不再添加，完成",
+            go: "manageReasons",
+            style: "success",
+          },
+        },
+      },
+
+      modifyword: {
+        ref: "modifyword",
+        name: "修改字",
+        mode: "modify",
+        props: {
+          instruction: "请选择token",
+          listTitle: "",
+          data: {
+            label: "修改字",
+            tokenarrays: [],
+          },
+          addBtn: {
+            text: "将所选片段加入列表",
+            style: "primary",
+          },
+          clearBtn: {
+            text: "清除选区",
+            style: "info",
+          },
+          okBtn: {
+            text: "不再添加，完成",
+            go: "manageReasons",
+            style: "success",
+          },
+        },
+      },
+
+      deleteword: {
+        ref: "deleteword",
+        name: "删除字",
+        mode: "delete",
+        props: {
+          instruction: "请选择token",
+          listTitle: "",
+          data: {
+            label: "删除字",
+            tokenarrays: [],
+          },
+          addBtn: {
+            text: "将所选片段加入列表",
+            style: "primary",
+          },
+          clearBtn: {
+            text: "清除选区",
+            style: "info",
+          },
+          okBtn: {
+            text: "不再添加，完成",
+            go: "manageReasons",
+            style: "success",
           },
         },
       },
@@ -330,7 +446,36 @@ const RootComponent = {
         },
       },
 
+      addchoose: {
+        ref: "addchoose",
+        name: "新增选项",
+        mode: "choose",
+        props: {
+          instruction: "请依次选择",
+          listTitle: "造成搭配不当的文本片段是：",
+          data: {
+            label: "新增选项",
+            tokenarrays: [],
+          },
+          addBtn: {
+            text: "将所选片段加入列表",
+            style: "primary",
+          },
+          clearBtn: {
+            text: "清除选区",
+            style: "info",
+          },
+          okBtn: {
+            text: "不再添加，完成",
+            go: "manageReasons",
+            style: "success",
+          },
+        },
+      },
+
     };
+
+
 
     const stepRecords = {list:[]};
     const currentStep = reactive(RootStep);
@@ -347,8 +492,81 @@ const RootComponent = {
         Object.assign(currentStep, stepObj);
       },
       goRefStep: (ref, value) => {
+        if(ref=="manageReasons"){
+          console.log("dsdsd");
+          // stepMethods.readdata1()
+        }
         let stepObj = stepsDict[ref];
         stepMethods.goStep(stepObj, value);
+      },
+      readdata1: (ref, value) => {
+        var file = document.getElementById("my_file").files[0];
+        var reader=new FileReader();
+	      reader.readAsText(file);
+	      reader.onload = function (e)
+	      {
+          var fileText = e.target.result;
+		      console.log(fileText);
+	      }
+      },
+      onExport1:()=>{
+        let jn = JSON.stringify(exampleWrap.example, null, 2);
+        let filename =exampleWrap.example.dbID+"注结果";
+        var file = new File([jn], (`${filename}`), {
+            type: "text/plain; charset=utf-8"
+          });
+        saveAs(file);
+      },
+      goRefStep1: (ref, value) => {
+        exampleWrap.example.annotations[0].tokenarrays.push(value.tokenarrays);
+        console.log(exampleWrap.example.annotations[0].tokenarrays);
+        let stepObj = stepsDict[ref];
+        stepMethods.goStep(stepObj, value);
+        value.tokenarrays=[];
+        console.log(value)
+      },
+      goRefStep2: (ref, value) => {
+        var data1={}
+        data1[data.modetype]=value.tokenarrays;
+        console.log(data1)
+        exampleWrap.example.annotations[3].withText.push(data1);
+        console.log(exampleWrap.example.annotations[3].withText);
+        let stepObj = stepsDict[ref];
+        stepMethods.goStep(stepObj, value);
+        value.tokenarrays=[];
+        data.modetype="常识1";
+      },
+      goRefStep3: (ref, value) => {
+        exampleWrap.example.annotations[4].source.push(value.tokenarrays);
+        exampleWrap.example.annotations[4].target.push(data.add_target);
+        let stepObj = stepsDict[ref];
+        stepMethods.goStep(stepObj, value);
+        value.tokenarrays=[];
+        data.add_target="";
+      },
+      goRefStep4: (ref, value) => {
+        exampleWrap.example.annotations[5].source.push(value.tokenarrays);
+        let stepObj = stepsDict[ref];
+        stepMethods.goStep(stepObj, value);
+        value.tokenarrays=[];
+      },
+      goRefStep5: (ref, value) => {
+        exampleWrap.example.annotations[6].source.push(value.tokenarrays);
+        exampleWrap.example.annotations[6].target.push(data.modify_target);
+        let stepObj = stepsDict[ref];
+        stepMethods.goStep(stepObj, value);
+        value.tokenarrays=[];
+        data.modify_target="";
+      },
+      opt2:()=>{
+        let obj1 = document.getElementById("pid1");
+        data.indext1 = obj1.options[obj1.selectedIndex].value;
+        if(data.indext1==0){
+          data.modetype="常识1";
+        }else{
+          data.modetype="常识2";
+        }
+
       },
       resetStep: (ref) => {
         let stepObj = stepsDict[ref];
@@ -359,6 +577,61 @@ const RootComponent = {
 
 
 
+    const data = reactive({
+      //
+      "file_meta_list": [],
+      "current_file_meta": {},
+      //
+      "data": [],
+      //
+      "worker": "",
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      "tag_map_1": ['难以判断', '不成立', '成立', '', '勉强成立'],
+      "tag_map_2": ['难以判断', '搭配不当', '意义冲突', '语义变化不大', '语义变化大', '', '', '', '', ''],
+      "test1":"",
+      "modetype":"常识1",
+      "index1":0,
+      "index2":0,
+      "add_source":"",
+      "add_target":"",
+      "delete_source":"",
+      "modify_source":"",
+      "modify_target":"",
+      "indext1":0,
+      "sitest": [
+        { text: '常识1' },
+        { text: '常识2' }
+      ],
+      "sites": [
+        { text: '无法搭配' },
+        { text: '语义冲突' },
+        { text: '在常识严重相悖' },
+        { text: '在上下文严重相悖' }
+      ],
+      "showLoadLocalStorage": false,
+      "documentId": -1,
+      "desc": "空间关系认知语料标注",
+      "apiVersion": "21-0131-00",
+      "meta": {
+        "workers": [],
+        "createdTime": "2021-01-30",
+        "modifiedTime": "2021-01-30",
+        "stage": 1
+      },
+    });
+
+
+    const timeString = () => {
+      let the_date = new Date();
+      let str = `${(''+the_date.getFullYear()).slice(2,4)}${(''+(the_date.getMonth()+1)).length==1?'0':''}${the_date.getMonth()+1}${(''+the_date.getDate()).length==1?'0':''}${the_date.getDate()}-${(''+the_date.getHours()).length==1?'0':''}${the_date.getHours()}${(''+the_date.getMinutes()).length==1?'0':''}${the_date.getMinutes()}${(''+the_date.getSeconds()).length==1?'0':''}${the_date.getSeconds()}`;
+      return str;
+    };
 
 
     // ↓ 参看 js/components/TheSelector.js
@@ -392,6 +665,7 @@ const RootComponent = {
     return {
       //
       ...toRefs(exampleWrap),
+      ...toRefs(data),
       //
       ...toRefs(appData),
       ...dataMethods,
