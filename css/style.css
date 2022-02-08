@@ -2,6 +2,7 @@
 
     .bodywrap {
       min-height: 120vh;
+      padding-bottom: 6rem;
     }
 
     .container.page {
@@ -41,6 +42,7 @@
       cursor: pointer;
       border: 2px dotted transparent;
       border-radius: 4px;
+      transition: all 0.15s;
     }
     .material-area span.token.right-space {
       /*margin-right: 3px;*/

@@ -18,7 +18,6 @@
   <link href="lib/bootstrap_5.1.3_.min.css" rel="stylesheet">
 
   <link href="css/style.css" rel="stylesheet">
-  
 
   <style type="text/css">
     .container {
@@ -375,48 +374,46 @@
                   <div class="btn-group btn-group-sm my-1 me-2 anno-entry" :data-deleted="anno.deleted??false" __v-if="!anno.deleted">
 
                     <button type="button" class="btn btn-outline-primary" v-if="example.annotations.length>1">{{anno.idx}}</button>
-                    <button type="button" class="btn btn-outline-secondary" __class="getAnnoBtnClass(anno.label)">{{anno.label}}</button>
+                    <button type="button" class="btn btn-outline-dark" __class="getAnnoBtnClass(anno.label)">{{anno.label}}</button>
 
                     <!-- <template v-if="anno.mode=='modify'">
-                      <button type="button" class="btn btn-outline-secondary" :title="example.material.tokenList[anno.source].idx"><span>{{example.material.tokenList[anno.source].word}}<sub>{{ example.material.tokenList[anno.source].idx }}</sub> → <span>{{anno.target}}</span></button>
+                      <button type="button" class="btn btn-outline-dark" :title="example.material.tokenList[anno.source].idx"><span>{{example.material.tokenList[anno.source].word}}<sub>{{ example.material.tokenList[anno.source].idx }}</sub> → <span>{{anno.target}}</span></button>
                     </template> -->
 
                     <template v-if="anno.mode=='multiSpans'">
-                      <button v-for="tokenarray, kk in anno.tokenarrays" :key="kk" type="button" class="btn btn-outline-secondary">
+                      <button v-for="tokenarray, kk in anno.tokenarrays" :key="kk" type="button" class="btn btn-outline-dark">
                         <span v-for="idx in tokenarray" :key="idx" :title="idx">{{ example.material.tokenList[idx]?.replaced ? example.material.tokenList[idx]?.to?.word : example.material.tokenList[idx].word }}<sub>{{idx}}</sub></span>
                       </button>
                     </template>
 
                     <template v-if="anno.mode=='add'">
-                      <button type="button" class="btn btn-outline-secondary">
-                        <span >{{ example.material.tokenList[anno.source]?.replaced ? example.material.tokenList[anno.source]?.to?.word : example.material.tokenList[anno.source].word }}<sub>{{anno.source}}</sub></span>
-                        <span>{{anno.target}}</span>
+                      <button type="button" class="btn btn-outline-dark">
+                        <span v-if="anno.side=='0'">{{anno.target}} +</span><span >{{ example.material.tokenList[anno.source]?.replaced ? example.material.tokenList[anno.source]?.to?.word : example.material.tokenList[anno.source].word }}<sub>{{anno.source}}</sub></span> <span v-if="anno.side=='1'">+ {{anno.target}}</span>
                       </button>
                     </template>
 
                     <template v-if="anno.mode=='modify'">
-                      <button type="button" class="btn btn-outline-secondary">
-                        <span >{{ example.material.tokenList[anno.source]?.replaced ? example.material.tokenList[anno.source]?.to?.word : example.material.tokenList[anno.source].word }}<sub>{{anno.source}}</sub></span>
-                        <span>{{anno.target}}</span>
+                      <button type="button" class="btn btn-outline-dark">
+                        <span >{{ example.material.tokenList[anno.source]?.replaced ? example.material.tokenList[anno.source]?.to?.word : example.material.tokenList[anno.source].word }}<sub>{{anno.source}}</sub></span> → <span>{{anno.target}}</span>
                       </button>
                     </template>
 
                     <template v-if="anno.mode=='delete'">
-                      <button type="button" class="btn btn-outline-secondary">
-                        <span >{{ example.material.tokenList[anno.source]?.replaced ? example.material.tokenList[anno.source]?.to?.word : example.material.tokenList[anno.source].word }}<sub>{{anno.source}}</sub></span>
+                      <button type="button" class="btn btn-outline-dark">
+                        <s><span >{{ example.material.tokenList[anno.source]?.replaced ? example.material.tokenList[anno.source]?.to?.word : example.material.tokenList[anno.source].word }}<sub>{{anno.source}}</sub></span> → 🚫</s>
                       </button>
                     </template>
 
                     <template v-if="anno.mode=='choose'||anno.mode=='text'">
-                      <button type="button" class="btn btn-outline-secondary" v-if="anno.on">
+                      <button type="button" class="btn btn-outline-dark" v-if="anno.on">
                         <span v-for="tokenIdx in anno.on" :key="tokenIdx" :title="tokenIdx">{{ example.material.tokenList[tokenIdx]?.replaced ? example.material.tokenList[tokenIdx]?.to?.word : example.material.tokenList[tokenIdx].word }}</span><sub>{{anno.on}}</sub>
                       </button>
-                      <button type="button" class="btn btn-outline-secondary">
+                      <button type="button" class="btn btn-outline-dark">
                         <span>{{anno.withText}}</span>
                       </button>
                     </template>
 
-                    <button type="button" class="btn btn-outline-secondary" v-if="anno.toSolve!=null">以解决 {{example.annotations[anno.toSolve].label}}<sub>{{anno.toSolve}}</sub> 的问题</button>
+                    <button type="button" class="btn btn-outline-dark" v-if="anno.toSolve!=null">以解决 {{example.annotations[anno.toSolve].label}}<sub>{{anno.toSolve}}</sub> 的问题</button>
 
                     <!-- <button type="button" class="btn btn-outline-danger" @click="anno.deleted=true" title="删除" v-if="!anno.deleted">×</button> -->
 
@@ -534,9 +531,9 @@
                 <div>{{ currentStep?.props?.selectedTitle }}<span>“<span v-for="tokenIdx in selection.array">{{ example.material.tokenList[tokenIdx]?.replaced ? example.material.tokenList[tokenIdx]?.to?.word : example.material.tokenList[tokenIdx].word }}</span>”</span><sub>{{selection.array}}</sub></div>
               </div>
               <template v-if="selection.array.length">
-                <!-- 指导语 -->
+                <!-- 选边指导语 -->
                 <div class="col col-12 my-1">
-                  <div v-if="currentStep?.props?.instruction">{{ currentStep?.props?.instruction }}</div>
+                  <div v-if="currentStep?.props?.sideInstruction">{{ currentStep?.props?.sideInstruction }}</div>
                 </div>
                 <!-- 选框区 -->
                 <div class="col col-12 my-1">
@@ -544,9 +541,13 @@
                     <option  v-for="(option, index) in currentStep?.props?.options" :key="index" :value="option.value">{{ option.text }}</option>
                   </select>
                 </div>
+                <!-- 添加内容指导语 -->
+                <div class="col col-12 my-1">
+                  <div v-if="currentStep?.props?.addInstruction">{{ currentStep?.props?.addInstruction }}</div>
+                </div>
                 <!-- 文本区 -->
                 <div class="col col-12 my-1">
-                  <input class="form-control form-control-sm" type="text" v-model="currentStep.props.data.target" :placeholder="currentStep?.props?.instruction ?? ''">
+                  <input class="form-control form-control-sm" type="text" v-model="currentStep.props.data.target" :placeholder="currentStep?.props?.addInstruction ?? ''">
                 </div>
               </template>
               <div class="col col-12 my-1">

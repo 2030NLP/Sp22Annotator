@@ -93,7 +93,7 @@
             },
             {
               "text": "+ 语义冲突",
-              "go": "xxx",
+              "go": "addYuYiChongTu",
               "style": "outline-primary"
             },
             {
@@ -112,17 +112,17 @@
               "style": "outline-primary"
             },
             {
-              "text": "+ 增加字",
+              "text": "+ 添加内容",
               "go": "addword",
               "style": "outline-primary"
             },
             {
-              "text": "+ 删除字",
+              "text": "+ 删除单词",
               "go": "deleteword",
               "style": "outline-primary"
             },
             {
-              "text": "+ 修改字",
+              "text": "+ 修改单词",
               "go": "modifyword",
               "style": "outline-primary"
             }
@@ -164,89 +164,109 @@
         "name": "其它",
         "mode": "text",
         "props": {
-          "instruction": "请在文中写下你的意见。",
-          "okBtn": {
-            "text": "不再添加，完成",
+          "qitainstruction": "请在文中写下你的意见。",
+          "data": {
+            "label": "其它",
+            "withText": ""
+          },
+          "okBtn1": {
+            "text": "确定",
             "go": "manageReasons",
             "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "manageReasons",
+            "style": "light"
           }
         }
       },
       "addword": {
         "ref": "addword",
-        "name": "增加字",
+        "name": "添加内容",
         "mode": "add",
         "props": {
-          "instruction": "请选择token",
+          "selectInstruction": "请在文中点选要在其前后添加内容的单词（限1词）",
+          "selectedTitle": "当前选中的单词是：",
+          "sideInstruction": "请选择在当前字的前还是后添加内容",
+          "addInstruction": "请填写要添加的内容",
           "listTitle": "",
+          "options": [
+            {
+              "text": "前",
+              "value": 0
+            },
+            {
+              "text": "后",
+              "value": 1
+            }
+          ],
           "data": {
-            "label": "增加字",
-            "tokenarrays": []
-          },
-          "addBtn": {
-            "text": "将所选片段加入列表",
-            "style": "primary"
-          },
-          "clearBtn": {
-            "text": "清除选区",
-            "style": "info"
+            "label": "添加",
+            "source": 0,
+            "side": 1,
+            "target": ""
           },
           "okBtn": {
-            "text": "不再添加，完成",
+            "text": "确定",
             "go": "manageReasons",
             "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "manageReasons",
+            "style": "light"
           }
         }
       },
       "modifyword": {
         "ref": "modifyword",
-        "name": "修改字",
+        "name": "修改单词",
         "mode": "modify",
         "props": {
-          "instruction": "请选择token",
+          "selectInstruction": "请在文中点选要修改的单词（限1词）",
+          "selectedTitle": "要修改的单词是：",
+          "instruction": "将该单词修改为：",
           "listTitle": "",
           "data": {
-            "label": "修改字",
-            "tokenarrays": []
-          },
-          "addBtn": {
-            "text": "将所选片段加入列表",
-            "style": "primary"
-          },
-          "clearBtn": {
-            "text": "清除选区",
-            "style": "info"
+            "label": "修改",
+            "source": 0,
+            "target": ""
           },
           "okBtn": {
-            "text": "不再添加，完成",
+            "text": "确定",
             "go": "manageReasons",
             "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "manageReasons",
+            "style": "light"
           }
         }
       },
       "deleteword": {
         "ref": "deleteword",
-        "name": "删除字",
+        "name": "删除单词",
         "mode": "delete",
         "props": {
-          "instruction": "请选择token",
+          "selectInstruction": "请在文中点选要删除的单词（限1词）",
+          "selectedTitle": "要删除的单词是：",
+          "instruction": "",
           "listTitle": "",
           "data": {
-            "label": "删除字",
-            "tokenarrays": []
-          },
-          "addBtn": {
-            "text": "将所选片段加入列表",
-            "style": "primary"
-          },
-          "clearBtn": {
-            "text": "清除选区",
-            "style": "info"
+            "label": "删除",
+            "source": 0
           },
           "okBtn": {
-            "text": "不再添加，完成",
+            "text": "确定",
             "go": "manageReasons",
             "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "manageReasons",
+            "style": "light"
           }
         }
       },
@@ -259,6 +279,32 @@
           "listTitle": "造成搭配不当的文本片段是：",
           "data": {
             "label": "搭配不当",
+            "tokenarrays": []
+          },
+          "addBtn": {
+            "text": "将所选片段加入列表",
+            "style": "primary"
+          },
+          "clearBtn": {
+            "text": "清除选区",
+            "style": "info"
+          },
+          "okBtn": {
+            "text": "不再添加，完成",
+            "go": "manageReasons",
+            "style": "success"
+          }
+        }
+      },
+      "addYuYiChongTu": {
+        "ref": "addYuYiChongTu",
+        "name": "新增语义冲突",
+        "mode": "multiSpans",
+        "props": {
+          "instruction": "请在文中依次划选造成语义冲突的全部文本片段。选择完成后，可将其加入列表。",
+          "listTitle": "造成语义冲突的文本片段是：",
+          "data": {
+            "label": "语义冲突",
             "tokenarrays": []
           },
           "addBtn": {
