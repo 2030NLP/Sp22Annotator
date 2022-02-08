@@ -22,7 +22,7 @@
 
       "isReplacedItem": true,
       "rpID": "1-77-34-5",
-      "replacedItemIdx": 5,
+      "rpIdx": 5,
 
       "material": {
         "content": "桌上有碗汤",
@@ -135,7 +135,7 @@
 
       "isReplacedItem": true,
       "rpID": "1-77-34-6",
-      "replacedItemIdx": 6,
+      "rpIdx": 6,
 
       "material": {
         "content": "桌上有碗汤",

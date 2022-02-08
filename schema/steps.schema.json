@@ -15,25 +15,37 @@
           "optionBtns": [
             {
               "text": "完全正常",
-              "value": "fine",
+              "data": {
+                "label": "fine",
+                "desc": "完全正常"
+              },
               "go": "judgeSimilarity",
               "style": "outline-primary"
             },
             {
               "text": "尚能说通",
-              "value": "someFine",
+              "data": {
+                "label": "someFine",
+                "desc": "尚能说通"
+              },
               "go": "judgeSimilarity",
               "style": "outline-primary"
             },
             {
               "text": "比较牵强",
-              "value": "someBad",
+              "data": {
+                "label": "someBad",
+                "desc": "比较牵强"
+              },
               "go": "manageReasons",
               "style": "outline-primary"
             },
             {
               "text": "根本不对",
-              "value": "bad",
+              "data": {
+                "label": "bad",
+                "desc": "根本不对"
+              },
               "go": "manageReasons",
               "style": "outline-primary"
             }
@@ -50,19 +62,28 @@
           "optionBtns": [
             {
               "text": "相同",
-              "value": "same",
+              "data": {
+                "label": "same",
+                "desc": "空间关系与原文相同"
+              },
               "go": "end",
               "style": "outline-primary"
             },
             {
               "text": "可能相同也可能不同",
-              "value": "ambi",
+              "data": {
+                "label": "ambi",
+                "desc": "空间关系与原文可能相同也可能不同"
+              },
               "go": "end",
               "style": "outline-primary"
             },
             {
               "text": "不同",
-              "value": "diff",
+              "data": {
+                "label": "diff",
+                "desc": "空间关系与原文不同"
+              },
               "go": "end",
               "style": "outline-primary"
             }
@@ -80,9 +101,6 @@
         "name": "管理归因",
         "mode": "interlude",
         "props": {
-          "data": {
-            "annotations": []
-          },
           "instruction": "这段材料中的空间关系存在的异常有____。",
           "showResults": true,
           "optionBtns": [
@@ -154,7 +172,7 @@
           },
           "cancelBtn": {
             "text": "返回并继续标注",
-            "go": "manageReasons",
+            "go": "start",
             "style": "outline-dark"
           }
         }
