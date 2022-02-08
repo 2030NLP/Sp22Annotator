@@ -400,7 +400,7 @@
 
                     <template v-if="anno.mode=='delete'">
                       <button type="button" class="btn btn-outline-dark">
-                        <s><span >{{ example.material.tokenList[anno.source]?.replaced ? example.material.tokenList[anno.source]?.to?.word : example.material.tokenList[anno.source].word }}<sub>{{anno.source}}</sub></span> → 🚫</s>
+                        <s><span >{{ example.material.tokenList[anno.source]?.replaced ? example.material.tokenList[anno.source]?.to?.word : example.material.tokenList[anno.source].word }}<sub>{{anno.source}}</sub></span></s>
                       </button>
                     </template>
 
@@ -500,11 +500,9 @@
               <!-- --- -->
               <div class="col col-12 my-1">
                 <!-- addBtn -->
-                <button v-if="currentStep?.props?.addBtn" type="button" v-on:click="currentStep?.props?.data.tokenarrays.push(selection.array);clearSelection();" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.addBtn.style}`">{{ currentStep.props.addBtn.text }}</button>
+                <button v-if="currentStep?.props?.addBtn" type="button" v-on:click="currentStep?.props?.data.tokenarrays.push(selection.array);clearSelection();" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.addBtn.style}`" :disabled="selection.array.length<1">{{ currentStep.props.addBtn.text }}</button>
                 <!-- clearBtn -->
                 <button v-if="currentStep?.props?.clearBtn" type="button" v-on:click="clearSelection" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.clearBtn.style}`">{{ currentStep.props.clearBtn.text }}</button>
-                <!-- okBtn -->
-                <button v-if="currentStep?.props?.okBtn" type="button" v-on:click="handleMultiSpans(currentStep.props.okBtn.go, currentStep.props.data);clearSelection();" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`">{{ currentStep.props.okBtn.text }}</button>
               </div>
               <!-- 已选列表 开始 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.listTitle">
@@ -517,7 +515,17 @@
                   </div>
                 </div>
               </div>
+              <div class="col col-12 my-1" v-if="currentStep.props.data.tokenarrays.length<2&&currentStep?.props?.lengthTip">
+                <div>{{ currentStep?.props?.lengthTip }}</div>
+              </div>
               <!-- 已选列表 结束 -->
+              <!-- --- -->
+              <div class="col col-12 my-1">
+                <!-- okBtn -->
+                <button v-if="currentStep?.props?.okBtn" type="button" v-on:click="handleMultiSpans(currentStep.props.okBtn.go, currentStep.props.data);clearSelection();" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`" :disabled="currentStep.props.data.tokenarrays.length<2">{{ currentStep.props.okBtn.text }}</button>
+                <!-- cancelBtn -->
+                <button v-if="currentStep?.props?.cancelBtn" type="button" v-on:click="cancelStep(currentStep.props.cancelBtn.go);clearSelection();" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.cancelBtn.style}`">{{ currentStep.props.cancelBtn.text }}</button>
+              </div>
             </div>
             <!-- multiSpans 模式 结束 -->
 
@@ -711,6 +719,7 @@
   <script type="text/javascript" src="lib/vue_3.2.26_.global.prod.min.js"></script>
   <script type="text/javascript" src="lib/axios_0.25.0_.min.js"></script>
   <script type="text/javascript" src="lib/FileSaver.js"></script>
+  <script type="text/javascript" src="js/components/BaseSaver.js"></script>
   <script type="text/javascript" src="js/components/BaseReader.js"></script>
   <script type="text/javascript" src="js/components/TheReader.js"></script>
   <script type="text/javascript" src="js/components/TheSteps.js"></script>

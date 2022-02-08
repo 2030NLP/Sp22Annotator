@@ -6,6 +6,11 @@ const APP_VERSION = "22-0207-00";
 const RootComponent = {
   setup() {
 
+
+    // ↓ 参看 js/components/BaseSaver.js
+    const theSaver = BaseSaver();
+    // ↑ 参看 js/components/BaseSaver.js
+
     // ↓ 参看 js/components/TheReader.js
     const theReader = TheReader();
     // ↑ 参看 js/components/TheReader.js
@@ -324,75 +329,74 @@ const RootComponent = {
 
 
 
-      onExport1:()=>{
-        let jn = JSON.stringify(exampleWrap.example, null, 2);
-        let filename =exampleWrap.example.dbID+"注结果";
-        var file = new File([jn], (`${filename}`), {
-            type: "text/plain; charset=utf-8"
-          });
-        saveAs(file);
-      },
-      goRefStep1: (ref, value) => {
-        // 搭配不当
-        exampleWrap.example.annotations[0].tokenarrays.push(value.tokenarrays);
-        console.log(exampleWrap.example.annotations[0].tokenarrays);
+      // onExport1:()=>{
+      //   let jn = JSON.stringify(exampleWrap.example, null, 2);
+      //   let filename =exampleWrap.example.dbID+"注结果";
+      //   var file = new File([jn], (`${filename}`), {
+      //       type: "text/plain; charset=utf-8"
+      //     });
+      //   saveAs(file);
+      // },
+      // goRefStep1: (ref, value) => {
+      //   // 搭配不当
+      //   exampleWrap.example.annotations[0].tokenarrays.push(value.tokenarrays);
+      //   console.log(exampleWrap.example.annotations[0].tokenarrays);
 
-        stepMethods.goRefStep(ref, value);
+      //   stepMethods.goRefStep(ref, value);
 
-        value.tokenarrays=[];
-        console.log(value)
-      },
-      goRefStep2: (ref, value) => {
-        // 常识
-        var data1={}
-        data1[data.modetype]=value.tokenarrays;
-        console.log(data1)
-        exampleWrap.example.annotations[3].withText.push(data1);
-        console.log(exampleWrap.example.annotations[3].withText);
+      //   value.tokenarrays=[];
+      //   console.log(value)
+      // },
+      // goRefStep2: (ref, value) => {
+      //   // 常识
+      //   var data1={}
+      //   data1[data.modetype]=value.tokenarrays;
+      //   console.log(data1)
+      //   exampleWrap.example.annotations[3].withText.push(data1);
+      //   console.log(exampleWrap.example.annotations[3].withText);
 
-        stepMethods.goRefStep(ref, value);
+      //   stepMethods.goRefStep(ref, value);
 
-        value.tokenarrays=[];
-        data.modetype="常识1";
-      },
-      goRefStep3: (ref, value) => {
-        // add
-        exampleWrap.example.annotations[4].source.push(value.tokenarrays);
-        exampleWrap.example.annotations[4].target.push(data.add_target);
+      //   value.tokenarrays=[];
+      //   data.modetype="常识1";
+      // },
+      // goRefStep3: (ref, value) => {
+      //   // add
+      //   exampleWrap.example.annotations[4].source.push(value.tokenarrays);
+      //   exampleWrap.example.annotations[4].target.push(data.add_target);
 
-        stepMethods.goRefStep(ref, value);
+      //   stepMethods.goRefStep(ref, value);
 
-        value.tokenarrays=[];
-        data.add_target="";
-      },
-      goRefStep4: (ref, value) => {
-        // delete
-        exampleWrap.example.annotations[5].source.push(value.tokenarrays);
+      //   value.tokenarrays=[];
+      //   data.add_target="";
+      // },
+      // goRefStep4: (ref, value) => {
+      //   // delete
+      //   exampleWrap.example.annotations[5].source.push(value.tokenarrays);
 
-        stepMethods.goRefStep(ref, value);
+      //   stepMethods.goRefStep(ref, value);
 
-        value.tokenarrays=[];
-      },
-      goRefStep5: (ref, value) => {
-        // modify
-        exampleWrap.example.annotations[6].source.push(value.tokenarrays);
-        exampleWrap.example.annotations[6].target.push(data.modify_target);
+      //   value.tokenarrays=[];
+      // },
+      // goRefStep5: (ref, value) => {
+      //   // modify
+      //   exampleWrap.example.annotations[6].source.push(value.tokenarrays);
+      //   exampleWrap.example.annotations[6].target.push(data.modify_target);
 
-        stepMethods.goRefStep(ref, value);
+      //   stepMethods.goRefStep(ref, value);
 
-        value.tokenarrays=[];
-        data.modify_target="";
-      },
-      opt2:()=>{
-        let obj1 = document.getElementById("pid1");
-        data.indext1 = obj1.options[obj1.selectedIndex].value;
-        if(data.indext1==0){
-          data.modetype="常识1";
-        }else{
-          data.modetype="常识2";
-        }
-
-      },
+      //   value.tokenarrays=[];
+      //   data.modify_target="";
+      // },
+      // opt2:()=>{
+      //   let obj1 = document.getElementById("pid1");
+      //   data.indext1 = obj1.options[obj1.selectedIndex].value;
+      //   if(data.indext1==0){
+      //     data.modetype="常识1";
+      //   }else{
+      //     data.modetype="常识2";
+      //   }
+      // },
     };
 
 
@@ -428,6 +432,7 @@ const RootComponent = {
       stepsDictWrap,
       updateSteps,
       //
+      theSaver,
       // getAnnoBtnClass,
     };
   },  // setup() end

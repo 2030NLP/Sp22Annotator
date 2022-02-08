@@ -5,10 +5,13 @@ const BaseSaver = () => {
       let file = new File([text], fileName, {type: "text/plain;charset=utf-8"});
       saveAs(file);
     },
+    saveJson(obj, fileName) {
+      let text = JSON.stringify(obj, null, 2);
+      fileName = (fileName==null) ? "file.json" : fileName;
+      methods.saveText(text, fileName);
+    },
     save(obj) {
-      let text = JSON.stringify(obj, null, 2)
-      let file = new File([text], "file.json", {type: "text/plain;charset=utf-8"});
-      saveAs(file);
+      methods.saveJson(obj);
     },
   };
   return { ...methods };
