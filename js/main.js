@@ -300,6 +300,21 @@ const RootComponent = {
         stepMethods.handleTemplate(ref, data, fn);
       },
 
+      handleWord: (ref, data) => {
+        let fn = (da)=>{
+          da.source = selection.array[0];
+          return da;
+        };
+        stepMethods.handleTemplate(ref, data, fn);
+      },
+
+      handleQita: (ref, data) => {
+        let fn = (da)=>{
+          return da;
+        };
+        stepMethods.handleTemplate(ref, data, fn);
+      },
+
       handleMultiSpans: (ref, data) => {
         let fn = (da)=>{
           return da;
@@ -309,16 +324,6 @@ const RootComponent = {
 
 
 
-      readdata1: (ref, value) => {
-        var file = document.getElementById("my_file").files[0];
-        var reader=new FileReader();
-        reader.readAsText(file);
-        reader.onload = function (e)
-        {
-          var fileText = e.target.result;
-          console.log(fileText);
-        }
-      },
       onExport1:()=>{
         let jn = JSON.stringify(exampleWrap.example, null, 2);
         let filename =exampleWrap.example.dbID+"注结果";

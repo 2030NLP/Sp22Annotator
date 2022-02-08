@@ -251,7 +251,6 @@
               v-on:click="readDataFromLocalStorage" class="btn btn-success">加载缓存数据</button>
           </div>
         </form>
-        <!-- <input type="file" ng-model="my_file" id="my_file" > -->
         <!-- fileCtrl end -->
         <!-- progressCtrl start -->
         <div class="row align-items-center">
@@ -384,12 +383,32 @@
 
                     <template v-if="anno.mode=='multiSpans'">
                       <button v-for="tokenarray, kk in anno.tokenarrays" :key="kk" type="button" class="btn btn-outline-secondary">
-                        <span v-for="idx in tokenarray" :key="idx" :title="idx">{{example.material.tokenList[idx].word}}<sub>{{idx}}</sub></span>
+                        <span v-for="idx in tokenarray" :key="idx" :title="idx">{{ example.material.tokenList[idx]?.replaced ? example.material.tokenList[idx]?.to?.word : example.material.tokenList[idx].word }}<sub>{{idx}}</sub></span>
+                      </button>
+                    </template>
+
+                    <template v-if="anno.mode=='add'">
+                      <button type="button" class="btn btn-outline-secondary">
+                        <span >{{ example.material.tokenList[anno.source]?.replaced ? example.material.tokenList[anno.source]?.to?.word : example.material.tokenList[anno.source].word }}<sub>{{anno.source}}</sub></span>
+                        <span>{{anno.target}}</span>
+                      </button>
+                    </template>
+
+                    <template v-if="anno.mode=='modify'">
+                      <button type="button" class="btn btn-outline-secondary">
+                        <span >{{ example.material.tokenList[anno.source]?.replaced ? example.material.tokenList[anno.source]?.to?.word : example.material.tokenList[anno.source].word }}<sub>{{anno.source}}</sub></span>
+                        <span>{{anno.target}}</span>
+                      </button>
+                    </template>
+
+                    <template v-if="anno.mode=='delete'">
+                      <button type="button" class="btn btn-outline-secondary">
+                        <span >{{ example.material.tokenList[anno.source]?.replaced ? example.material.tokenList[anno.source]?.to?.word : example.material.tokenList[anno.source].word }}<sub>{{anno.source}}</sub></span>
                       </button>
                     </template>
 
                     <template v-if="anno.mode=='choose'||anno.mode=='text'">
-                      <button type="button" class="btn btn-outline-secondary">
+                      <button type="button" class="btn btn-outline-secondary" v-if="anno.on">
                         <span v-for="tokenIdx in anno.on" :key="tokenIdx" :title="tokenIdx">{{ example.material.tokenList[tokenIdx]?.replaced ? example.material.tokenList[tokenIdx]?.to?.word : example.material.tokenList[tokenIdx].word }}</span><sub>{{anno.on}}</sub>
                       </button>
                       <button type="button" class="btn btn-outline-secondary">
@@ -508,56 +527,64 @@
             <!-- add模式开始 -->
             <div class="row" v-if=" 'add' == (currentStep.mode)" :data-mode="currentStep.mode">
               <!-- 指导语 -->
-              <div class="col col-12 my-1" v-if="currentStep?.props?.instruction">
-                <div>{{ currentStep?.props?.instruction }}</div>
+              <div class="col col-12 my-1" v-if="!selection.array.length&&currentStep?.props?.selectInstruction">
+                <div>{{ currentStep?.props?.selectInstruction }}</div>
               </div>
-              <!-- --- -->
-              <div class="col col-12 my-1">
-                <!-- addBtn -->
-                <button v-if="currentStep?.props?.addBtn" type="button" v-on:click="currentStep?.props?.data.tokenarrays.push(selection.array)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.addBtn.style}`">{{ currentStep.props.addBtn.text }}</button>
-                <!-- clearBtn -->
-                <button v-if="currentStep?.props?.clearBtn" type="button" v-on:click="clearSelection" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.clearBtn.style}`">{{ currentStep.props.clearBtn.text }}</button>
-                <!-- okBtn -->
-                <button v-if="currentStep?.props?.okBtn" type="button" v-on:click="goRefStep3(currentStep.props.okBtn.go, currentStep.props.data)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`">{{ currentStep.props.okBtn.text }}</button>
+              <div class="col col-12 my-1" v-if="selection.array.length&&currentStep?.props?.selectedTitle">
+                <div>{{ currentStep?.props?.selectedTitle }}<span>“<span v-for="tokenIdx in selection.array">{{ example.material.tokenList[tokenIdx]?.replaced ? example.material.tokenList[tokenIdx]?.to?.word : example.material.tokenList[tokenIdx].word }}</span>”</span><sub>{{selection.array}}</sub></div>
               </div>
-              <div class="col col-12 my-1" v-if="['add'].includes(currentStep.mode)">
-                <div class="card">
-                  <div class="card-body">
-                    <span class="badge rounded-pill bg-light text-dark m-1" v-for="tokenarray in currentStep.props.data.tokenarrays">{{tokenarray}}</span>
-                  </div>
+              <template v-if="selection.array.length">
+                <!-- 指导语 -->
+                <div class="col col-12 my-1">
+                  <div v-if="currentStep?.props?.instruction">{{ currentStep?.props?.instruction }}</div>
                 </div>
-              </div>
+                <!-- 选框区 -->
+                <div class="col col-12 my-1">
+                  <select class="form-select form-select-sm" v-model="currentStep.props.data.side">
+                    <option  v-for="(option, index) in currentStep?.props?.options" :key="index" :value="option.value">{{ option.text }}</option>
+                  </select>
+                </div>
+                <!-- 文本区 -->
+                <div class="col col-12 my-1">
+                  <input class="form-control form-control-sm" type="text" v-model="currentStep.props.data.target" :placeholder="currentStep?.props?.instruction ?? ''">
+                </div>
+              </template>
               <div class="col col-12 my-1">
-                <input placeholder="请输入..." v-model="add_target">
+                <!-- okBtn -->
+                <button v-if="currentStep?.props?.okBtn" type="button" v-on:click="handleWord(currentStep.props.okBtn.go, currentStep.props.data)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`" :disabled="(!selection.array.length)||(!currentStep.props.data.target.length)">{{ currentStep.props.okBtn.text }}</button>
+                <!-- cancelBtn -->
+                <button v-if="currentStep?.props?.cancelBtn" type="button" v-on:click="cancelStep(currentStep.props.cancelBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.cancelBtn.style}`">{{ currentStep.props.cancelBtn.text }}</button>
               </div>
+
             </div>
             <!-- add模式结束 -->
 
             <!-- modify模式开始 -->
             <div class="row" v-if=" 'modify' == (currentStep.mode)" :data-mode="currentStep.mode">
               <!-- 指导语 -->
-              <div class="col col-12 my-1" v-if="currentStep?.props?.instruction">
-                <div>{{ currentStep?.props?.instruction }}</div>
+              <div class="col col-12 my-1" v-if="!selection.array.length&&currentStep?.props?.selectInstruction">
+                <div>{{ currentStep?.props?.selectInstruction }}</div>
               </div>
-              <!-- --- -->
-              <div class="col col-12 my-1">
-                <!-- addBtn -->
-                <button v-if="currentStep?.props?.addBtn" type="button" v-on:click="currentStep?.props?.data.tokenarrays.push(selection.array)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.addBtn.style}`">{{ currentStep.props.addBtn.text }}</button>
-                <!-- clearBtn -->
-                <button v-if="currentStep?.props?.clearBtn" type="button" v-on:click="clearSelection" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.clearBtn.style}`">{{ currentStep.props.clearBtn.text }}</button>
-                <!-- okBtn -->
-                <button v-if="currentStep?.props?.okBtn" type="button" v-on:click="goRefStep5(currentStep.props.okBtn.go, currentStep.props.data)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`">{{ currentStep.props.okBtn.text }}</button>
+              <div class="col col-12 my-1" v-if="selection.array.length&&currentStep?.props?.selectedTitle">
+                <div>{{ currentStep?.props?.selectedTitle }}<span>“<span v-for="tokenIdx in selection.array">{{ example.material.tokenList[tokenIdx]?.replaced ? example.material.tokenList[tokenIdx]?.to?.word : example.material.tokenList[tokenIdx].word }}</span>”</span><sub>{{selection.array}}</sub></div>
               </div>
-              <div class="col col-12 my-1" v-if="['modify'].includes(currentStep.mode)">
-                <div class="card">
-                  <div class="card-body">
-                    <span class="badge rounded-pill bg-light text-dark m-1" v-for="tokenarray in currentStep.props.data.tokenarrays">{{tokenarray}}</span>
-                  </div>
+              <template v-if="selection.array.length">
+                <!-- 指导语 -->
+                <div class="col col-12 my-1">
+                  <div v-if="currentStep?.props?.instruction">{{ currentStep?.props?.instruction }}</div>
                 </div>
-              </div>
+                <!-- 文本区 -->
+                <div class="col col-12 my-1">
+                  <input class="form-control form-control-sm" type="text" v-model="currentStep.props.data.target" :placeholder="currentStep?.props?.instruction ?? ''">
+                </div>
+              </template>
               <div class="col col-12 my-1">
-                <input placeholder="请输入..." v-model="modify_target">
+                <!-- okBtn -->
+                <button v-if="currentStep?.props?.okBtn" type="button" v-on:click="handleWord(currentStep.props.okBtn.go, currentStep.props.data)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`" :disabled="(!selection.array.length)||(!currentStep.props.data.target.length)">{{ currentStep.props.okBtn.text }}</button>
+                <!-- cancelBtn -->
+                <button v-if="currentStep?.props?.cancelBtn" type="button" v-on:click="cancelStep(currentStep.props.cancelBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.cancelBtn.style}`">{{ currentStep.props.cancelBtn.text }}</button>
               </div>
+
             </div>
             <!-- modify模式结束 -->
 
@@ -565,25 +592,19 @@
             <!-- delete模式开始 -->
             <div class="row" v-if=" 'delete' == (currentStep.mode)" :data-mode="currentStep.mode">
               <!-- 指导语 -->
-              <div class="col col-12 my-1" v-if="currentStep?.props?.instruction">
-                <div>{{ currentStep?.props?.instruction }}</div>
+              <div class="col col-12 my-1" v-if="!selection.array.length&&currentStep?.props?.selectInstruction">
+                <div>{{ currentStep?.props?.selectInstruction }}</div>
               </div>
-              <!-- --- -->
+              <div class="col col-12 my-1" v-if="selection.array.length&&currentStep?.props?.selectedTitle">
+                <div>{{ currentStep?.props?.selectedTitle }}<span>“<span v-for="tokenIdx in selection.array">{{ example.material.tokenList[tokenIdx]?.replaced ? example.material.tokenList[tokenIdx]?.to?.word : example.material.tokenList[tokenIdx].word }}</span>”</span><sub>{{selection.array}}</sub></div>
+              </div>
               <div class="col col-12 my-1">
-                <!-- addBtn -->
-                <button v-if="currentStep?.props?.addBtn" type="button" v-on:click="currentStep?.props?.data.tokenarrays.push(selection.array)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.addBtn.style}`">{{ currentStep.props.addBtn.text }}</button>
-                <!-- clearBtn -->
-                <button v-if="currentStep?.props?.clearBtn" type="button" v-on:click="clearSelection" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.clearBtn.style}`">{{ currentStep.props.clearBtn.text }}</button>
                 <!-- okBtn -->
-                <button v-if="currentStep?.props?.okBtn" type="button" v-on:click="goRefStep4(currentStep.props.okBtn.go, currentStep.props.data)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`">{{ currentStep.props.okBtn.text }}</button>
+                <button v-if="currentStep?.props?.okBtn" type="button" v-on:click="handleWord(currentStep.props.okBtn.go, currentStep.props.data)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`" :disabled="(!selection.array.length)">{{ currentStep.props.okBtn.text }}</button>
+                <!-- cancelBtn -->
+                <button v-if="currentStep?.props?.cancelBtn" type="button" v-on:click="cancelStep(currentStep.props.cancelBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.cancelBtn.style}`">{{ currentStep.props.cancelBtn.text }}</button>
               </div>
-              <div class="col col-12 my-1" v-if="['delete'].includes(currentStep.mode)">
-                <div class="card">
-                  <div class="card-body">
-                    <span class="badge rounded-pill bg-light text-dark m-1" v-for="tokenarray in currentStep.props.data.tokenarrays">{{tokenarray}}</span>
-                  </div>
-                </div>
-              </div>
+
             </div>
             <!-- delete模式结束 -->
 
@@ -615,10 +636,22 @@
                 </div>
               </template>
 
+              <template v-if="!selection.array.length&&currentStep?.props?.qitainstruction">
+                <!-- 指导语 -->
+                <div class="col col-12 my-1">
+                  <div v-if="currentStep?.props?.instruction">{{ currentStep?.props?.qitainstruction }}</div>
+                </div>
+                <!-- 文本区 -->
+                <div class="col col-12 my-1" v-if="currentStep.mode=='text'">
+                  <input class="form-control form-control-sm" type="text" v-model="currentStep.props.data.withText" :placeholder="currentStep?.props?.qitainstruction ?? ''">
+                </div>
+              </template>
+
               <!-- 按钮区 -->
               <div class="col col-12 my-1">
                 <!-- okBtn -->
                 <button v-if="currentStep?.props?.okBtn" type="button" v-on:click="handleChooseOrText(currentStep.props.okBtn.go, currentStep.props.data)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`" :disabled="(!selection.array.length)||(!currentStep.props.data.withText.length)">{{ currentStep.props.okBtn.text }}</button>
+                <button v-if="currentStep?.props?.okBtn1" type="button" v-on:click="handleQita(currentStep.props.okBtn1.go, currentStep.props.data)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn1.style}`" :disabled="(!currentStep.props.data.withText.length)">{{ currentStep.props.okBtn1.text }}</button>
                 <!-- cancelBtn -->
                 <button v-if="currentStep?.props?.cancelBtn" type="button" v-on:click="cancelStep(currentStep.props.cancelBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.cancelBtn.style}`">{{ currentStep.props.cancelBtn.text }}</button>
               </div>
