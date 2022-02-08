@@ -245,7 +245,7 @@
           </div>
           <div class="btn-group btn-group-sm col-md-4 my-2">
             <button type="button" name="do_import" id="do_import" @click="onImport" class="btn btn-primary">导入</button>
-            <button type="button" name="do_export" id="do_export" @click="onExport1" class="btn btn-info">导出</button>
+            <button type="button" name="do_export" id="do_export" @click="onExport" class="btn btn-info">导出</button>
             <button v-if="showLoadLocalStorage" type="button" name="do_localStorage" id="do_localStorage"
               v-on:click="readDataFromLocalStorage" class="btn btn-success">加载缓存数据</button>
           </div>
@@ -268,19 +268,12 @@
       </div>
     </div>
 
-    <div class="container page my-4 hidden" id="page-stage">
-      <div class="container py-2">
-        <!-- 页码操作区 开始 -->
-        <!-- 页码操作区 结束 -->
-      </div>
-    </div>
 
 
 
-
-    <!-- 新版编辑区 开始 -->
+    <!-- 编辑区 开始 -->
     <div class="container page my-4 py-2" id="page-main-editor" __v-show="meta.currentWorker.length">
-      <div class="container">
+      <div class="container" v-if="example!=null&&example?.material!=null">
         <div class="row mt-2 mb-3 align-items-center" id="page-main-editor--main">
           <!-- 内容区 开始 -->
           <div class="col col-12 col-lg-7 my-2">
@@ -288,7 +281,7 @@
             <div class="row my-2 material-area" id="material-replaced">
               <p>
                 <span
-                  v-for="token in example.material.tokenList"
+                  v-for="token in example?.material?.tokenList"
                   :key="token.idx"
                   class="token"
                   :class="{'right-space': true}"
@@ -312,7 +305,7 @@
             <div class="row my-2 material-area" id="material-origin" :data-show="ctrl.showOrigin" v-show="ctrl.showOrigin">
               <p>
                 <span
-                  v-for="token in example.material.tokenList"
+                  v-for="token in example?.material?.tokenList"
                   :key="token.idx"
                   class="token"
                   :class="{'right-space': true}"
@@ -693,18 +686,18 @@
 
       </div>
     </div>
-    <!-- 新版编辑区 结束 -->
+    <!-- 编辑区 结束 -->
 
-    <div class="position-fixed bottom-0 w-100 p-2">
+    <div class="position-fixed bottom-0 w-100 p-2" v-if="dataWrap.dataItems.length">
       <div class="container">
         <!-- 页码操作区 开始 -->
         <div class="row page-ctrl">
           <div class="col col-12 col-md-4 my-1">
             <div class="input-group input-group-sm ">
-              <button class="btn btn-outline-secondary" type="button">上一条</button>
+              <button class="btn btn-outline-secondary" type="button" @click="saveExample();goIdx(ctrl.currentIdx-1)">上一条</button>
               <!-- <span class="input-group-text">3</span> -->
               <input type="text" class="form-control text-center" disabled v-model="ctrl.currentIdx">
-              <button class="btn btn-outline-secondary" type="button">下一条</button>
+              <button class="btn btn-outline-secondary" type="button" @click="saveExample();goIdx(ctrl.currentIdx+1)">下一条</button>
             </div>
           </div>
           <div class="col-md-4 my-0">
@@ -712,9 +705,9 @@
           <div class="col col-12 col-md-4 my-1">
             <div class="input-group input-group-sm">
               <span class="input-group-text">前往第</span>
-              <input type="number" class="form-control">
+              <input type="number" class="form-control text-center" v-model="ctrl.targetIdx">
               <span class="input-group-text">条</span>
-              <button class="btn btn-outline-secondary" type="button">GO</button>
+              <button class="btn btn-outline-secondary" type="button" @click="saveExample();goIdx(ctrl.targetIdx)">GO</button>
             </div>
           </div>
           <!-- <div class="col-md-1 my-0">
@@ -739,7 +732,7 @@
   <script type="text/javascript" src="js/components/BaseReader.js"></script>
   <script type="text/javascript" src="js/components/TheReader.js"></script>
   <script type="text/javascript" src="js/components/TheSteps.js"></script>
-  <script type="text/javascript" src="js/components/TheSelector.js"></script>
+  <!-- <script type="text/javascript" src="js/components/TheSelector.js"></script> -->
   <script type="text/javascript" src="js/util.js"></script>
   <script type="text/javascript" src="js/main.js"></script>
 

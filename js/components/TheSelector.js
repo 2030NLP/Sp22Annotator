@@ -1,18 +1,8 @@
-const TheSelector = (tokenList) => {
+const TheSelector = (exampleWrap, selection) => {
 
+  const tokenList = exampleWrap?.example?.material?.tokenList;
 
-  const selection = reactive({
-    isSelecting: false,
-    start: null,
-    end: null,
-    end: null,
-    array: [],
-    again: false,
-    hasDown: false,
-  });
-
-
- const selectionMethods = {
+  const selectionMethods = {
     clearSelection: () => {
       Object.assign(selection, {
         isSelecting: false,

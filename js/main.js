@@ -1,7 +1,9 @@
 // import { reactive, readonly, ref, toRef, toRefs, computed, onMounted, onUpdated } from 'vue';
 const { reactive, readonly, ref, toRef, toRefs, computed, onMounted, onUpdated } = Vue;
 
-const APP_VERSION = "22-0207-00";
+
+const APP_NAME = "Sp22-Anno";
+const APP_VERSION = "22-0208-00";
 
 const RootComponent = {
   setup() {
@@ -11,97 +13,171 @@ const RootComponent = {
     const theSaver = BaseSaver();
     // ↑ 参看 js/components/BaseSaver.js
 
+
     // ↓ 参看 js/components/TheReader.js
     const theReader = TheReader();
     // ↑ 参看 js/components/TheReader.js
 
 
+
+
+
+
+
     const exampleWrap = reactive({
-      example: {
-        "dbID": "1-77-34",
-        "batchID": 1,
-        "fID": 77,
-        "srcID": 34,
-        "innerID": 3,
-        //
-        "isReplacedItem": true,
-        "rpID": "1-77-34-5",
-        "rpIdx": 5,
-        //
-        "material": {
-          "content": "桌上有碗汤",
-          "tokenList": [
-            {
-              "word": "桌",
-              "idx": 0,
-              "pos": "n",
-              "autoEntity": true,
-              "autoSpatial": false
-            },
-            {
-              "word": "上",
-              "idx": 1,
-              "pos": "f",
-              "autoEntity": false,
-              "autoSpatial": true,
-              "replaced": true,
-              "to": {
-                "word": "下",
-                "pos": "f",
-                "class": "上下左右类",
-              },
-            },
-            {
-              "word": "有",
-              "idx": 2,
-              "pos": "v",
-              "autoEntity": false,
-              "autoSpatial": false
-            },
-            {
-              "word": "碗",
-              "idx": 3,
-              "pos": "q",
-              "autoEntity": false,
-              "autoSpatial": false,
-              "replaced": true,
-              "to": {
-                "word": "杯",
-                "pos": "q",
-                "class": "容器量词",
-              },
-            },
-            {
-              "word": "米饭",
-              "idx": 4,
-              "pos": "n",
-              "autoEntity": true,
-              "autoSpatial": false,
-              "replaced": true,
-              "to": {
-                "word": "钢铁",
-                "pos": "n",
-                "class": "物质名词",
-              },
-            },
-            {
-              "word": "。",
-              "idx": 5,
-              "pos": "w",
-              "autoEntity": false,
-              "autoSpatial": false
-            }
-          ]
-        },
-        //
-        "annotations": [],
-        //
-        "_ctrl": {
-          "schema": [],  // 当前正在使用的步骤方案 [name, version, using]
-          "step": "",  // 当前步骤
-        },
-      }
+      example: {}
     });
+    const selection = reactive({
+      isSelecting: false,
+      start: null,
+      end: null,
+      end: null,
+      array: [],
+      again: false,
+      hasDown: false,
+    });
+
+    // ↓ 参看 js/components/TheSelector.js
+    // const theSelector = TheSelector(exampleWrap, selection);
+    // const selectionMethods = theSelector.selectionMethods;
+    // ↑ 参看 js/components/TheSelector.js
+
+    const selectionMethods = {
+      clearSelection: () => {
+        if (!selection.array.length) {return;};
+        Object.assign(selection, {
+          isSelecting: false,
+          start: null,
+          end: null,
+          end: null,
+          array: [],
+          again: false,
+          hasDown: false,
+        });
+        for (let tkn of exampleWrap?.example?.material?.tokenList) {
+          if (tkn._ctrl != null) {
+            Object.assign(tkn._ctrl, {
+              selecting: false,
+              selected: false,
+            })
+          };
+        };
+      },
+      onMouseDown:  (token) => {
+        // console.log(['mouseDown', token.word]);
+        //
+        if (selection.hasDown) {
+          return;
+        };
+        //
+        selection.hasDown = true;
+        for (let tkn of exampleWrap?.example?.material?.tokenList) {
+          tkn._ctrl = tkn._ctrl ?? {};
+          tkn._ctrl.selected = false;
+        };
+        token._ctrl.selecting = true;
+        //
+        selection.isSelecting = true;
+        selection.start = token.idx;
+        selection.current = token.idx;
+        selection.end = null;
+      },
+      onMouseEnter: (token) => {
+        // console.log(['mouseEnter', token.word]);
+        if (!selection.isSelecting) { return; };
+        selection.current = token.idx;
+        let [aa, bb] = [selection.start, selection.current];
+        if (bb < aa) {
+          [bb, aa] = [aa, bb];
+        };
+        let array = []
+        for (let idx = aa; idx<=bb; idx++) {
+          array.push(idx);
+          for (let tkn of exampleWrap?.example?.material?.tokenList) {
+            tkn._ctrl.selecting = (array.includes(tkn.idx));
+          };
+        };
+      },
+      onMouseOut:   (token) => {
+        selection.current = null;
+        // console.log(['mouseOut', token.word]);
+      },
+      onMouseUp:    (token) => {
+        // console.log(['mouseUp', token.word]);
+        //
+        if (selection.start == null) {return;};
+        //
+        //
+        selection.end = token.idx;
+        let [aa, bb] = [selection.start, selection.end];
+        if (bb < aa) {
+          [bb, aa] = [aa, bb];
+        };
+        selection.isSelecting = false;
+        selection.array = [];
+        for (let idx = aa; idx<=bb; idx++) {
+          selection.array.push(idx);
+          for (let tkn of exampleWrap?.example?.material?.tokenList) {
+            if (selection.array.includes(tkn.idx)) {
+              // tkn._ctrl = tkn._ctrl ?? {};
+              tkn._ctrl.selecting = false;
+              tkn._ctrl.selected = true;
+            }
+          };
+        };
+        selection.hasDown = false;
+        // console.log(selection.array);
+      },
+      onMouseDown_Old:  (token) => {
+        // console.log(['mouseDown', token.word]);
+        //
+        if (selection.isSelecting) {
+          selection.again = true;
+          return;
+        };
+        //
+        selection.again = false;
+        for (let tkn of exampleWrap?.example?.material?.tokenList) {
+          tkn._ctrl = tkn._ctrl ?? {};
+          tkn._ctrl.selected = false;
+        };
+        token._ctrl.selecting = true;
+        //
+        selection.isSelecting = true;
+        selection.start = token.idx;
+        selection.current = token.idx;
+        selection.end = null;
+      },
+      onMouseUp_Old:    (token) => {
+        // console.log(['mouseUp', token.word]);
+        //
+        if (selection.start == null) {return;};
+        //
+        if (selection.start == token.idx) {
+          if (!selection.again) {return;};
+          selection.again = false;
+        };
+        //
+        selection.end = token.idx;
+        let [aa, bb] = [selection.start, selection.end];
+        if (bb < aa) {
+          [bb, aa] = [aa, bb];
+        };
+        selection.isSelecting = false;
+        selection.array = [];
+        for (let idx = aa; idx<=bb; idx++) {
+          selection.array.push(idx);
+          for (let tkn of exampleWrap?.example?.material?.tokenList) {
+            if (selection.array.includes(tkn.idx)) {
+              // tkn._ctrl = tkn._ctrl ?? {};
+              tkn._ctrl.selecting = false;
+              tkn._ctrl.selected = true;
+            }
+          };
+        };
+        // console.log(selection.array);
+      },
+    };
 
 
     const appData = reactive({
@@ -111,7 +187,6 @@ const RootComponent = {
       fileError: false,
       meta: {
         currentWorker: "",
-        handleLogs: [],
       },
       dataWrap: {
         dataItems: [],
@@ -121,15 +196,25 @@ const RootComponent = {
         totalNum: 0,
         donePct: "0%",
         currentIdx: 0,
+        targetIdx: 0,
         showOrigin: false,
       },
     });
 
     const dataMethods = {
+      saveStore: async () => {},
+      loadStore: async () => {},
+      onClose: async () => {},
+      beforeExport: async () => {},
+      onExport: async () => {
+        dataMethods.beforeExport();
+        theSaver.save(appData.dataWrap);
+      },
       onImport: async () => {
         let fileItem = document.forms["file-form"]["file-input"].files[0];
         console.debug(fileItem);
 
+        if (fileItem == null) {return;};
 
         let fileWrap = {};
         fileWrap.file = fileItem;
@@ -143,8 +228,9 @@ const RootComponent = {
 
         await theReader.readFileAsBinaryString(fileWrap, fileWrap.encoding);
         await theReader.readFile(fileWrap);
-        Object.assign(appData.fileWrapWrap, {fileWrap: fileWrap});
-        console.debug(appData.fileWrapWrap.fileWrap);
+        // Object.assign(appData.fileWrapWrap, {fileWrap: fileWrap});
+        appData.fileWrapWrap.fileWrap = fileWrap;
+        // console.debug(appData.fileWrapWrap.fileWrap);
 
         dataMethods.readData();
 
@@ -154,32 +240,109 @@ const RootComponent = {
         let obj = JSON.parse(fileWrap.content);
         // fileWrap.obj = obj;
 
+        // 看是不是用于这次评测的数据
+        // TODO: 未来如果版本有大改，可能要针对 _appVersion 做某些判断和处理。
         if (obj?.desc != "SpaCE2022") {
-          appData.meta.fileError = true;
+          appData.fileError = true;
           return;
         };
-        appData.meta.fileError = false;
+        appData.fileError = false;
 
-        // TODO: 未来如果版本有大改，可能要针对 _appVersion 做某些判断和处理。
+        // ↓ 读取数据
+        // Object.assign(appData.dataWrap, foolCopy(obj));
+        appData.dataWrap = foolCopy(obj);
 
-        // ↓ 读取过往操作记录
-        Object.assign(appData.meta, {handleLogs: obj.handleLogs});
-        // appData.meta.handleLogs.push({});
-
-        // ↓ 读取数据条目
-        Object.assign(appData.dataWrap, {dataItems: obj.dataItems});
+        dataMethods.fixData();
         ctrlMethods.updateProgress();
+        ctrlMethods.goIdx(appData.dataWrap._ctrl.currentIdx);
+      },
+      fixData: () => {
+        console.debug("开始 fixData");
+        console.debug(foolCopy(appData.dataWrap));
 
+        // 更新当前要标注的材料的序号
+        if (!('_ctrl' in appData.dataWrap)) {
+          appData.dataWrap._ctrl = {};
+        };
+        if (!('currentIdx' in appData.dataWrap._ctrl)) {
+          appData.dataWrap._ctrl.currentIdx = 0;
+        };
+        // console.debug(appData.dataWrap._ctrl.currentIdx);
+
+        for (item of appData.dataWrap.dataItems) {
+          if (!('annotations' in item)) {
+            item.annotations = [];
+          };
+          if (!('_ctrl' in item)) {
+            item._ctrl = {};
+          };
+        };
+
+        console.debug(foolCopy(appData.dataWrap));
+        console.debug("结束 fixData");
+      },
+
+      ensureExampleStep: () => {
+        // 保存当前步骤
+        if (!('_ctrl' in exampleWrap.example)) {
+          exampleWrap.example._ctrl = {};
+        };
+        exampleWrap.example._ctrl.currentStepRef = currentStep.ref;
+        exampleWrap.example._ctrl.currentSchema = {
+          name: stepsDictWrap.name ?? null,
+          version: stepsDictWrap.version ?? null,
+          using: stepsDictWrap.using ?? null,
+        };
+      },
+      saveExample: () => {
+        if (!appData.dataWrap.dataItems.length) {return;};
+        dataMethods.ensureExampleStep();
+        // 覆盖
+        appData.dataWrap.dataItems[appData.ctrl.currentIdx] = foolCopy(exampleWrap.example);
       },
     };
     const ctrlMethods = {
+      fineIdx: (idx) => {
+        idx = Math.min(idx, appData.dataWrap.dataItems.length-1);
+        idx = Math.max(idx, 0);
+        return idx;
+      },
+      goIdx: (idx) => {
+        selectionMethods.clearSelection();
+
+        idx = ctrlMethods.fineIdx(idx);
+        appData.ctrl.currentIdx = idx;
+        // Object.assign(exampleWrap.example, foolCopy(appData.dataWrap.dataItems[appData.ctrl.currentIdx]));
+        if (!appData.dataWrap.dataItems.length) {return;};
+
+        // 覆盖
+        exampleWrap.example = foolCopy(appData.dataWrap.dataItems[appData.ctrl.currentIdx]);
+        appData.dataWrap._ctrl.currentIdx = idx;
+        appData.ctrl.targetIdx = null;
+
+        // 还原步骤
+        let stepRef;
+        if (!exampleWrap?.example?._ctrl?.currentStepRef?.length) {
+          stepRef = stepsDictWrap?.[stepsDictWrap?.using]?.startStep ?? 'start';
+        } else {
+          stepRef = exampleWrap.example._ctrl.currentStepRef;
+        };
+        if (stepRef in stepsDict) {
+          stepMethods.goRefStep(stepRef);
+        };
+
+        selectionMethods.clearSelection();
+      },
       toogleShowOrigin: () => {
         appData.ctrl.showOrigin = !appData.ctrl.showOrigin;
         // console.debug(appData.ctrl.showOrigin);
       },
       updateProgress: () => {
+        let endStep = stepsDictWrap?.[stepsDictWrap?.using]?.endStep;
         appData.ctrl.totalNum = appData.dataWrap.dataItems.length;
-        appData.ctrl.doneNum = appData.dataWrap.dataItems.filter(it=>it?._ctrl?.done).length;
+        appData.ctrl.doneNum = appData.dataWrap.dataItems.filter(it=>{
+          return it?._ctrl?.currentStepRef == endStep && endStep?.length;
+        }).length;
         appData.ctrl.donePct = `${appData.ctrl.doneNum / appData.ctrl.totalNum * 100}%`;
       },
     };
@@ -244,6 +407,10 @@ const RootComponent = {
         };
         appData.ctrl.showOrigin = stepObj?.props?.showOrigin ?? false;
         Object.assign(currentStep, stepObj);
+
+        dataMethods.ensureExampleStep();
+        dataMethods.saveExample();
+        ctrlMethods.updateProgress();
       },
       goRefStep: (ref, data) => {
         let stepObj = foolCopy(stepsDict?.[ref] ?? null);
@@ -326,16 +493,6 @@ const RootComponent = {
 
 
 
-    // ↓ 参看 js/components/TheSelector.js
-    const theSelector = TheSelector(exampleWrap.example.material.tokenList);
-    const selection = reactive(theSelector.selection);
-    const selectionMethods = theSelector.selectionMethods;
-    // ↑ 参看 js/components/TheSelector.js
-
-
-
-
-
     return {
       //
       ...toRefs(exampleWrap),
@@ -364,11 +521,11 @@ const RootComponent = {
 
 
   // TODO:
-  // 1. 文件导入导出的调整
-  // 2. stepsSchema还没完善好
-  // 3. example改成遍历的
-  // 4. 控件逻辑
-  // 5. 本地存储标注进度，自动填入标注人姓名
+  // [ ] 1. 文件导入导出的调整
+  // [ ] 2. stepsSchema还没完善好
+  // [x] 3. example改成遍历的
+  // [y] 4. 页码控件
+  // [ ] 5. 本地存储标注进度，自动填入标注人姓名
 
 
 };

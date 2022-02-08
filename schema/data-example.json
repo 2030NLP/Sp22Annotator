@@ -112,17 +112,17 @@
         {
           "idx": 2,
           "label": "两段材料中的空间关系相同",
-          "mode": "choose"
+          "mode": "selectValue"
         },
         {
           "idx": 3,
           "label": "两段材料中的空间关系不同",
-          "mode": "choose"
+          "mode": "selectValue"
         },
         {
           "idx": 4,
           "label": "两段材料中的空间关系可能相同也可能不同",
-          "mode": "choose"
+          "mode": "selectValue"
         }
       ]
     },
@@ -206,5 +206,8 @@
       "annotations": [
       ]
     }
-  ]
+  ],
+  "_ctrl": {
+    "currentIdx": 1
+  }
 }
