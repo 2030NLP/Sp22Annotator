@@ -258,7 +258,7 @@ const RootComponent = {
           showResults: true,
           optionBtns: [
             {text: "+ 搭配不当", go:"addDaPeiBuDang", style: "outline-primary", },
-            {text: "+ 语义冲突", go:"xxx", style: "outline-primary", },
+            {text: "+ 语义冲突", go:"addYuYiChongTu", style: "outline-primary", },
             {text: "+ 不符合常识（选择）", go:"addChangShi", style: "outline-primary", },
             {text: "+ 不符合常识（文本）", go:"addChangShi1", style: "outline-primary", },
             {text: "+ 其它", go:"addtext", style: "outline-primary", },
@@ -304,11 +304,20 @@ const RootComponent = {
         name: "其它",
         mode: "text",
         props: {
-          instruction: "请在文中写下你的意见。",
-          okBtn: {
-            text: "不再添加，完成",
+          qitainstruction: "请在文中写下你的意见。",
+          data: {
+            label: "其它",
+            withText: "",
+          },
+          okBtn1: {
+            text: "确定",
             go: "manageReasons",
             style: "success",
+          },
+          cancelBtn: {
+            text: "取消",
+            go: "manageReasons",
+            style: "light",
           },
         },
       },
@@ -318,24 +327,29 @@ const RootComponent = {
         name: "增加字",
         mode: "add",
         props: {
-          instruction: "请选择token",
+          selectInstruction: "请在文中划选在哪个字的前后增加字",
+          selectedTitle: "当前选中的字是：",
+          instruction: "选择在当前字的前还是后添加字并且在文本中写入添加的字",
           listTitle: "",
+          options:[
+            { text: '前', value: 0},
+            { text: '后', value: 1}
+          ],
           data: {
             label: "增加字",
-            tokenarrays: [],
-          },
-          addBtn: {
-            text: "将所选片段加入列表",
-            style: "primary",
-          },
-          clearBtn: {
-            text: "清除选区",
-            style: "info",
+            source: 0,
+            side: 1,
+            target: "",
           },
           okBtn: {
-            text: "不再添加，完成",
+            text: "确定",
             go: "manageReasons",
             style: "success",
+          },
+          cancelBtn: {
+            text: "取消",
+            go: "manageReasons",
+            style: "light",
           },
         },
       },
@@ -345,24 +359,24 @@ const RootComponent = {
         name: "修改字",
         mode: "modify",
         props: {
-          instruction: "请选择token",
+          selectInstruction: "请在文中划选修改哪个字",
+          selectedTitle: "当前选中的字是：",
+          instruction: "修改当前选中的字",
           listTitle: "",
           data: {
             label: "修改字",
-            tokenarrays: [],
-          },
-          addBtn: {
-            text: "将所选片段加入列表",
-            style: "primary",
-          },
-          clearBtn: {
-            text: "清除选区",
-            style: "info",
+            source: 0,
+            target: "",
           },
           okBtn: {
-            text: "不再添加，完成",
+            text: "确定",
             go: "manageReasons",
             style: "success",
+          },
+          cancelBtn: {
+            text: "取消",
+            go: "manageReasons",
+            style: "light",
           },
         },
       },
@@ -372,24 +386,23 @@ const RootComponent = {
         name: "删除字",
         mode: "delete",
         props: {
-          instruction: "请选择token",
+          selectInstruction: "请在文中划选在删除哪个字",
+          selectedTitle: "当前选中的字是：",
+          instruction: "",
           listTitle: "",
           data: {
             label: "删除字",
-            tokenarrays: [],
-          },
-          addBtn: {
-            text: "将所选片段加入列表",
-            style: "primary",
-          },
-          clearBtn: {
-            text: "清除选区",
-            style: "info",
+            source: 0,
           },
           okBtn: {
-            text: "不再添加，完成",
+            text: "确定",
             go: "manageReasons",
             style: "success",
+          },
+          cancelBtn: {
+            text: "取消",
+            go: "manageReasons",
+            style: "light",
           },
         },
       },
@@ -403,6 +416,33 @@ const RootComponent = {
           listTitle: "造成搭配不当的文本片段是：",
           data: {
             label: "搭配不当",
+            tokenarrays: [],
+          },
+          addBtn: {
+            text: "将所选片段加入列表",
+            style: "primary",
+          },
+          clearBtn: {
+            text: "清除选区",
+            style: "info",
+          },
+          okBtn: {
+            text: "不再添加，完成",
+            go: "manageReasons",
+            style: "success",
+          },
+        },
+      },
+
+      addYuYiChongTu: {
+        ref: "addYuYiChongTu",
+        name: "新增语义冲突",
+        mode: "multiSpans",
+        props: {
+          instruction: "请在文中依次划选造成语义冲突的全部文本片段。选择完成后，可将其加入列表。",
+          listTitle: "造成语义冲突的文本片段是：",
+          data: {
+            label: "语义冲突",
             tokenarrays: [],
           },
           addBtn: {
@@ -540,10 +580,23 @@ const RootComponent = {
         stepMethods.handleTemplate(ref, data, fn);
       },
 
-      handleMultiSpans: (ref, data) => {
-
+      handleWord: (ref, data) => {
         let fn = (da)=>{
-          // TODO
+          da.source = selection.array[0];
+          return da;
+        };
+        stepMethods.handleTemplate(ref, data, fn);
+      },
+
+      handleQita: (ref, data) => {
+        let fn = (da)=>{
+          return da;
+        };
+        stepMethods.handleTemplate(ref, data, fn);
+      },
+
+      handleMultiSpans: (ref, data) => {
+        let fn = (da)=>{
           return da;
         };
         stepMethods.handleTemplate(ref, data, fn);
@@ -551,16 +604,6 @@ const RootComponent = {
 
 
 
-      readdata1: (ref, value) => {
-        var file = document.getElementById("my_file").files[0];
-        var reader=new FileReader();
-        reader.readAsText(file);
-        reader.onload = function (e)
-        {
-          var fileText = e.target.result;
-          console.log(fileText);
-        }
-      },
       onExport1:()=>{
         let jn = JSON.stringify(exampleWrap.example, null, 2);
         let filename =exampleWrap.example.dbID+"注结果";
