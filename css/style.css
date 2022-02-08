@@ -1,5 +1,52 @@
 
 
+
+
+    .page-cover {
+      position: absolute;
+      top:0; right:0; bottom:0; left:0;
+      overflow: hidden;
+      background: #fff;
+      z-index: 99999;
+    }
+
+
+    .container {
+      transition: max-width 0.5s, width 0.5s;
+    }
+    .progress-bar {
+      transition: all 0.5s;
+    }
+    .btn {
+      transition: all 0.2s;
+    }
+    .btn-info {
+      color: #fff;
+      background-color: #17a2b8;
+      border-color: #17a2b8;
+    }
+    .btn-info:hover {
+      color: #fff;
+      background-color: #138496;
+      border-color: #117a8b;
+    }
+    .btn-info.focus, .btn-info:focus {
+      color: #fff;
+      background-color: #138496;
+      border-color: #117a8b;
+      box-shadow: 0 0 0 .2rem rgba(58,176,195,.5);
+    }
+    .btn-info:active {
+      color: #fff;
+      background-color: #138496;
+      border-color: #117a8b;
+    }
+    .btn-info.disabled, .btn-info:disabled {
+      color: #fff;
+      background-color: #17a2b8;
+      border-color: #17a2b8;
+    }
+
     .bodywrap {
       min-height: 120vh;
       padding-bottom: 6rem;

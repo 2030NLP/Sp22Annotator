@@ -4,6 +4,8 @@ const { reactive, readonly, ref, toRef, toRefs, computed, onMounted, onUpdated }
 
 const APP_NAME = "Sp22-Anno";
 const APP_VERSION = "22-0208-00";
+const PROJ_DESC = "SpaCE2022";
+const PROJ_PREFIX = "Sp22";
 
 const RootComponent = {
   setup() {
@@ -201,31 +203,49 @@ const RootComponent = {
       if (storedVersion == APP_VERSION) {
         appData.ctrl.haveStore = true;
       };
+      let storedWorker = store.get(`${APP_NAME}:worker`);
+      appData.ctrl.currentWorker = storedWorker;
     });
 
+    // const formFilesRef = (document?.forms?.["file-form"]?.["file-input"]?.files);
+    // const formFiles = computed(() => formFilesRef);
     const dataMethods = {
-      onClose: async () => {},
-      beforeSave: async () => {
+      log: (action) => {
         let worker = appData.ctrl.currentWorker;
         let info = {
           time: timeString(),
           person: worker,
-          action: "save",
+          action: action,
         };
         appData.dataWrap.handleLogs.push(info);
+        appData.dataWrap.lastModifiedAt = info.time;
+        appData.dataWrap.appVersion = APP_VERSION;
+      },
+
+      onClose: async () => {},
+      beforeSave: async () => {
       },
       saveStore: async () => {
         await dataMethods.beforeSave();
         store.set(`${APP_NAME}:dataWrap`, foolCopy(appData.dataWrap));
         store.set(`${APP_NAME}:version`, APP_VERSION);
+        let worker = appData.ctrl.currentWorker;
+        store.set(`${APP_NAME}:worker`, worker);
       },
       loadStore: async () => {
         appData.dataWrap = store.get(`${APP_NAME}:dataWrap`);
         await dataMethods.fixData();
+        dataMethods.log("load from store");
       },
       onExport: async () => {
+        if (!appData?.dataWrap?.dataItems?.length) {return;};
         await dataMethods.beforeSave();
-        theSaver.save(appData.dataWrap);
+        dataMethods.log("export to file");
+        let worker = appData.ctrl.currentWorker;
+        let fid = appData.dataWrap.fID;
+        let using = stepsDictWrap.using;
+        let fileName = `${PROJ_PREFIX}-${using} [${fid}] @${worker} (${timeString()}).json`;
+        theSaver.saveJson(appData.dataWrap, fileName);
       },
       onImport: async () => {
         let fileItem = document.forms["file-form"]["file-input"].files[0];
@@ -251,6 +271,9 @@ const RootComponent = {
 
         await dataMethods.readData();
 
+
+        dataMethods.log("import from file");
+        dataMethods.saveStore();
       },
       readData: async () => {
         let fileWrap = appData.fileWrapWrap.fileWrap;
@@ -258,8 +281,8 @@ const RootComponent = {
         // fileWrap.obj = obj;
 
         // 看是不是用于这次评测的数据
-        // TODO: 未来如果版本有大改，可能要针对 _appVersion 做某些判断和处理。
-        if (obj?.desc != "SpaCE2022") {
+        // TODO: 未来如果版本有大改，可能要针对 appVersion 做某些判断和处理。
+        if (obj?.desc != PROJ_DESC) {
           appData.fileError = true;
           return;
         };
@@ -524,7 +547,7 @@ const RootComponent = {
 
     return {
       //
-      ...toRefs(exampleWrap),
+      ...toRefs(exampleWrap),  // 提供 example
       // ...toRefs(data),
       //
       ...toRefs(appData),
@@ -544,6 +567,8 @@ const RootComponent = {
       updateSteps,
       //
       theSaver,
+      //
+      // formFiles,
       // getAnnoBtnClass,
     };
   },  // setup() end
