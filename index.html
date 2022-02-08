@@ -374,7 +374,7 @@
                   <div class="btn-group btn-group-sm my-1 me-2 anno-entry" :data-deleted="anno.deleted??false" __v-if="!anno.deleted">
 
                     <button type="button" class="btn btn-outline-primary" v-if="example.annotations.length>1">{{anno.idx}}</button>
-                    <button type="button" class="btn btn-outline-dark" __class="getAnnoBtnClass(anno.label)">{{anno.label}}</button>
+                    <button type="button" class="btn btn-outline-dark" __class="getAnnoBtnClass(anno.label)">{{anno.desc || anno.label}}</button>
 
                     <!-- <template v-if="anno.mode=='modify'">
                       <button type="button" class="btn btn-outline-dark" :title="example.material.tokenList[anno.source].idx"><span>{{example.material.tokenList[anno.source].word}}<sub>{{ example.material.tokenList[anno.source].idx }}</sub> → <span>{{anno.target}}</span></button>
@@ -448,21 +448,15 @@
 
 
 
-            <!-- 标注一般流程模块 开始 -->
-            <div class="row" v-if="['selectValue', 'interlude'].includes(currentStep.mode)" :data-mode="currentStep.mode">
+            <!-- 选值模块 开始 -->
+            <div class="row" v-if="['selectValue'].includes(currentStep.mode)" :data-mode="currentStep.mode">
               <!-- 指导语 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.instruction">
                 <div>{{ currentStep?.props?.instruction }}</div>
               </div>
-              <!-- 结果列表 -->
-
-
-
-
-
               <!-- 选项按钮 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.optionBtns">
-                <button v-for="btn in currentStep.props.optionBtns" :key="btn.text" type="button" v-on:click="goRefStep(btn.go, btn.value)" class="btn btn-sm my-1 me-1" :class="`btn-${btn.style}`">{{ btn.text }}</button>
+                <button v-for="btn in currentStep.props.optionBtns" :key="btn.text" type="button" v-on:click="goRefStep(btn.go, btn.data)" class="btn btn-sm my-1 me-1" :class="`btn-${btn.style}`">{{ btn.text }}</button>
               </div>
               <!-- 完成按钮 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.okBtn">
@@ -473,7 +467,29 @@
                 <button type="button" v-on:click="cancelStep(currentStep.props.resetBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.resetBtn.style}`">{{ currentStep.props.resetBtn.text }}</button>
               </div>
             </div>
-            <!-- 标注一般流程模块 结束 -->
+            <!-- 选值模块 结束 -->
+
+
+            <!-- 幕间模块 开始 -->
+            <div class="row" v-if="['interlude'].includes(currentStep.mode)" :data-mode="currentStep.mode">
+              <!-- 指导语 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.instruction">
+                <div>{{ currentStep?.props?.instruction }}</div>
+              </div>
+              <!-- 选项按钮 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.optionBtns">
+                <button v-for="btn in currentStep.props.optionBtns" :key="btn.text" type="button" v-on:click="goRefStep(btn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${btn.style}`">{{ btn.text }}</button>
+              </div>
+              <!-- 完成按钮 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.okBtn">
+                <button type="button" v-on:click="goRefStep(currentStep.props.okBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`">{{ currentStep.props.okBtn.text }}</button>
+              </div>
+              <!-- 重置按钮 -->
+              <div class="col col-12 my-1" v-if="currentStep?.props?.canReset">
+                <button type="button" v-on:click="cancelStep(currentStep.props.resetBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.resetBtn.style}`">{{ currentStep.props.resetBtn.text }}</button>
+              </div>
+            </div>
+            <!-- 幕间模块 结束 -->
 
 
             <!-- 初始模块 开始 -->

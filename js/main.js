@@ -26,7 +26,7 @@ const RootComponent = {
         //
         "isReplacedItem": true,
         "rpID": "1-77-34-5",
-        "replacedItemIdx": 5,
+        "rpIdx": 5,
         //
         "material": {
           "content": "桌上有碗汤",
@@ -94,22 +94,12 @@ const RootComponent = {
           ]
         },
         //
-        "annotations": [
-          {
-            "idx": 0,
-            "label": "搭配不当",
-            "mode": "multiSpans",
-            "tokenarrays": [],  // [ 杯, 铁 ]
-          },
-          {
-            "idx": 1,
-            "toSolve": 0,  // 针对哪一个标注内容进行的进一步改正
-            "label": "修改",
-            "mode": "modify",
-            "source": 3,  // 杯
-            "target": "块",
-          },
-        ]
+        "annotations": [],
+        //
+        "_ctrl": {
+          "schema": [],  // 当前正在使用的步骤方案 [name, version, using]
+          "step": "",  // 当前步骤
+        },
       }
     });
 
@@ -240,40 +230,36 @@ const RootComponent = {
 
     const stepRecords = {list:[]};
     const stepMethods = {
-      resetStep: (ref) => {
-        stepMethods.cancelStep(ref);
-        exampleWrap.example.annotations = [];
-      },
-      cancelStep: (ref) => {
-        let stepObj = JSON.parse(JSON.stringify(stepsDict?.[ref]??null));
-        stepMethods.goStep(stepObj);
-        stepRecords.list = [];
-        selectionMethods.clearSelection();
-      },
       goStep: (stepObj_, data) => {
-        // stepRecords.list.push(data);
-        // data 其实没用了
+        if (data!=null) {
+          stepMethods.dealWithData(data, da=>da);
+        };
 
+        // 消除 stepObj 的引用关系
         let stepObj = {
           ref: stepObj_?.ref ?? null,
           name: stepObj_?.name ?? null,
           mode: stepObj_?.mode ?? null,
-          props: JSON.parse(JSON.stringify(stepObj_?.props ?? null)),
+          props: foolCopy(stepObj_?.props ?? null),
         };
         appData.ctrl.showOrigin = stepObj?.props?.showOrigin ?? false;
         Object.assign(currentStep, stepObj);
       },
       goRefStep: (ref, data) => {
-        // data 其实没用了
-
-        let stepObj = stepsDict[ref];
+        let stepObj = foolCopy(stepsDict?.[ref] ?? null);
         stepMethods.goStep(stepObj, data);
       },
+      cancelStep: (ref) => {
+        stepMethods.goRefStep(ref, null);  // 不要把 data 放进去，避免重复标记
+        stepRecords.list = [];
+        selectionMethods.clearSelection();
+      },
+      resetStep: (ref) => {
+        stepMethods.cancelStep(ref);
+        exampleWrap.example.annotations = [];
+      },
 
-      handleTemplate: (ref, data, fn) => {
-        // 这个函数是一个抽象出来的通用流程框架
-        // 之前的 value 改成了 data
-
+      dealWithData: (data, fn) => {
         // 按照 schema 补充必要的数据字段
         let idx = exampleWrap.example.annotations.length;
         data.idx = idx;
@@ -281,17 +267,26 @@ const RootComponent = {
 
         data = fn(data);
 
-        data._schema = {
-          name: stepsDictWrap.name ?? null,
-          version: stepsDictWrap.version ?? null,
-          using: stepsDictWrap.using ?? null,
-        };
+        data._schema = [
+          stepsDictWrap.name ?? null,
+          stepsDictWrap.version ?? null,
+          stepsDictWrap.using ?? null,
+        ];
 
         // 加入 annotations 清单
-        exampleWrap.example.annotations.push(JSON.parse(JSON.stringify(data)));
+        exampleWrap.example.annotations.push(foolCopy(data));
+
+        return data;
+      },
+
+      handleTemplate: (ref, data, fn) => {
+        // 这个函数是一个抽象出来的通用流程框架
+        // 之前的 value 改成了 data
+
+        stepMethods.dealWithData(data, fn);
 
         selectionMethods.clearSelection();
-        stepMethods.goRefStep(ref, data);  // data 其实没用了
+        stepMethods.goRefStep(ref);  // 不要把 data 放进去，避免重复标记
       },
 
       handleChooseOrText: (ref, data) => {
@@ -327,76 +322,6 @@ const RootComponent = {
         stepMethods.handleTemplate(ref, data, fn);
       },
 
-
-
-      // onExport1:()=>{
-      //   let jn = JSON.stringify(exampleWrap.example, null, 2);
-      //   let filename =exampleWrap.example.dbID+"注结果";
-      //   var file = new File([jn], (`${filename}`), {
-      //       type: "text/plain; charset=utf-8"
-      //     });
-      //   saveAs(file);
-      // },
-      // goRefStep1: (ref, value) => {
-      //   // 搭配不当
-      //   exampleWrap.example.annotations[0].tokenarrays.push(value.tokenarrays);
-      //   console.log(exampleWrap.example.annotations[0].tokenarrays);
-
-      //   stepMethods.goRefStep(ref, value);
-
-      //   value.tokenarrays=[];
-      //   console.log(value)
-      // },
-      // goRefStep2: (ref, value) => {
-      //   // 常识
-      //   var data1={}
-      //   data1[data.modetype]=value.tokenarrays;
-      //   console.log(data1)
-      //   exampleWrap.example.annotations[3].withText.push(data1);
-      //   console.log(exampleWrap.example.annotations[3].withText);
-
-      //   stepMethods.goRefStep(ref, value);
-
-      //   value.tokenarrays=[];
-      //   data.modetype="常识1";
-      // },
-      // goRefStep3: (ref, value) => {
-      //   // add
-      //   exampleWrap.example.annotations[4].source.push(value.tokenarrays);
-      //   exampleWrap.example.annotations[4].target.push(data.add_target);
-
-      //   stepMethods.goRefStep(ref, value);
-
-      //   value.tokenarrays=[];
-      //   data.add_target="";
-      // },
-      // goRefStep4: (ref, value) => {
-      //   // delete
-      //   exampleWrap.example.annotations[5].source.push(value.tokenarrays);
-
-      //   stepMethods.goRefStep(ref, value);
-
-      //   value.tokenarrays=[];
-      // },
-      // goRefStep5: (ref, value) => {
-      //   // modify
-      //   exampleWrap.example.annotations[6].source.push(value.tokenarrays);
-      //   exampleWrap.example.annotations[6].target.push(data.modify_target);
-
-      //   stepMethods.goRefStep(ref, value);
-
-      //   value.tokenarrays=[];
-      //   data.modify_target="";
-      // },
-      // opt2:()=>{
-      //   let obj1 = document.getElementById("pid1");
-      //   data.indext1 = obj1.options[obj1.selectedIndex].value;
-      //   if(data.indext1==0){
-      //     data.modetype="常识1";
-      //   }else{
-      //     data.modetype="常识2";
-      //   }
-      // },
     };
 
 
