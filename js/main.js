@@ -8,11 +8,9 @@ const APP_VERSION = "22-0208-00";
 const RootComponent = {
   setup() {
 
-
     // ↓ 参看 js/components/BaseSaver.js
     const theSaver = BaseSaver();
     // ↑ 参看 js/components/BaseSaver.js
-
 
     // ↓ 参看 js/components/TheReader.js
     const theReader = TheReader();
@@ -20,13 +18,6 @@ const RootComponent = {
 
 
 
-
-
-
-
-    const exampleWrap = reactive({
-      example: {}
-    });
     const selection = reactive({
       isSelecting: false,
       start: null,
@@ -180,18 +171,22 @@ const RootComponent = {
     };
 
 
+
+    const exampleWrap = reactive({
+      example: {}
+    });
+
     const appData = reactive({
       fileWrapWrap: {
         fileWrap: {},
       },
       fileError: false,
-      meta: {
-        currentWorker: "",
-      },
       dataWrap: {
         dataItems: [],
       },
       ctrl: {
+        currentWorker: "",
+        haveStore: false,
         doneNum: 0,
         totalNum: 0,
         donePct: "0%",
@@ -201,13 +196,35 @@ const RootComponent = {
       },
     });
 
+    onMounted(()=>{
+      let storedVersion = store.get(`${APP_NAME}:version`);
+      if (storedVersion == APP_VERSION) {
+        appData.ctrl.haveStore = true;
+      };
+    });
+
     const dataMethods = {
-      saveStore: async () => {},
-      loadStore: async () => {},
       onClose: async () => {},
-      beforeExport: async () => {},
+      beforeSave: async () => {
+        let worker = appData.ctrl.currentWorker;
+        let info = {
+          time: timeString(),
+          person: worker,
+          action: "save",
+        };
+        appData.dataWrap.handleLogs.push(info);
+      },
+      saveStore: async () => {
+        await dataMethods.beforeSave();
+        store.set(`${APP_NAME}:dataWrap`, foolCopy(appData.dataWrap));
+        store.set(`${APP_NAME}:version`, APP_VERSION);
+      },
+      loadStore: async () => {
+        appData.dataWrap = store.get(`${APP_NAME}:dataWrap`);
+        await dataMethods.fixData();
+      },
       onExport: async () => {
-        dataMethods.beforeExport();
+        await dataMethods.beforeSave();
         theSaver.save(appData.dataWrap);
       },
       onImport: async () => {
@@ -232,7 +249,7 @@ const RootComponent = {
         appData.fileWrapWrap.fileWrap = fileWrap;
         // console.debug(appData.fileWrapWrap.fileWrap);
 
-        dataMethods.readData();
+        await dataMethods.readData();
 
       },
       readData: async () => {
@@ -252,11 +269,9 @@ const RootComponent = {
         // Object.assign(appData.dataWrap, foolCopy(obj));
         appData.dataWrap = foolCopy(obj);
 
-        dataMethods.fixData();
-        ctrlMethods.updateProgress();
-        ctrlMethods.goIdx(appData.dataWrap._ctrl.currentIdx);
+        await dataMethods.fixData();
       },
-      fixData: () => {
+      fixData: async () => {
         console.debug("开始 fixData");
         console.debug(foolCopy(appData.dataWrap));
 
@@ -278,8 +293,19 @@ const RootComponent = {
           };
         };
 
+        if (!('handleLogs' in appData.dataWrap)) {
+          appData.dataWrap.handleLogs = [{
+            time: timeString(),
+            person: "App",
+            action: "fix",
+          }];
+        };
+
         console.debug(foolCopy(appData.dataWrap));
         console.debug("结束 fixData");
+
+        ctrlMethods.updateProgress();
+        await ctrlMethods.goIdx(appData.dataWrap._ctrl.currentIdx);
       },
 
       ensureExampleStep: () => {
@@ -307,7 +333,9 @@ const RootComponent = {
         idx = Math.max(idx, 0);
         return idx;
       },
-      goIdx: (idx) => {
+      goIdx: async (idx) => {
+        dataMethods.saveStore();
+        await updateSteps();
         selectionMethods.clearSelection();
 
         idx = ctrlMethods.fineIdx(idx);
@@ -328,7 +356,7 @@ const RootComponent = {
           stepRef = exampleWrap.example._ctrl.currentStepRef;
         };
         if (stepRef in stepsDict) {
-          stepMethods.goRefStep(stepRef);
+          await stepMethods.goRefStep(stepRef);
         };
 
         selectionMethods.clearSelection();
@@ -367,33 +395,10 @@ const RootComponent = {
     const currentStep = reactive({});
     // console.debug(currentStep);
 
-    const updateSteps = async () => {
-      let response = await axios.request({
-        url: "schema/steps.schema.json",
-        method: 'post',
-        headers: {'Catch-Cotrol': 'no-cache'},
-      });
-      let wrap = (response.data);
-      console.debug(wrap);
-      if (stepsDictWrap.name == wrap.name &&
-        stepsDictWrap.version == wrap.version &&
-        stepsDictWrap.using == wrap.using) {
-        return;
-      };
-      Object.assign(stepsDictWrap, wrap);
-      Object.assign(stepsDict, stepsDictWrap?.[stepsDictWrap?.using]?.steps??null);
-      Object.assign(RootStep, stepsDictWrap?.[stepsDictWrap?.using]?.steps?.[stepsDictWrap?.[stepsDictWrap?.using]?.startStep]??null);
-      Object.assign(currentStep, RootStep);
-    };
-
-    onMounted(async ()=>{
-      await updateSteps();
-    });
-
-
     const stepRecords = {list:[]};
     const stepMethods = {
-      goStep: (stepObj_, data) => {
+      goStep: async (stepObj_, data) => {
+        // await updateSteps();
         if (data!=null) {
           stepMethods.dealWithData(data, da=>da);
         };
@@ -411,17 +416,18 @@ const RootComponent = {
         dataMethods.ensureExampleStep();
         dataMethods.saveExample();
         ctrlMethods.updateProgress();
+        dataMethods.saveStore();
       },
-      goRefStep: (ref, data) => {
+      goRefStep: async (ref, data) => {
         let stepObj = foolCopy(stepsDict?.[ref] ?? null);
-        stepMethods.goStep(stepObj, data);
+        await stepMethods.goStep(stepObj, data);
       },
-      cancelStep: (ref) => {
-        stepMethods.goRefStep(ref, null);  // 不要把 data 放进去，避免重复标记
+      cancelStep: async (ref) => {
+        await stepMethods.goRefStep(ref, null);  // 不要把 data 放进去，避免重复标记
         stepRecords.list = [];
         selectionMethods.clearSelection();
       },
-      resetStep: (ref) => {
+      resetStep: async (ref) => {
         stepMethods.cancelStep(ref);
         exampleWrap.example.annotations = [];
       },
@@ -446,17 +452,17 @@ const RootComponent = {
         return data;
       },
 
-      handleTemplate: (ref, data, fn) => {
+      handleTemplate: async (ref, data, fn) => {
         // 这个函数是一个抽象出来的通用流程框架
         // 之前的 value 改成了 data
 
         stepMethods.dealWithData(data, fn);
 
         selectionMethods.clearSelection();
-        stepMethods.goRefStep(ref);  // 不要把 data 放进去，避免重复标记
+        await stepMethods.goRefStep(ref);  // 不要把 data 放进去，避免重复标记
       },
 
-      handleChooseOrText: (ref, data) => {
+      handleChooseOrText: async (ref, data) => {
         // 这个函数就是之前的「goRefStepChoose」
         // 之前的 value 改成了 data
 
@@ -464,33 +470,56 @@ const RootComponent = {
           da.on = selection.array;
           return da;
         };
-        stepMethods.handleTemplate(ref, data, fn);
+        await stepMethods.handleTemplate(ref, data, fn);
       },
 
-      handleWord: (ref, data) => {
+      handleWord: async (ref, data) => {
         let fn = (da)=>{
           da.source = selection.array[0];
           return da;
         };
-        stepMethods.handleTemplate(ref, data, fn);
+        await stepMethods.handleTemplate(ref, data, fn);
       },
 
-      handleQita: (ref, data) => {
+      handleQita: async (ref, data) => {
         let fn = (da)=>{
           return da;
         };
-        stepMethods.handleTemplate(ref, data, fn);
+        await stepMethods.handleTemplate(ref, data, fn);
       },
 
-      handleMultiSpans: (ref, data) => {
+      handleMultiSpans: async (ref, data) => {
         let fn = (da)=>{
           return da;
         };
-        stepMethods.handleTemplate(ref, data, fn);
+        await stepMethods.handleTemplate(ref, data, fn);
       },
 
     };
 
+
+    const updateSteps = async () => {
+      let response = await axios.request({
+        url: "schema/steps.schema.json",
+        method: 'post',
+        headers: {'Catch-Cotrol': 'no-cache'},
+      });
+      let wrap = (response.data);
+      // console.debug(wrap);
+      if (stepsDictWrap.name == wrap.name &&
+        stepsDictWrap.version == wrap.version &&
+        stepsDictWrap.using == wrap.using) {
+        return;
+      };
+      Object.assign(stepsDictWrap, wrap);
+      Object.assign(stepsDict, stepsDictWrap?.[stepsDictWrap?.using]?.steps??null);
+      Object.assign(RootStep, stepsDictWrap?.[stepsDictWrap?.using]?.steps?.[stepsDictWrap?.[stepsDictWrap?.using]?.startStep]??null);
+      Object.assign(currentStep, RootStep);
+    };
+
+    onMounted(async ()=>{
+      await updateSteps();
+    });
 
 
     return {

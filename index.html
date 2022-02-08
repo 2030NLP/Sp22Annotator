@@ -246,15 +246,14 @@
           <div class="btn-group btn-group-sm col-md-4 my-2">
             <button type="button" name="do_import" id="do_import" @click="onImport" class="btn btn-primary">导入</button>
             <button type="button" name="do_export" id="do_export" @click="onExport" class="btn btn-info">导出</button>
-            <button v-if="showLoadLocalStorage" type="button" name="do_localStorage" id="do_localStorage"
-              v-on:click="readDataFromLocalStorage" class="btn btn-success">加载缓存数据</button>
+            <button v-if="!dataWrap?.dataItems?.length && ctrl.haveStore" type="button" name="do_loadStore" id="do_loadStore" v-on:click="loadStore" class="btn btn-success">加载缓存数据</button>
           </div>
         </form>
         <!-- fileCtrl end -->
         <!-- progressCtrl start -->
         <div class="row align-items-center">
           <div class="col col-12 col-md-3 col-lg-2 my-2">
-            <input class="form-control form-control-sm" type="text" v-model="meta.currentWorker" placeholder="请在此输入姓名">
+            <input class="form-control form-control-sm" type="text" v-model="ctrl.currentWorker" placeholder="请在此输入姓名">
           </div>
           <div class="col col-12 col-md-9 col-lg-10 my-2">
             <div class="progress">
@@ -272,7 +271,7 @@
 
 
     <!-- 编辑区 开始 -->
-    <div class="container page my-4 py-2" id="page-main-editor" __v-show="meta.currentWorker.length">
+    <div class="container page my-4 py-2" id="page-main-editor" __v-show="ctrl.currentWorker.length">
       <div class="container" v-if="example!=null&&example?.material!=null">
         <div class="row mt-2 mb-3 align-items-center" id="page-main-editor--main">
           <!-- 内容区 开始 -->
@@ -696,7 +695,7 @@
             <div class="input-group input-group-sm ">
               <button class="btn btn-outline-secondary" type="button" @click="saveExample();goIdx(ctrl.currentIdx-1)">上一条</button>
               <!-- <span class="input-group-text">3</span> -->
-              <input type="text" class="form-control text-center" disabled v-model="ctrl.currentIdx">
+              <input type="text" class="form-control text-center" disabled :value="ctrl.currentIdx+1">
               <button class="btn btn-outline-secondary" type="button" @click="saveExample();goIdx(ctrl.currentIdx+1)">下一条</button>
             </div>
           </div>
@@ -707,7 +706,7 @@
               <span class="input-group-text">前往第</span>
               <input type="number" class="form-control text-center" v-model="ctrl.targetIdx">
               <span class="input-group-text">条</span>
-              <button class="btn btn-outline-secondary" type="button" @click="saveExample();goIdx(ctrl.targetIdx)">GO</button>
+              <button class="btn btn-outline-secondary" type="button" @click="saveExample();goIdx(ctrl.targetIdx-1)">GO</button>
             </div>
           </div>
           <!-- <div class="col-md-1 my-0">
