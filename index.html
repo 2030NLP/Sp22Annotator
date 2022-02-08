@@ -185,7 +185,7 @@
       <div class="container py-2">
         <!-- progressCtrl start -->
         <div class="row align-items-center">
-          <div class="col col-12 my-2" v-if="!ctrl.currentWorker.length">
+          <div class="col col-12 my-2" v-if="!ctrl?.currentWorker?.length">
             <div>请填写姓名！</div>
           </div>
           <div class="col col-12 col-md-3 col-lg-2 my-2">
@@ -207,7 +207,7 @@
           </div>
           <div class="btn-group btn-group-sm col-md-4 my-2">
             <button
-              v-if="ctrl.currentWorker.length"
+              v-if="ctrl?.currentWorker?.length"
               type="button"
               name="do_import"
               id="do_import"
@@ -215,7 +215,7 @@
               class="btn btn-primary"
             >导入</button>
             <button
-              v-if="!dataWrap?.dataItems?.length && ctrl.haveStore && ctrl.currentWorker.length"
+              v-if="!dataWrap?.dataItems?.length && ctrl.haveStore && ctrl?.currentWorker?.length"
               type="button"
               name="do_loadStore"
               id="do_loadStore"
@@ -242,7 +242,7 @@
     <div
       class="container page my-4 py-2"
       id="page-main-editor"
-      v-show="ctrl.currentWorker.length"
+      v-show="ctrl?.currentWorker?.length"
       v-if="example!=null&&example?.material!=null"
     >
       <div class="container">
