@@ -524,7 +524,7 @@ const RootComponent = {
     const updateSteps = async () => {
       let response = await axios.request({
         url: "schema/steps.schema.json",
-        method: 'post',
+        method: 'get',
         headers: {'Catch-Cotrol': 'no-cache'},
       });
       let wrap = (response.data);
