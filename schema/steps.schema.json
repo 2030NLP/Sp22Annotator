@@ -18,7 +18,7 @@
             "go": "start",
             "style": "outline-danger"
           },
-          "cancelBtn": {
+          "__cancelBtn": {
             "text": "返回并补充标注",
             "go": "start",
             "style": "outline-secondary"

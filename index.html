@@ -429,7 +429,7 @@
               </div>
               <!-- 重置按钮 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.canReset">
-                <button type="button" v-on:click="cancelStep(currentStep.props.resetBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.resetBtn.style}`">{{ currentStep.props.resetBtn.text }}</button>
+                <button type="button" v-on:click="resetStep(currentStep.props.resetBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.resetBtn.style}`">{{ currentStep.props.resetBtn.text }}</button>
               </div>
             </div>
             <!-- 选值模块 结束 -->
@@ -451,7 +451,7 @@
               </div>
               <!-- 重置按钮 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.canReset">
-                <button type="button" v-on:click="cancelStep(currentStep.props.resetBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.resetBtn.style}`">{{ currentStep.props.resetBtn.text }}</button>
+                <button type="button" v-on:click="resetStep(currentStep.props.resetBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.resetBtn.style}`">{{ currentStep.props.resetBtn.text }}</button>
               </div>
             </div>
             <!-- 幕间模块 结束 -->
