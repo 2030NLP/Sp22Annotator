@@ -3,7 +3,7 @@ const { reactive, readonly, ref, toRef, toRefs, computed, onMounted, onUpdated }
 
 
 const APP_NAME = "Sp22-Anno";
-const APP_VERSION = "22-0208-00";
+const APP_VERSION = "22-0216-00";
 const PROJ_DESC = "SpaCE2022";
 const PROJ_PREFIX = "Sp22";
 
