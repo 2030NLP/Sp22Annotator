@@ -124,66 +124,55 @@
             <!-- 标注结果展示模块 开始 -->
             <div class="row mb-3 carded" id="annotations-area">
               <div class="col col-12 my-1" v-show="!example?.annotations?.length">
-                <div>标注好的内容将显示在这里。</div>
+                <div class="text-muted">标注好的内容将显示在这里。</div>
               </div>
               <div class="col col-12 my-1" v-show="example?.annotations?.length">
-                <div>已标信息：</div>
-              </div>
-              <div
-                class="col col-12 col-lg-12"
-                v-for="anno in example.annotations"
-                :key="anno.idx"
-                :data-mode="anno.mode"
-                :data-label="anno.label"
-              >
-                <div class="btn-group btn-group-sm my-1 me-2 anno-entry" :data-deleted="anno.deleted??false" __v-if="!anno.deleted">
+                <div class="text-muted">已标信息：</div>
+                <div
+                  class="d-inline-block"
+                  v-for="anno in example.annotations"
+                  :key="anno.idx"
+                  :data-mode="anno.mode"
+                  :data-label="anno.label"
+                >
+                  <span class="badge bg-light text-dark my-1 me-2">
+                    <template v-if="true"><span class="text-black-50 me-1">{{anno.idx}}</span></template>
 
-                  <button type="button" class="btn btn-outline-primary" v-if="example.annotations.length>1">{{anno.idx}}</button>
+                    <template v-if="anno.mode=='multiSpans'">
+                      <span v-for="tokenarray, kk in anno.tokenarrays" :key="kk">
+                        “<span v-for="idx in tokenarray" :key="idx" :title="idx">{{ getReplacedToken(idx) }}<!-- <sub>{{idx}}</sub> --></span>”
+                      </span>
+                    </template>
 
-                  <!-- <template v-if="anno.mode=='modify'">
-                    <button type="button" class="btn btn-outline-dark" :title="example.material.tokenList[anno.source].idx"><span>{{example.material.tokenList[anno.source].word}}<sub>{{ example.material.tokenList[anno.source].idx }}</sub> → <span>{{anno.target}}</span></button>
-                  </template> -->
+                    <template v-if="anno.mode=='choose'||anno.mode=='text'">
+                      “<span v-for="tokenIdx in anno.on" :key="tokenIdx" :title="tokenIdx">{{ getReplacedToken(tokenIdx) }}</span>”
+                    </template>
 
-                  <template v-if="anno.mode=='multiSpans'">
-                    <button v-for="tokenarray, kk in anno.tokenarrays" :key="kk" type="button" class="btn btn-outline-dark">
-                      <span v-for="idx in tokenarray" :key="idx" :title="idx">{{ example.material.tokenList[idx]?.replaced ? example.material.tokenList[idx]?.to?.word : example.material.tokenList[idx].word }}<!-- <sub>{{idx}}</sub> --></span>
-                    </button>
-                  </template>
+                    <template v-if="anno.desc || anno.label">
+                      <span>{{anno.desc || anno.label}}</span>
+                    </template>
 
-                  <template v-if="anno.mode=='add'">
-                    <button type="button" class="btn btn-outline-dark">
-                      <span v-if="anno.side=='0'">{{anno.target}} +</span><span >{{ getReplacedToken(anno.source) }}<!-- <sub>{{anno.source}}</sub> --></span> <span v-if="anno.side=='1'">+ {{anno.target}}</span>
-                    </button>
-                  </template>
+                    <template v-if="anno.mode=='choose'||anno.mode=='text'">
+                      ：<span>{{anno.withText}}</span>
+                    </template>
 
-                  <template v-if="anno.mode=='modify'">
-                    <button type="button" class="btn btn-outline-dark">
-                      <span >{{ getReplacedToken(anno.source) }}<!-- <sub>{{anno.source}}</sub> --></span> → <span>{{anno.target}}</span>
-                    </button>
-                  </template>
+                    <template v-if="anno.mode=='add'">
+                      将“<span >{{ getReplacedToken(anno.source) }}<!-- <sub>{{anno.source}}</sub> --></span>”增改为“<span v-if="anno.side=='0'">{{anno.target}}</span><span >{{ getReplacedToken(anno.source) }}<!-- <sub>{{anno.source}}</sub> --></span><span v-if="anno.side=='1'">{{anno.target}}</span>”
+                    </template>
 
-                  <template v-if="anno.mode=='delete'">
-                    <button type="button" class="btn btn-outline-dark">
-                      <s><span >{{ getReplacedToken(anno.source) }}<!-- <sub>{{anno.source}}</sub> --></span></s>
-                    </button>
-                  </template>
+                    <template v-if="anno.mode=='modify'">
+                      将 <span >“{{ getReplacedToken(anno.source) }}”<!-- <sub>{{anno.source}}</sub> --></span> 改为 <span>“{{anno.target}}”</span>
+                    </template>
 
-                  <template v-if="anno.mode=='choose'||anno.mode=='text'">
-                    <button type="button" class="btn btn-outline-dark" v-if="anno.on">
-                      <span v-for="tokenIdx in anno.on" :key="tokenIdx" :title="tokenIdx">{{ getReplacedToken(tokenIdx) }}</span><!-- <sub>{{anno.on}}</sub> -->
-                    </button>
-                    <button type="button" class="btn btn-outline-dark">
-                      <span>{{anno.withText}}</span>
-                    </button>
-                  </template>
+                    <template v-if="anno.mode=='delete'">
+                      删除<s><span >“{{ getReplacedToken(anno.source) }}”<!-- <sub>{{anno.source}}</sub> --></span></s>
+                    </template>
 
-                  <button type="button" class="btn btn-outline-dark" __class="getAnnoBtnClass(anno.label)">{{anno.desc || anno.label}}</button>
+                    <template v-if="anno.toSolve!=null">
+                      <span >以解决 {{example.annotations[anno.toSolve].label}}<!-- <sub>{{anno.toSolve}}</sub> --> 的问题</span>
+                    </template>
 
-                  <button type="button" class="btn btn-outline-dark" v-if="anno.toSolve!=null">以解决 {{example.annotations[anno.toSolve].label}}<!-- <sub>{{anno.toSolve}}</sub> --> 的问题</button>
-
-                  <!-- <button type="button" class="btn btn-outline-danger" @click="anno.deleted=true" title="删除" v-if="!anno.deleted">×</button> -->
-
-                  <!-- <button type="button" class="btn btn-outline-success no-delete" @click="anno.deleted=false" title="恢复" v-if="anno.deleted">恢复</button> -->
+                  </span>
                 </div>
               </div>
             </div>

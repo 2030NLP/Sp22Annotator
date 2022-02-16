@@ -220,7 +220,7 @@
             }
           ],
           "data": {
-            "label": "添加",
+            "_label": "添加",
             "source": 0,
             "side": 1,
             "target": ""
@@ -247,7 +247,7 @@
           "instruction": "将该单词修改为：",
           "listTitle": "",
           "data": {
-            "label": "修改",
+            "_label": "修改",
             "source": 0,
             "target": ""
           },
@@ -273,7 +273,7 @@
           "instruction": "",
           "listTitle": "",
           "data": {
-            "label": "删除",
+            "_label": "删除",
             "source": 0
           },
           "okBtn": {
