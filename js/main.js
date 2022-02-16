@@ -451,8 +451,8 @@ const RootComponent = {
         selectionMethods.clearSelection();
       },
       resetStep: async (ref) => {
-        stepMethods.cancelStep(ref);
         exampleWrap.example.annotations = [];
+        stepMethods.cancelStep(ref);
       },
 
       dealWithData: (data, fn) => {

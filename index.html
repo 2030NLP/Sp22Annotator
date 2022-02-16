@@ -122,12 +122,12 @@
       <div class="container">
 
             <!-- 标注结果展示模块 开始 -->
-            <div class="row mb-3 carded" id="annotations-area">
+            <div class="row mt-1 mb-3 carded" id="annotations-area">
               <div class="col col-12 my-1" v-show="!example?.annotations?.length">
-                <div class="text-muted">标注好的内容将显示在这里。</div>
+                <div class="text-muted small">标注好的内容将显示在这里。</div>
               </div>
               <div class="col col-12 my-1" v-show="example?.annotations?.length">
-                <div class="text-muted">已标信息：</div>
+                <div class="text-muted small">已标信息：</div>
                 <div
                   class="d-inline-block"
                   v-for="anno in example.annotations"
@@ -136,7 +136,7 @@
                   :data-label="anno.label"
                 >
                   <span class="badge bg-light text-dark my-1 me-2">
-                    <template v-if="true"><span class="text-black-50 me-1">{{anno.idx}}</span></template>
+                    <template v-if="example?.annotations?.length>1"><span class="text-black-50 me-1">{{anno.idx}}</span></template>
 
                     <template v-if="anno.mode=='multiSpans'">
                       <span v-for="tokenarray, kk in anno.tokenarrays" :key="kk">

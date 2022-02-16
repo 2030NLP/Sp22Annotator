@@ -72,7 +72,7 @@
     }
 
     .bodywrap {
-      min-height: 120vh;
+      min-height: 110vh;
       padding-bottom: 6rem;
     }
 
@@ -96,7 +96,7 @@
       border-radius: 8px;
     }
     #page-main-editor--main {
-      min-height: 35vh;
+      min-height: 30vh;
     }
     #page-main-editor p {
       margin-top: 0.25rem;
