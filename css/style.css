@@ -5,7 +5,7 @@
     #material-replaced, #material-origin, #convenient-ctrl {}
     .carded {
       padding: 0.5em 0.25em;
-      border: 1px solid #ccc;
+      border: 1px solid #eee;
       border-radius: 4px;
     }
 
@@ -36,13 +36,13 @@
 
 
     .container {
-      transition: max-width 0.5s, width 0.5s;
+      transition: max-width 0.2s, width 0.2s;
     }
     .progress-bar {
-      transition: all 0.5s;
+      transition: all 0.2s;
     }
     .btn {
-      transition: all 0.2s;
+      transition: all 0.1s;
     }
     .btn-info {
       color: #fff;
@@ -79,7 +79,7 @@
     .container.page {
       background: #fff;
       border-radius: 8px;
-      transition: all 0.5s;
+      transition: all 0.2s;
     }
     @media screen and (max-width: 576.5px) {
       .container.page {
@@ -113,7 +113,7 @@
       cursor: pointer;
       border: 2px dotted transparent;
       border-radius: 4px;
-      transition: all 0.15s;
+      transition: all 0.2s;
     }
     .material-area span.token.right-space {
       /*margin-right: 3px;*/
