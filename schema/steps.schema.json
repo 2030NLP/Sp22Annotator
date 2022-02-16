@@ -11,7 +11,7 @@
         "name": "标注结果",
         "mode": "finalResult",
         "props": {
-          "instruction": "标注结果如下：",
+          "instruction": "标注已完成。",
           "canReset": true,
           "resetBtn": {
             "text": "清空并重新标注",
@@ -308,6 +308,10 @@
             "text": "清除选区",
             "style": "info"
           },
+          "cleanBtn": {
+            "text": "清除已选片段",
+            "style": "light"
+          },
           "okBtn": {
             "text": "不再添加，完成",
             "go": "manageReasons",
@@ -339,6 +343,10 @@
           "clearBtn": {
             "text": "清除选区",
             "style": "info"
+          },
+          "cleanBtn": {
+            "text": "清除已选片段",
+            "style": "light"
           },
           "okBtn": {
             "text": "不再添加，完成",

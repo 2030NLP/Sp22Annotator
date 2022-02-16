@@ -21,6 +21,14 @@
       "action": "export to file"
     }
   ],
+  "_____": {
+    "1-77-34-5": {
+      "annotations":[]
+    },
+    "1-77-34-6": {
+      "annotations":[]
+    }
+  },
   "dataItems": [
     {
       "dbID": "1-77-34",
@@ -29,9 +37,12 @@
       "srcID": 34,
       "innerID": 3,
       "isReplacedItem": true,
-      "rpID": "1-77-34-5",
-      "rpIdx": 5,
+      "rpID0": "1-77-34-5",
+      "rpID1": "1-77-34-6",
+      "rpIdx0": 5,
+      "rpIdx1": 6,
       "material": {
+        "replaced": true,
         "content": "桌上有碗汤",
         "tokenList": [
           {

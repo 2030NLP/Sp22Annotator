@@ -1,0 +1,72 @@
+{
+  "fID": 77,
+  "fID 说明": "当前批次下要标注的文件中，该文件的编号",
+  "desc": "SpaCE2022",
+  "desc 说明": "文件内容标识，照抄即可",
+  "appVersion": "22-0212-00",
+  "appVersion 说明": "API版本号，照抄即可",
+  "createdAt": "220202-160439",
+  "createdAt 说明": "格式化的创建时间",
+  "lastModifiedAt": "220202-160439",
+  "lastModifiedAt 说明": "最后修改时间，标注工具会自动更新，最初与 createdAt 相同即可",
+  "handleLogs": [{"说明":"标注工具会自动记录处理过程，最初留一个空数组即可"}],
+  "dataItems 说明": "要标注的内容的列表",
+  "dataItems": [
+    {
+      "dbID": "1-77-34  | 由 batchID-fID-srcID 组合而成",
+      "batchID": 1,
+      "batchID 说明": "标注批次的编号",
+      "fID": 77,
+      "fID 说明": "当前批次下要标注的文件中，该文件的编号",
+      "srcID": 34,
+      "srcID 说明": "原句编号，原句需要有一个总的数据库文件，该编号要能在总库之中检索到相应的信息，如来源文件，来源类型等",
+      "isReplacedItem": true,
+      "isReplacedItem 说明": "true表示此句为替换句，false表示此句为原句",
+      "rpID": "1-77-34-1-5  | 由 dbID-rpGID-rpGIdx 组合而成",
+      "rpGID": 1,
+      "rpGID 说明": "替换句分组编号，对于该编号相同的同源替换句，它们被替换的词一定是相同的，该编号不同，则替换词不同",
+      "rpGIdx": 5,
+      "rpGIdx 说明": "替换句组内编号，同一组替换词相同的替换句内部的编号",
+      "material": {
+        "tokenList 说明": "文本材料分词列表",
+        "tokenList": [
+          {
+            "word": "桌",
+            "word 说明": "原句的词",
+            "idx": 0,
+            "idx 说明": "词在句中的序号",
+            "pos": "n",
+            "pos 说明": "词性标签",
+            "autoEntity": true,
+            "autoEntity 说明": "机器自动标注的「是否是实体词」",
+            "autoSpatial": false,
+            "autoSpatial 说明": "机器自动标注的「是否是空间义词」"
+          },
+          {
+            "word": "上",
+            "idx": 1,
+            "pos": "f",
+            "autoEntity": false,
+            "autoSpatial": true,
+            "replaced": true,
+            "replaced 说明": "当前词语是否被替换了",
+            "to": {
+              "word": "下",
+              "word 说明": "替换后的词",
+              "pos": "f",
+              "pos 说明": "替换后的词性标签，可以不要了",
+              "class": "上下左右类",
+              "class 说明": "替换词在替换词表中的分类"
+            }
+          }
+        ]
+      },
+      "annotations": ["标注工具生成的，标注之前可以没有"],
+      "_ctrl": {"说明": "标注工具生成的，标注之前可以没有"}
+    },
+    {
+      "...": "这又是另一个「dataItem」"
+    }
+  ],
+  "_ctrl": {"说明": "标注工具生成的，标注之前可以没有"}
+}

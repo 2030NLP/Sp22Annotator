@@ -512,6 +512,15 @@ const RootComponent = {
       },
 
       handleMultiSpans: async (ref, data) => {
+        let aa = data.tokenarrays.flat(Infinity);
+        let should = (aa.length == Array.from(new Set(aa)).length);
+
+        if (!should) {
+          alert("存在重复的片段，请重新选择");
+          data.tokenarrays = [];
+          return;
+        };
+
         let fn = (da)=>{
           return da;
         };
@@ -545,6 +554,12 @@ const RootComponent = {
     });
 
 
+    const getReplacedToken = (idx) => {
+      let tokenList = exampleWrap.example.material.tokenList;
+      return tokenList[idx]?.replaced ? tokenList[idx]?.to?.word : tokenList[idx].word;
+    };
+
+
     return {
       //
       ...toRefs(exampleWrap),  // 提供 example
@@ -567,6 +582,8 @@ const RootComponent = {
       updateSteps,
       //
       theSaver,
+      //
+      getReplacedToken,
       //
       // formFiles,
       // getAnnoBtnClass,
