@@ -524,14 +524,15 @@ const RootComponent = {
                         if(exampleWrap.example.annotations[i].tokenarrays[j].toString()==data.tokenarrays[k].toString()){
                             flag1=flag1+1;
                         }
+                        for (t = 0; t < data.tokenarrays[k].length; t++) {
+                            if((exampleWrap.example.annotations[i].tokenarrays[j].indexOf(data.tokenarrays[k][t]))!=-1){
+                                flag=1;
+                            }
+                        }
                    }
                    if(flag1){
-                       console.log(flag1);
                        if((flag1==exampleWrap.example.annotations[i].tokenarrays.length)&&(flag1==data.tokenarrays.length)){
                             flag=2;
-                       }
-                       else{
-                            flag=1;
                        }
                    }
                }
@@ -545,7 +546,7 @@ const RootComponent = {
         };
 
         if(flag==1){
-            if(confirm("与之前标注相比有部分重复，是否重新选择")){
+            if(confirm("与之前标注相比有部分重复，点击确定即重新选择，反之则取消。")){
                 data.tokenarrays = [];
                 return;
             }
