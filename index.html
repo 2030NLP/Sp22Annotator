@@ -121,62 +121,7 @@
     >
       <div class="container">
 
-            <!-- 标注结果展示模块 开始 -->
-            <div class="row mt-1 mb-3 carded" id="annotations-area">
-              <div class="col col-12 my-1" v-show="!example?.annotations?.length">
-                <div class="text-muted small">标注好的内容将显示在这里。</div>
-              </div>
-              <div class="col col-12 my-1" v-show="example?.annotations?.length">
-                <div class="text-muted small">已标信息：</div>
-                <div
-                  class="d-inline-block"
-                  v-for="anno in example.annotations"
-                  :key="anno.idx"
-                  :data-mode="anno.mode"
-                  :data-label="anno.label"
-                >
-                  <span class="badge bg-light text-dark my-1 me-2">
-                    <template v-if="example?.annotations?.length>1"><span class="text-black-50 me-1">{{anno.idx}}</span></template>
 
-                    <template v-if="anno.mode=='multiSpans'">
-                      <span v-for="tokenarray, kk in anno.tokenarrays" :key="kk">
-                        “<span v-for="idx in tokenarray" :key="idx" :title="idx">{{ getReplacedToken(idx) }}<!-- <sub>{{idx}}</sub> --></span>”
-                      </span>
-                    </template>
-
-                    <template v-if="anno.mode=='choose'||anno.mode=='text'">
-                      “<span v-for="tokenIdx in anno.on" :key="tokenIdx" :title="tokenIdx">{{ getReplacedToken(tokenIdx) }}</span>”
-                    </template>
-
-                    <template v-if="anno.desc || anno.label">
-                      <span>{{anno.desc || anno.label}}</span>
-                    </template>
-
-                    <template v-if="anno.mode=='choose'||anno.mode=='text'">
-                      ：<span>{{anno.withText}}</span>
-                    </template>
-
-                    <template v-if="anno.mode=='add'">
-                      将“<span >{{ getReplacedToken(anno.source) }}<!-- <sub>{{anno.source}}</sub> --></span>”增改为“<span v-if="anno.side=='0'">{{anno.target}}</span><span >{{ getReplacedToken(anno.source) }}<!-- <sub>{{anno.source}}</sub> --></span><span v-if="anno.side=='1'">{{anno.target}}</span>”
-                    </template>
-
-                    <template v-if="anno.mode=='modify'">
-                      将 <span >“{{ getReplacedToken(anno.source) }}”<!-- <sub>{{anno.source}}</sub> --></span> 改为 <span>“{{anno.target}}”</span>
-                    </template>
-
-                    <template v-if="anno.mode=='delete'">
-                      删除<s><span >“{{ getReplacedToken(anno.source) }}”<!-- <sub>{{anno.source}}</sub> --></span></s>
-                    </template>
-
-                    <template v-if="anno.toSolve!=null">
-                      <span >以解决 {{example.annotations[anno.toSolve].label}}<!-- <sub>{{anno.toSolve}}</sub> --> 的问题</span>
-                    </template>
-
-                  </span>
-                </div>
-              </div>
-            </div>
-            <!-- 标注结果展示模块 结束 -->
         <div class="row mt-2 mb-3 align-items-center" id="page-main-editor--main">
           <!-- 内容区 开始 -->
           <div class="col col-12 col-lg-7 my-2">
@@ -527,6 +472,68 @@
           <!-- 功能区 结束 -->
         </div>
 
+        <!-- 标注结果展示模块 开始 -->
+        <div class="row mt-1 mb-3 carded" id="annotations-area">
+              <div class="col col-12 my-1" v-show="!example?.annotations?.length">
+                <div class="text-muted small">标注好的内容将显示在这里。</div>
+              </div>
+              <div class="col col-12 my-1" v-show="example?.annotations?.length">
+                <div class="text-muted small">标注结果：</div>
+                <div
+                  class="col col-12 col-lg-12"
+                  v-for="anno in example.annotations"
+                  :key="anno.idx"
+                  :data-mode="anno.mode"
+                  :data-label="anno.label"
+                >
+                  <span class="badge bg-light text-dark my-1 me-2">
+                    <template v-if="anno.mode=='selectValue'">
+                      <span>这句话空间信息{{anno.desc}}</span>
+                    </template>
+                  </span>
+                  <span class="badge bg-light text-dark my-1 me-2">
+
+                    <template v-if="anno.mode=='multiSpans'">
+                      <span>错误原因：</span>
+                      <span v-for="tokenarray, kk in anno.tokenarrays" :key="kk">
+                        “<span v-for="idx in tokenarray" :key="idx" :title="idx">{{ getReplacedToken(idx) }}<!-- <sub>{{idx}}</sub> --></span>”
+                      </span>
+                      <span>{{anno.label}}</span>
+                    </template>
+
+                    <template v-if="anno.mode=='choose'||anno.mode=='text'">
+                      <div v-if="anno.on">
+                        <span>错误原因：</span>
+                        “<span v-for="tokenIdx in anno.on" :key="tokenIdx" :title="tokenIdx">{{ getReplacedToken(tokenIdx) }}</span>”
+                        <span>不符合{{anno.withText}}的常识</span>
+                      </div>
+                      <div v-else>
+                        <span>错误原因：</span>
+                        <span> {{anno.withText}}</span>
+                      </div>
+                    </template>
+
+                    <template v-if="anno.mode=='add'">
+                      将“<span >{{ getReplacedToken(anno.source) }}<!-- <sub>{{anno.source}}</sub> --></span>”增改为“<span v-if="anno.side=='0'">{{anno.target}}</span><span >{{ getReplacedToken(anno.source) }}<!-- <sub>{{anno.source}}</sub> --></span><span v-if="anno.side=='1'">{{anno.target}}</span>”
+                    </template>
+
+                    <template v-if="anno.mode=='modify'">
+                      将 <span >“{{ getReplacedToken(anno.source) }}”<!-- <sub>{{anno.source}}</sub> --></span> 改为 <span>“{{anno.target}}”</span>
+                    </template>
+
+                    <template v-if="anno.mode=='delete'">
+                      删除<s><span >“{{ getReplacedToken(anno.source) }}”<!-- <sub>{{anno.source}}</sub> --></span></s>
+                    </template>
+
+                    <template v-if="anno.toSolve!=null">
+                      <span >以解决 {{example.annotations[anno.toSolve].label}}<!-- <sub>{{anno.toSolve}}</sub> --> 的问题</span>
+                    </template>
+
+                  </span>
+                </div>
+              </div>
+            </div>
+        <!-- 标注结果展示模块 结束 -->
 
 
 
