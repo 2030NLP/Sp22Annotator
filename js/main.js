@@ -515,11 +515,47 @@ const RootComponent = {
         let aa = data.tokenarrays.flat(Infinity);
         let should = (aa.length == Array.from(new Set(aa)).length);
 
+        let flag=0;
+        for (i = 0; i < exampleWrap.example.annotations.length; i++) {
+           if((exampleWrap.example.annotations[i].mode=="multiSpans")&&(exampleWrap.example.annotations[i].label==data.label)){
+               let flag1=0;
+               for (j = 0; j < exampleWrap.example.annotations[i].tokenarrays.length; j++) {
+                   for (k = 0; k < data.tokenarrays.length; k++) {
+                        if(exampleWrap.example.annotations[i].tokenarrays[j].toString()==data.tokenarrays[k].toString()){
+                            flag1=flag1+1;
+                        }
+                   }
+                   if(flag1){
+                       console.log(flag1);
+                       if((flag1==exampleWrap.example.annotations[i].tokenarrays.length)&&(flag1==data.tokenarrays.length)){
+                            flag=2;
+                       }
+                       else{
+                            flag=1;
+                       }
+                   }
+               }
+           }
+        }
+
         if (!should) {
           alert("存在重复的片段，请重新选择");
           data.tokenarrays = [];
           return;
         };
+
+        if(flag==1){
+            if(confirm("与之前标注相比有部分重复，是否重新选择")){
+                data.tokenarrays = [];
+                return;
+            }
+        }
+
+        if(flag==2){
+              alert("与之前标注相比完全重复，请重新选择");
+              data.tokenarrays = [];
+              return;
+        }
 
         let fn = (da)=>{
           return da;

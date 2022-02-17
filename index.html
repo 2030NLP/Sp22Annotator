@@ -486,11 +486,7 @@
                   :data-mode="anno.mode"
                   :data-label="anno.label"
                 >
-                  <span class="badge bg-light text-dark my-1 me-2">
-                    <template v-if="anno.mode=='selectValue'">
-                      <span>这句话空间信息{{anno.desc}}</span>
-                    </template>
-                  </span>
+                  <span class="badge bg-light text-dark my-1 me-2">{{anno.desc}}</span>
                   <span class="badge bg-light text-dark my-1 me-2">
 
                     <template v-if="anno.mode=='multiSpans'">
@@ -502,14 +498,14 @@
                     </template>
 
                     <template v-if="anno.mode=='choose'||anno.mode=='text'">
-                      <div v-if="anno.on">
+                      <div v-if="anno.label=='不符合常识'">
                         <span>错误原因：</span>
                         “<span v-for="tokenIdx in anno.on" :key="tokenIdx" :title="tokenIdx">{{ getReplacedToken(tokenIdx) }}</span>”
-                        <span>不符合{{anno.withText}}的常识</span>
+                        <span>不符合{{anno.withText}}</span>
                       </div>
                       <div v-else>
                         <span>错误原因：</span>
-                        <span> {{anno.withText}}</span>
+                        <span>  {{anno.withText}}</span>
                       </div>
                     </template>
 

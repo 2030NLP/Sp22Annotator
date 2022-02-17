@@ -36,7 +36,7 @@
               "text": "完全正常",
               "data": {
                 "label": "fine",
-                "desc": "完全正常"
+                "desc": "这句话空间信息完全正常"
               },
               "go": "judgeSimilarity",
               "style": "outline-primary"
@@ -45,7 +45,7 @@
               "text": "尚能说通",
               "data": {
                 "label": "someFine",
-                "desc": "尚能说通"
+                "desc": "这句话空间信息尚能说通"
               },
               "go": "judgeSimilarity",
               "style": "outline-primary"
@@ -54,7 +54,7 @@
               "text": "比较牵强",
               "data": {
                 "label": "someBad",
-                "desc": "比较牵强"
+                "desc": "这句话空间信息比较牵强"
               },
               "go": "manageReasons",
               "style": "outline-primary"
@@ -63,7 +63,7 @@
               "text": "根本不对",
               "data": {
                 "label": "bad",
-                "desc": "根本不对"
+                "desc": "这句话空间信息根本不对"
               },
               "go": "manageReasons",
               "style": "outline-primary"
