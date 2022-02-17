@@ -546,7 +546,7 @@ const RootComponent = {
         };
 
         if(flag==1){
-            if(confirm("与之前标注相比有部分重复，点击确定即重新选择，反之则取消。")){
+            if(!confirm("与之前标注相比有部分重复，点击取消即重新选择，反之则点击确定。")){
                 data.tokenarrays = [];
                 return;
             }
