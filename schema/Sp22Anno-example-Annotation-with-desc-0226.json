@@ -1,0 +1,41 @@
+{
+  "id": "14",
+  "topic": "第1期",
+  "eId": "5",
+  "user": "asefea-ewgasd-qwefas-wefadf",
+  "user 备注": "是不是用序列号更安全？还有这个 key 是不是改成 userId 之类更好",
+  "content": {
+    "annotations": [
+      {
+        "label": "someBad",
+        "desc": "比较牵强",
+        "idx": 0,
+        "mode": "selectValue",
+        "_schema": [
+          "SpaCE2022",
+          "220208",
+          "众标"
+        ]
+      },
+      {
+        "label": "其它",
+        "withText": "iii",
+        "idx": 1,
+        "mode": "text",
+        "_schema": [
+          "SpaCE2022",
+          "220208",
+          "众标"
+        ]
+      }
+    ],
+    "_ctrl": {
+      "currentStepRef": "end",
+      "currentSchema": {
+        "name": "SpaCE2022",
+        "version": "220208",
+        "using": "众标"
+      }
+    }
+  }
+}
