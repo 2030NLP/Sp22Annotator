@@ -1,4 +1,37 @@
 
+    .alert-wrap {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 2060;
+      display: none;
+      width: 360px;
+      max-width: 80vw;
+      overflow: hidden;
+      outline: 0;
+    }
+    .fade-enter-active,
+    .fade-leave-active {
+      transition: opacity 0.5s ease;
+    }
+
+    .fade-enter-from,
+    .fade-leave-to {
+      opacity: 0;
+    }
+
+    .hidden-before-ready {
+      display: none;
+    }
+    .hidden-before-ready.ready {
+      display: block;
+    }
+    .hidden-after-ready {
+      display: block;
+    }
+    .hidden-after-ready.ready {
+      display: none;
+    }
 
 
 

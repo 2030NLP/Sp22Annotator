@@ -54,61 +54,107 @@
     <!-- navbar end -->
 
 
+    <div class="container page my-4 hiddent" id="page-nav">
+      <div class="container py-2">
+        <div class="row align-items-center">
+          <div class="col col-12 my-2">
+            <button
+              type="button"
+              name="nav_setup"
+              id="nav_setup"
+              class="btn btn-sm me-2"
+              :class="ctrl.currentPage=='setup'?'btn-primary':'btn-outline-primary'"
+              @click="ctrl.currentPage='setup'"
+            >配置</button>
+            <button
+              type="button"
+              name="nav_list"
+              id="nav_list"
+              class="btn btn-sm me-2"
+              :class="ctrl.currentPage=='list'?'btn-primary':'btn-outline-primary'"
+              @click="ctrl.currentPage='list'"
+            >清单</button>
+            <button
+              type="button"
+              name="nav_anno"
+              id="nav_anno"
+              class="btn btn-sm me-2"
+              :class="ctrl.currentPage=='anno'?'btn-primary':'btn-outline-primary'"
+              @click="ctrl.currentPage='anno'"
+            >标注</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <div class="container page my-4 hiddent" id="page-import">
+
+    <div class="container page my-4" id="page-setup" v-show="ctrl.currentPage=='setup'">
+      <div class="container py-2">
+        <div class="row align-items-center">
+          <div class="col col-12 col-md-3 col-lg-3 my-2">
+            <div class="form-floating">
+              <input class="form-control form-control-sm" type="text" v-model="ctrl.currentWorker" placeholder="请输入您的姓名">
+              <label class="form-label">姓名</label>
+            </div>
+          </div>
+          <div class="col col-12 col-md-6 col-lg-6 my-2">
+            <div class="form-floating">
+              <input class="form-control form-control-sm" type="text" v-model="ctrl.currentWorkerSecret" placeholder="请输入您的序列号">
+              <label class="form-label">序列号</label>
+            </div>
+          </div>
+          <div class="col col-12 col-md-3 col-lg-3 my-2">
+            <div class="form-floating">
+              <input class="form-control form-control-sm" type="text" v-model="ctrl.currentWorkerTarget" placeholder="请输入您的标注目标">
+              <label class="form-label">标注目标数量</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="container page my-4" id="page-overview" v-show="ctrl.currentWorkerTarget">
       <div class="container py-2">
         <!-- progressCtrl start -->
         <div class="row align-items-center">
-          <div class="col col-12 my-2" v-if="!ctrl?.currentWorker?.length">
-            <div>请填写姓名！</div>
-          </div>
-          <div class="col col-12 col-md-3 col-lg-2 my-2">
-            <input class="form-control form-control-sm" type="text" v-model="ctrl.currentWorker" placeholder="请在此输入姓名">
-          </div>
-          <div class="col col-12 col-md-9 col-lg-10 my-2">
-            <div class="progress">
-              <div class="progress-bar bg-success" role="progressbar" :style="`min-width: ${ctrl.donePct};`"
-                :aria-valuenow="ctrl.doneNum" aria-valuemin="0" :aria-valuemax="ctrl.totalNum">{{ ctrl.doneNum }}/{{
+          <div class="col col-12 col-md-12 col-lg-12 my-2">
+            <!-- <label class="form-label">标注进度</label> -->
+            <div class="progress" title="标注进度">
+              <div
+                class="progress-bar bg-success"
+                role="progressbar"
+                :style="`min-width: ${ctrl.donePct};`"
+                :aria-valuenow="ctrl.doneNum"
+                :aria-valuemax="ctrl.totalNum"
+                aria-valuemin="0"
+              >{{ ctrl.doneNum }}/{{
                 ctrl.totalNum }}</div>
             </div>
           </div>
         </div>
         <!-- progressCtrl end -->
-        <!-- fileCtrl start -->
-        <form name="file-form" class="row" id="filePicker">
-          <div class="col-md-8 my-2">
-            <input type="file" class="form-control form-control-sm" name="file-input" id="file-input" accept=".json, .txt" />
-          </div>
-          <div class="btn-group btn-group-sm col-md-4 my-2">
-            <button
-              v-if="ctrl?.currentWorker?.length"
-              type="button"
-              name="do_import"
-              id="do_import"
-              @click="onImport"
-              class="btn btn-primary"
-            >导入</button>
-            <button
-              v-if="!dataWrap?.dataItems?.length && ctrl.haveStore && ctrl?.currentWorker?.length"
-              type="button"
-              name="do_loadStore"
-              id="do_loadStore"
-              v-on:click="loadStore"
-              class="btn btn-success"
-            >加载缓存数据</button>
-            <button
-              :disabled="!dataWrap?.dataItems?.length"
-              type="button"
-              name="do_export"
-              id="do_export"
-              @click="onExport"
-              class="btn btn-info"
-            >导出</button>
-          </div>
-        </form>
-        <!-- fileCtrl end -->
       </div>
     </div>
+
+
+    <div class="container page my-4" id="page-list" v-show="ctrl.currentPage=='list'">
+      <div class="container py-2">
+        <div class="row align-items-center">
+          <div class="col col-12 col-md-12 col-lg-12 my-2">
+            <button
+              type="button"
+              v-for="task in tasks"
+              class="btn btn-sm me-2 my-1"
+              :class="`btn-outline-${task.valid?'info':task.dropped?'dark':task.skipped?'primary':'primary'}`"
+              @click=""
+            >{{task.id}}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
 
 
 
@@ -187,7 +233,40 @@
           <!-- 内容区 结束 -->
 
 
-          <!-- 功能区 开始 -->
+          <!-- 0228的新版功能区 开始 -->
+          <div class="col col-12 col-lg-5 my-2" id="func-ctrl">
+
+
+
+
+
+
+
+
+
+
+
+            <!-- 按钮组包裹 -->
+            <div class="row" v-if="currentStep?.props?.btnGroups?.length">
+              <!-- 按钮组 -->
+              <div class="col col-12 my-1" v-for="btnGroup in currentStep.props.btnGroups">
+                <!-- 按钮 -->
+                <button v-for="btn in btnGroup" type="button" v-on:click="stepBtnFunc(btn, currentStep.props)" class="btn btn-sm my-1 me-1" :class="`btn-${btn.style}`">{{ btn.text }}</button>
+              </div>
+            </div>
+          </div>
+          <!-- 0228的新版功能区 结束 -->
+
+
+
+
+
+
+
+
+
+
+          <!-- 0228之前的旧版功能区 开始 -->
           <div class="col col-12 col-lg-5 my-2" id="func-ctrl">
 
             <!-- deBug用的 开始 -->
@@ -469,7 +548,7 @@
             <!-- choose 或 text 模式结束 -->
 
           </div>
-          <!-- 功能区 结束 -->
+          <!-- 0228之前的旧版功能区 结束 -->
         </div>
 
         <!-- 标注结果展示模块 开始 -->
@@ -570,7 +649,72 @@
     </div>
 
 
+    <div __v-if="false" class="container page my-4 hiddent" id="page-import">
+      <div class="container py-2">
+        <!-- progressCtrl start -->
+        <div class="row align-items-center">
+          <div class="col col-12 my-2" v-if="!ctrl?.currentWorker?.length">
+            <div>请填写姓名！</div>
+          </div>
+          <div class="col col-12 col-md-3 col-lg-2 my-2">
+            <input class="form-control form-control-sm" type="text" v-model="ctrl.currentWorker" placeholder="请在此输入姓名">
+          </div>
+          <div class="col col-12 col-md-9 col-lg-10 my-2">
+            <div class="progress">
+              <div class="progress-bar bg-success" role="progressbar" :style="`min-width: ${ctrl.donePct};`"
+                :aria-valuenow="ctrl.doneNum" aria-valuemin="0" :aria-valuemax="ctrl.totalNum">{{ ctrl.doneNum }}/{{
+                ctrl.totalNum }}</div>
+            </div>
+          </div>
+        </div>
+        <!-- progressCtrl end -->
+        <!-- fileCtrl start -->
+        <form name="file-form" class="row" id="filePicker">
+          <div class="col-md-8 my-2">
+            <input type="file" class="form-control form-control-sm" name="file-input" id="file-input" accept=".json, .txt" />
+          </div>
+          <div class="btn-group btn-group-sm col-md-4 my-2">
+            <button
+              v-if="ctrl?.currentWorker?.length"
+              type="button"
+              name="do_import"
+              id="do_import"
+              @click="onImport"
+              class="btn btn-primary"
+            >导入</button>
+            <button
+              v-if="!dataWrap?.dataItems?.length && ctrl.haveStore && ctrl?.currentWorker?.length"
+              type="button"
+              name="do_loadStore"
+              id="do_loadStore"
+              v-on:click="loadStore"
+              class="btn btn-success"
+            >加载缓存数据</button>
+            <button
+              :disabled="!dataWrap?.dataItems?.length"
+              type="button"
+              name="do_export"
+              id="do_export"
+              @click="onExport"
+              class="btn btn-info"
+            >导出</button>
+          </div>
+        </form>
+        <!-- fileCtrl end -->
+      </div>
+    </div>
 
+
+
+  <!-- Alert -->
+  <div class="alert-wrap" style="display: block;" ref="alert_wrap">
+    <transition name = "fade" v-for="alert in theAlert.alerts">
+      <div v-show="alert?.show" class="alert alert-dismissible alert-info" :class="'alert-'+alert?.type">
+        <button type="button" class="btn-close" @click="theAlert.removeAlert(alert?.idx)"></button>
+        <div>{{alert?.content}}</div>
+      </div>
+    </transition>
+  </div>
 
   </div>
   <!-- bodywrap end -->
@@ -581,6 +725,7 @@
   <script type="text/javascript" src="lib/axios_0.25.0_.min.js"></script>
   <script type="text/javascript" src="lib/FileSaver.js"></script>
   <script type="text/javascript" src="js/components/BaseSaver.js"></script>
+  <script type="text/javascript" src="js/components/BaseAlert.js"></script>
   <script type="text/javascript" src="js/components/BaseReader.js"></script>
   <script type="text/javascript" src="js/components/TheReader.js"></script>
   <script type="text/javascript" src="js/components/TheSteps.js"></script>

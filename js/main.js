@@ -14,9 +14,16 @@ const RootComponent = {
     const theSaver = BaseSaver();
     // ↑ 参看 js/components/BaseSaver.js
 
+    const theAlert = reactive(BaseAlert());
     // ↓ 参看 js/components/TheReader.js
-    const theReader = TheReader();
+    const theReader = TheReader(theAlert.pushAlert);
     // ↑ 参看 js/components/TheReader.js
+
+    onMounted(()=>{
+      theAlert.lastIdx = 1;
+      theAlert.alerts = [];
+      theAlert.pushAlert(`您好！`, 'success', 3000);
+    });
 
 
 
@@ -186,12 +193,16 @@ const RootComponent = {
       dataWrap: {
         dataItems: [],
       },
+      tasks: [{id:"666",skipped:true},{id:"888",dropped:true},{id:"222",valid:true},{id:"333"},{id:"111"}],
       ctrl: {
         currentWorker: "",
+        currentWorkerSecret: "",
+        currentWorkerTarget: 600,
+        currentPage: "setup",
         haveStore: false,
-        doneNum: 0,
-        totalNum: 0,
-        donePct: "0%",
+        doneNum: 60,
+        totalNum: 600,
+        donePct: "10%",
         currentIdx: 0,
         targetIdx: 0,
         showOrigin: false,
@@ -390,12 +401,19 @@ const RootComponent = {
       },
       updateProgress: () => {
         let endStep = stepsDictWrap?.[stepsDictWrap?.using]?.endStep;
-        appData.ctrl.totalNum = appData.dataWrap.dataItems.length;
-        appData.ctrl.doneNum = appData.dataWrap.dataItems.filter(it=>{
-          return it?._ctrl?.currentStepRef == endStep && endStep?.length;
-        }).length;
+        appData.ctrl.totalNum = appData.ctrl.currentWorkerTarget;
+        appData.ctrl.doneNum = 60;  // TODO
         appData.ctrl.donePct = `${appData.ctrl.doneNum / appData.ctrl.totalNum * 100}%`;
       },
+      // 0228 之前的旧版函数
+      // __updateProgress: () => {
+      //   let endStep = stepsDictWrap?.[stepsDictWrap?.using]?.endStep;
+      //   appData.ctrl.totalNum = appData.dataWrap.dataItems.length;
+      //   appData.ctrl.doneNum = appData.dataWrap.dataItems.filter(it=>{
+      //     return it?._ctrl?.currentStepRef == endStep && endStep?.length;
+      //   }).length;
+      //   appData.ctrl.donePct = `${appData.ctrl.doneNum / appData.ctrl.totalNum * 100}%`;
+      // },
     };
 
 
@@ -601,6 +619,7 @@ const RootComponent = {
       //
       ...toRefs(exampleWrap),  // 提供 example
       // ...toRefs(data),
+      theAlert,
       //
       ...toRefs(appData),
       ...dataMethods,
