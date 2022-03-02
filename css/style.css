@@ -1,4 +1,12 @@
 
+
+
+    .z-1030 {
+      z-index: 1030;
+    }
+
+
+
     .alert-wrap {
       position: fixed;
       bottom: 1rem;
@@ -147,6 +155,7 @@
       border: 2px dotted transparent;
       border-radius: 4px;
       transition: all 0.2s;
+      white-space: nowrap;
     }
     .material-area span.token.right-space {
       /*margin-right: 3px;*/
