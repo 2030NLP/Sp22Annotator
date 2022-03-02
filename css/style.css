@@ -164,14 +164,14 @@
       background: #fee;
     }
     .material-area span.token[data-auto-entity=true] {
-      /*color: steelblue;*/
+      color: #0d6efd;
       /*color: #056;*/
-      color: #210;
+      /*color: #210;*/
     }
     .material-area span.token[data-auto-spatial=true] {
-      /*color: #fa0;*/
+      color: #198754;
       /*color: #650;*/
-      color: #120;
+      /*color: #120;*/
     }
     .material-area span.token[data-replaced=true] {
       color: #f00;
