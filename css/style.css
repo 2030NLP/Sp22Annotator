@@ -173,6 +173,9 @@
       /*color: #650;*/
       /*color: #120;*/
     }
+    .material-area span.token[data-pos=f] {
+      color: #0dcaf0;
+    }
     .material-area span.token[data-replaced=true] {
       color: #f00;
       font-weight: bold;
