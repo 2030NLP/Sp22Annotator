@@ -1,6 +1,6 @@
 {
   "name": "SpaCE2022",
-  "version": "220302",
+  "version": "220302v1",
   "using": "第0期",
   "第0期": {
     "startStep": "start",
@@ -109,12 +109,14 @@
         "name": "备注",
         "mode": "text",
         "props": {
-          "qitainstruction": "请填写备注",
+          "selectInstruction": "请在文中划选需要备注的文本片段",
+          "selectedTitle": "当前选中的文本片段是：",
+          "instruction": "请填写备注",
           "data": {
-            "label": "备注",
+            "label": "备注：",
             "withText": ""
           },
-          "okBtn1": {
+          "okBtn": {
             "text": "确定",
             "go": "manageEdits",
             "style": "success"
