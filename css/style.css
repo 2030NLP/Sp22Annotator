@@ -1,6 +1,47 @@
 
 
 
+    .z-1030 {
+      z-index: 1030;
+    }
+
+
+
+    .alert-wrap {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 2060;
+      display: none;
+      width: 360px;
+      max-width: 80vw;
+      overflow: hidden;
+      outline: 0;
+    }
+    .fade-enter-active,
+    .fade-leave-active {
+      transition: opacity 0.5s ease;
+    }
+
+    .fade-enter-from,
+    .fade-leave-to {
+      opacity: 0;
+    }
+
+    .hidden-before-ready {
+      display: none;
+    }
+    .hidden-before-ready.ready {
+      display: block;
+    }
+    .hidden-after-ready {
+      display: block;
+    }
+    .hidden-after-ready.ready {
+      display: none;
+    }
+
+
 
     #material-replaced, #material-origin, #convenient-ctrl {}
     .carded {
@@ -116,9 +157,9 @@
       transition: all 0.2s;
       white-space: nowrap;
     }
-    .material-area span.token.right-space {
+    /*.material-area span.token.right-space {
       /*margin-right: 3px;*/
-    }
+    }*/
     .material-area span.token:hover {
       background: #fee;
     }
@@ -134,6 +175,7 @@
     }
     .material-area span.token[data-replaced=true] {
       color: #f00;
+      font-weight: bold;
     }
     .material-area span.token[data-have-replace=true] {
       border-bottom: 2px dotted #faa;
