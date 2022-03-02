@@ -150,10 +150,10 @@
       user-select: none;
     }
     .material-area span.token {
-      padding: 0 1px;
+      /*padding: 0 1px;*/
       cursor: pointer;
-      border: 2px dotted transparent;
-      border-radius: 4px;
+      /*border: 2px dotted transparent;*/
+      /*border-radius: 4px;*/
       transition: all 0.2s;
       white-space: nowrap;
     }
