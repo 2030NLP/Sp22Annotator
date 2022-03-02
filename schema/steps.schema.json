@@ -1,7 +1,7 @@
 {
   "name": "SpaCE2022",
   "version": "220302",
-  "using": "第1期",
+  "using": "精标",
   "精标": {
     "startStep": "start",
     "endStep": "end",
@@ -90,6 +90,24 @@
               },
               "go": "end",
               "style": "outline-primary"
+            },
+            {
+              "text": "存在分词问题",
+              "data": {
+                "label": "cutError",
+                "desc": "这段话存在分词问题"
+              },
+              "go": "end",
+              "style": "outline-dark"
+            },
+            {
+              "text": "存在错别字等其他问题",
+              "data": {
+                "label": "otherError",
+                "desc": "这段话存在错别字等其他问题"
+              },
+              "go": "end",
+              "style": "outline-dark"
             }
           ]
         }
