@@ -14,8 +14,9 @@ const RootComponent = {
     const theSaver = BaseSaver();
     // ↑ 参看 js/components/BaseSaver.js
 
+    const theAlert = reactive(BaseAlert());
     // ↓ 参看 js/components/TheReader.js
-    const theReader = TheReader();
+    const theReader = TheReader(theAlert.pushAlert);
     // ↑ 参看 js/components/TheReader.js
 
 
@@ -580,6 +581,7 @@ const RootComponent = {
         stepsDictWrap.using == wrap.using) {
         return;
       };
+      theAlert.pushAlert("schema 已更新");
       Object.assign(stepsDictWrap, wrap);
       Object.assign(stepsDict, stepsDictWrap?.[stepsDictWrap?.using]?.steps??null);
       Object.assign(RootStep, stepsDictWrap?.[stepsDictWrap?.using]?.steps?.[stepsDictWrap?.[stepsDictWrap?.using]?.startStep]??null);
@@ -617,6 +619,8 @@ const RootComponent = {
       //
       stepsDictWrap,
       updateSteps,
+      //
+      theAlert,
       //
       theSaver,
       //

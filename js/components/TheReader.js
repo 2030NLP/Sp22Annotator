@@ -34,7 +34,7 @@ const TheReader = (handleError=console.log) => {
         })
         .then((fileWrap) => {
           if (encoding==null) {
-            encoding = encoding || jschardet.detect(fileWrap.test).encoding;
+            // encoding = encoding || jschardet?.detect(fileWrap.test)?.encoding || "utf-8";
             encoding = encoding== "ascii" ? "utf-8" : encoding;
           };
           return [encoding, fileWrap];
@@ -44,9 +44,7 @@ const TheReader = (handleError=console.log) => {
           fileWrap.encodingGot = true;
           return fileWrap;
         })
-        .catch(({
-          error
-        }) => {
+        .catch((error) => {
           handleError(error);
         });
     },
