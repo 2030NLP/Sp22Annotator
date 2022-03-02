@@ -150,7 +150,7 @@
       user-select: none;
     }
     .material-area span.token {
-      padding: 0 2px;
+      padding: 0 1px;
       cursor: pointer;
       border: 2px dotted transparent;
       border-radius: 4px;
@@ -165,11 +165,13 @@
     }
     .material-area span.token[data-auto-entity=true] {
       /*color: steelblue;*/
-      color: #056;
+      /*color: #056;*/
+      color: #210;
     }
     .material-area span.token[data-auto-spatial=true] {
       /*color: #fa0;*/
-      color: #650;
+      /*color: #650;*/
+      color: #120;
     }
     .material-area span.token[data-replaced=true] {
       color: #f00;
