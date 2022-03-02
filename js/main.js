@@ -581,7 +581,7 @@ const RootComponent = {
         stepsDictWrap.using == wrap.using) {
         return;
       };
-      theAlert.pushAlert(`收到 schema（版本：${wrap.version}，规范：${wrap.using}）`);
+      theAlert.pushAlert(`收到 schema（版本：${wrap.version}，规范：${wrap.using}）`, "warning");
       Object.assign(stepsDictWrap, wrap);
       Object.assign(stepsDict, stepsDictWrap?.[stepsDictWrap?.using]?.steps??null);
       Object.assign(RootStep, stepsDictWrap?.[stepsDictWrap?.using]?.steps?.[stepsDictWrap?.[stepsDictWrap?.using]?.startStep]??null);
