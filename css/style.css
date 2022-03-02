@@ -157,9 +157,9 @@
       transition: all 0.2s;
       white-space: nowrap;
     }
-    .material-area span.token.right-space {
+    /*.material-area span.token.right-space {
       /*margin-right: 3px;*/
-    }
+    }*/
     .material-area span.token:hover {
       background: #fee;
     }
@@ -175,6 +175,7 @@
     }
     .material-area span.token[data-replaced=true] {
       color: #f00;
+      font-weight: bold;
     }
     .material-area span.token[data-have-replace=true] {
       border-bottom: 2px dotted #faa;
