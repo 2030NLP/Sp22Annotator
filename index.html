@@ -305,6 +305,14 @@
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-${currentStep.props.resetBtn.style}`"
                 >{{ currentStep.props.resetBtn.text }}</button>
+                <!-- 下一条按钮 -->
+                <button
+                  type="button"
+                  v-if="'finalResult'==(currentStep.mode)&&currentStep?.props?.nextBtn"
+                  v-on:click="goIdx(ctrl.currentIdx+1)"
+                  class="btn btn-sm my-1 me-1"
+                  :class="`btn-${currentStep.props.nextBtn.style}`"
+                >{{ currentStep.props.nextBtn.text }}</button>
               </div>
             </div>
             <!-- 结束模块 结束 -->
@@ -416,7 +424,7 @@
                 <div>{{ currentStep?.props?.selectInstruction }}</div>
               </div>
               <div class="col col-12 my-1" v-if="selection.array.length&&currentStep?.props?.selectedTitle">
-                <div>{{ currentStep?.props?.selectedTitle }}<span>“<span v-for="tokenIdx in selection.array">{{ getReplacedToken(tokenIdx) }}</span>”</span><!-- <sub>{{selection.array}}</sub> --></div>
+                <div>{{ currentStep?.props?.selectedTitle }}<span>“<span v-for="tokenIdx in [selection.array[0]]">{{ getReplacedToken(tokenIdx) }}</span>”</span><!-- <sub>{{selection.array}}</sub> --></div>
               </div>
               <template v-if="selection.array.length">
                 <!-- 选边指导语 -->
@@ -455,7 +463,7 @@
                 <div>{{ currentStep?.props?.selectInstruction }}</div>
               </div>
               <div class="col col-12 my-1" v-if="selection.array.length&&currentStep?.props?.selectedTitle">
-                <div>{{ currentStep?.props?.selectedTitle }}<span>“<span v-for="tokenIdx in selection.array">{{ getReplacedToken(tokenIdx) }}</span>”</span><!-- <sub>{{selection.array}}</sub> --></div>
+                <div>{{ currentStep?.props?.selectedTitle }}<span>“<span v-for="tokenIdx in [selection.array[0]]">{{ getReplacedToken(tokenIdx) }}</span>”</span><!-- <sub>{{selection.array}}</sub> --></div>
               </div>
               <template v-if="selection.array.length">
                 <!-- 指导语 -->
@@ -485,7 +493,7 @@
                 <div>{{ currentStep?.props?.selectInstruction }}</div>
               </div>
               <div class="col col-12 my-1" v-if="selection.array.length&&currentStep?.props?.selectedTitle">
-                <div>{{ currentStep?.props?.selectedTitle }}<span>“<span v-for="tokenIdx in selection.array">{{ getReplacedToken(tokenIdx) }}</span>”</span><!-- <sub>{{selection.array}}</sub> --></div>
+                <div>{{ currentStep?.props?.selectedTitle }}<span>“<span v-for="tokenIdx in [selection.array[0]]">{{ getReplacedToken(tokenIdx) }}</span>”</span><!-- <sub>{{selection.array}}</sub> --></div>
               </div>
               <div class="col col-12 my-1">
                 <!-- okBtn -->
@@ -583,8 +591,9 @@
                         <span>不符合{{anno.withText}}</span>
                       </div>
                       <div v-else>
-                        <span>错误原因：</span>
-                        <span>  {{anno.withText}}</span>
+                        “<span v-for="tokenIdx in anno.on" :key="tokenIdx" :title="tokenIdx">{{ getReplacedToken(tokenIdx) }}</span>”
+                        <span> {{anno.label}} </span>
+                        <span> {{anno.withText}}</span>
                       </div>
                     </template>
 
@@ -724,8 +733,8 @@
   <script type="text/javascript" src="lib/vue_3.2.26_.global.prod.min.js"></script>
   <script type="text/javascript" src="lib/axios_0.25.0_.min.js"></script>
   <script type="text/javascript" src="lib/FileSaver.js"></script>
-  <script type="text/javascript" src="js/components/BaseSaver.js"></script>
   <script type="text/javascript" src="js/components/BaseAlert.js"></script>
+  <script type="text/javascript" src="js/components/BaseSaver.js"></script>
   <script type="text/javascript" src="js/components/BaseReader.js"></script>
   <script type="text/javascript" src="js/components/TheReader.js"></script>
   <script type="text/javascript" src="js/components/TheSteps.js"></script>

@@ -1,7 +1,249 @@
 {
   "name": "SpaCE2022",
-  "version": "220302",
-  "using": "精标",
+  "version": "220302v1",
+  "using": "第0期",
+  "第0期": {
+    "startStep": "start",
+    "endStep": "end",
+    "steps": {
+      "end": {
+        "ref": "end",
+        "name": "标注结果",
+        "mode": "finalResult",
+        "props": {
+          "instruction": "标注已完成。",
+          "canReset": true,
+          "resetBtn": {
+            "text": "清空并重新标注",
+            "go": "start",
+            "style": "outline-danger"
+          },
+          "nextBtn": {
+            "text": "下一条",
+            "style": "outline-primary"
+          },
+          "__cancelBtn": {
+            "text": "返回并补充标注",
+            "go": "start",
+            "style": "outline-secondary"
+          }
+        }
+      },
+      "start": {
+        "ref": "start",
+        "name": "评估材料质量",
+        "mode": "selectValue",
+        "props": {
+          "instruction": "这段材料____。",
+          "optionBtns": [
+            {
+              "text": "没问题",
+              "data": {
+                "label": "fine",
+                "desc": "这段材料没问题"
+              },
+              "go": "end",
+              "style": "outline-primary"
+            },
+            {
+              "text": "有问题",
+              "data": {
+                "label": "someBad",
+                "desc": "这段材料有问题"
+              },
+              "go": "manageEdits",
+              "style": "outline-danger"
+            }
+          ]
+        }
+      },
+      "manageEdits": {
+        "ref": "manageEdits",
+        "name": "管理修改",
+        "mode": "interlude",
+        "props": {
+          "instruction": "要对材料做什么修改？",
+          "showResults": true,
+          "optionBtns": [
+            {
+              "text": "添加内容",
+              "go": "addword",
+              "style": "outline-primary"
+            },
+            {
+              "text": "删除单词",
+              "go": "deleteword",
+              "style": "outline-primary"
+            },
+            {
+              "text": "修改单词",
+              "go": "modifyword",
+              "style": "outline-primary"
+            },
+            {
+              "text": "重新分词",
+              "go": "recut",
+              "style": "outline-primary"
+            },
+            {
+              "text": "写备注",
+              "go": "addcomment",
+              "style": "outline-primary"
+            }
+          ],
+          "okBtn": {
+            "text": "✔️ 结束",
+            "go": "end",
+            "style": "outline-success"
+          },
+          "canReset": true,
+          "resetBtn": {
+            "text": "重置",
+            "go": "start",
+            "style": "outline-dark"
+          }
+        }
+      },
+      "addcomment": {
+        "ref": "addcomment",
+        "name": "备注",
+        "mode": "text",
+        "props": {
+          "selectInstruction": "请在文中划选需要备注的文本片段",
+          "selectedTitle": "当前选中的文本片段是：",
+          "instruction": "请填写备注",
+          "data": {
+            "label": "备注：",
+            "withText": ""
+          },
+          "okBtn": {
+            "text": "确定",
+            "go": "manageEdits",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "manageEdits",
+            "style": "light"
+          }
+        }
+      },
+      "recut": {
+        "ref": "recut",
+        "name": "重新分词",
+        "mode": "text",
+        "props": {
+          "selectInstruction": "请在文中划选需要重新分词的文本片段",
+          "selectedTitle": "当前选中的文本片段是：",
+          "instruction": "请填写重新分词后的片段，单词之间用空格隔开",
+          "data": {
+            "label": "重新分词为：",
+            "on": [],
+            "withText": ""
+          },
+          "okBtn": {
+            "text": "确定",
+            "go": "manageEdits",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "manageEdits",
+            "style": "light"
+          }
+        }
+      },
+      "addword": {
+        "ref": "addword",
+        "name": "添加内容",
+        "mode": "add",
+        "props": {
+          "selectInstruction": "请在文中点选要在其前后添加内容的单词（限1词）",
+          "selectedTitle": "当前选中的单词是：",
+          "sideInstruction": "请选择在当前字的前还是后添加内容",
+          "addInstruction": "请填写要添加的内容",
+          "listTitle": "",
+          "options": [
+            {
+              "text": "前",
+              "value": 0
+            },
+            {
+              "text": "后",
+              "value": 1
+            }
+          ],
+          "data": {
+            "_label": "添加",
+            "source": 0,
+            "side": 1,
+            "target": ""
+          },
+          "okBtn": {
+            "text": "确定",
+            "go": "manageEdits",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "manageEdits",
+            "style": "light"
+          }
+        }
+      },
+      "modifyword": {
+        "ref": "modifyword",
+        "name": "修改单词",
+        "mode": "modify",
+        "props": {
+          "selectInstruction": "请在文中点选要修改的单词（限1词）",
+          "selectedTitle": "要修改的单词是：",
+          "instruction": "将该单词修改为：",
+          "listTitle": "",
+          "data": {
+            "_label": "修改",
+            "source": 0,
+            "target": ""
+          },
+          "okBtn": {
+            "text": "确定",
+            "go": "manageEdits",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "manageEdits",
+            "style": "light"
+          }
+        }
+      },
+      "deleteword": {
+        "ref": "deleteword",
+        "name": "删除单词",
+        "mode": "delete",
+        "props": {
+          "selectInstruction": "请在文中点选要删除的单词（限1词）",
+          "selectedTitle": "要删除的单词是：",
+          "instruction": "",
+          "listTitle": "",
+          "data": {
+            "_label": "删除",
+            "source": 0
+          },
+          "okBtn": {
+            "text": "确定",
+            "go": "manageEdits",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "manageEdits",
+            "style": "light"
+          }
+        }
+      }
+    }
+  },
   "精标": {
     "startStep": "start",
     "endStep": "end",
@@ -130,6 +372,10 @@
             "go": "start",
             "style": "outline-danger"
           },
+          "nextBtn": {
+            "text": "下一条",
+            "style": "outline-primary"
+          },
           "__cancelBtn": {
             "text": "返回并补充标注",
             "go": "start",
@@ -218,6 +464,10 @@
             "text": "清空并重新标注",
             "go": "start",
             "style": "outline-danger"
+          },
+          "nextBtn": {
+            "text": "下一条",
+            "style": "outline-primary"
           },
           "__cancelBtn": {
             "text": "返回并补充标注",
