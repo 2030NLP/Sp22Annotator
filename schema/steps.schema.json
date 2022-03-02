@@ -1,7 +1,7 @@
 {
   "name": "SpaCE2022",
   "version": "220302v1",
-  "using": "第0期",
+  "using": "示例",
   "第0期": {
     "startStep": "start",
     "endStep": "end",
@@ -672,6 +672,7 @@
           ],
           "data": {
             "_label": "添加",
+            "_pattern": "将“<[%source%]>”增改为“<[%targetText%]>”",
             "source": 0,
             "side": 1,
             "target": ""

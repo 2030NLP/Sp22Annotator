@@ -522,6 +522,26 @@ const RootComponent = {
         await stepMethods.handleTemplate(ref, data, fn);
       },
 
+      handleAdd: async (ref, data) => {
+        // TODO 这个函数还没写好，想用来试试替换法
+        let tokenList = exampleWrap.example.material.tokenList;
+        let fn = (da)=>{
+          da.source = selection.array[0];
+          da.targetText = da.side==1 ? `${da.target}${da.source}` : `${da.source}${da.target}`;
+
+          if (da?._pattern?.length) {
+            let face = da._pattern;
+            for (let kk of ["source", "target", "targetText", "side"]) {
+              face = face.replace(`<[%${kk}%]>`, da[kk]??" [?] ");
+            };
+            da._face = face;
+          };
+
+          return da;
+        };
+        await stepMethods.handleTemplate(ref, data, fn);
+      },
+
       handleQita: async (ref, data) => {
         let fn = (da)=>{
           return da;
