@@ -174,15 +174,15 @@
     }
     .material-area span.token[data-auto-entity=true][data-pos=ns] {
       color: #0d6efd;
-      border: 1px #0d6efd solid;
+      border-bottom: 1px #0d6efd solid;
     }
     .material-area span.token[data-auto-entity=true][data-pos=nr] {
       color: #0d6efd;
-      border: 1px #0d6efd solid;
+      border-bottom: 1px #0d6efd dotted;
     }
     .material-area span.token[data-auto-entity=true][data-pos=s] {
       color: #20c997;
-      border: 1px #20c997 solid;
+      /*border: 1px #20c997 solid;*/
     }
     .material-area span.token[data-auto-spatial=true] {
       /*border: 1px #198754 solid;*/
