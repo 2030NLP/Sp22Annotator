@@ -188,6 +188,8 @@
                   :data-selecting="token?._ctrl?.selecting"
                   :data-selected="token?._ctrl?.selected"
                   :data-replaced="token?.replaced ?? false"
+                  :data-word="token.word"
+                  :data-to-word="token?.to?.word"
                   @mousedown="onMouseDown(token, $event)"
                   @mouseenter="onMouseEnter(token)"
                   @mouseout="onMouseOut(token)"
