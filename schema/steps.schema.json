@@ -427,15 +427,6 @@
               "style": "outline-primary"
             },
             {
-              "text": "存在分词问题",
-              "data": {
-                "label": "cutError",
-                "desc": "这段话存在分词问题"
-              },
-              "go": "end",
-              "style": "outline-dark"
-            },
-            {
               "text": "存在错别字等其他问题",
               "data": {
                 "label": "otherError",

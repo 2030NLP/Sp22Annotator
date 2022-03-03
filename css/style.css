@@ -164,23 +164,52 @@
       background: #fee;
     }
     .material-area span.token[data-auto-entity=true] {
-      color: #0d6efd;
+      /*border: 1px #0d6efd solid;*/
+      /*color: #0d6efd;*/
       /*color: #056;*/
       /*color: #210;*/
     }
+    .material-area span.token[data-auto-entity=true][data-pos=n] {
+      color: #0d6efd;
+    }
+    .material-area span.token[data-auto-entity=true][data-pos=ns] {
+      color: #0d6efd;
+      border-bottom: 1px #0d6efd solid;
+    }
+    .material-area span.token[data-auto-entity=true][data-pos=nr] {
+      color: #0d6efd;
+      border-bottom: 1px #0d6efd dotted;
+    }
+    .material-area span.token[data-auto-entity=true][data-pos=s] {
+      color: #20c997;
+      /*border: 1px #20c997 solid;*/
+    }
     .material-area span.token[data-auto-spatial=true] {
-      color: #198754;
+      /*border: 1px #198754 solid;*/
+      /*color: #198754;*/
       /*color: #650;*/
       /*color: #120;*/
     }
-    .material-area span.token[data-replaced=true] {
+    .material-area span.token[data-auto-spatial=true][data-pos=v] {
+      color: #d63384;
+    }
+    .material-area span.token[data-pos=f] {
+      color: #0dcaf0;
+    }
+    .material-area span.token[data-pos=r] {
+      color: #adb5bd;
+    }
+    .material-area span.token[data-pos=p] {
+      color: #6f42c1;
+    }
+    /*.material-area span.token[data-replaced=true] {
       color: #f00;
       font-weight: bold;
     }
     .material-area span.token[data-have-replace=true] {
       border-bottom: 2px dotted #faa;
       border-radius: 5px;
-    }
+    }*/
     .material-area span.token[data-selecting=true] {
       background: #eef;
     }
