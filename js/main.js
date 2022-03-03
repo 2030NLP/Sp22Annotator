@@ -57,8 +57,13 @@ const RootComponent = {
           };
         };
       },
-      onMouseDown:  (token) => {
+      onMouseDown:  (token, event) => {
         // console.log(['mouseDown', token.word]);
+        //
+        if (event.buttons == 2) {
+          console.log("右键");
+          return;
+        };
         //
         if (selection.hasDown) {
           return;

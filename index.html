@@ -142,7 +142,7 @@
                   :data-selecting="token?._ctrl?.selecting"
                   :data-selected="token?._ctrl?.selected"
                   :data-replaced="token?.replaced ?? false"
-                  @mousedown="onMouseDown(token)"
+                  @mousedown="onMouseDown(token, $event)"
                   @mouseenter="onMouseEnter(token)"
                   @mouseout="onMouseOut(token)"
                   @mouseup="onMouseUp(token)"
