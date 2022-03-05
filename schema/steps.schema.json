@@ -1,6 +1,6 @@
 {
   "name": "SpaCE2022",
-  "version": "220302",
+  "version": "220304v1",
   "using": "第1期",
   "第0期": {
     "startStep": "start",
@@ -332,6 +332,24 @@
               },
               "go": "end",
               "style": "outline-primary"
+            },
+            {
+              "text": "存在分词问题",
+              "data": {
+                "label": "cutError",
+                "desc": "这段话存在分词问题"
+              },
+              "go": "end",
+              "style": "outline-dark"
+            },
+            {
+              "text": "存在错别字等其他问题",
+              "data": {
+                "label": "otherError",
+                "desc": "这段话存在错别字等其他问题"
+              },
+              "go": "end",
+              "style": "outline-dark"
             }
           ]
         }
@@ -409,10 +427,11 @@
               "style": "outline-primary"
             },
             {
-              "text": "存在错别字等其他问题",
+              "text": "存在与空间关系无关的其他问题",
               "data": {
                 "label": "otherError",
-                "desc": "这段话存在错别字等其他问题"
+                "isDropping": true,
+                "desc": "这段话存在与空间关系无关的其他问题"
               },
               "go": "end",
               "style": "outline-dark"
@@ -645,6 +664,7 @@
           ],
           "data": {
             "_label": "添加",
+            "_pattern": "将“<[%source%]>”增改为“<[%targetText%]>”",
             "source": 0,
             "side": 1,
             "target": ""

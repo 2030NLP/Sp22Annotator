@@ -219,7 +219,7 @@ const RootComponent = {
       log: (action) => {
         let worker = appData.ctrl.currentWorker;
         let info = {
-          time: timeString(),
+          time: JSON.parse(JSON.stringify(new Date())),
           person: worker,
           action: action,
         };
@@ -241,12 +241,12 @@ const RootComponent = {
       loadStore: async () => {
         appData.dataWrap = store.get(`${APP_NAME}:dataWrap`);
         await dataMethods.fixData();
-        dataMethods.log("load from store");
+        dataMethods.log(`load from store at idx(${appData?.dataWrap?._ctrl?.currentIdx})`);
       },
       onExport: async () => {
         if (!appData?.dataWrap?.dataItems?.length) {return;};
         await dataMethods.beforeSave();
-        dataMethods.log("export to file");
+        dataMethods.log(`export to file at idx(${appData?.dataWrap?._ctrl?.currentIdx})`);
         let worker = appData.ctrl.currentWorker;
         let fid = appData.dataWrap.fID;
         let using = stepsDictWrap.using;
@@ -278,7 +278,7 @@ const RootComponent = {
         await dataMethods.readData();
 
 
-        dataMethods.log("import from file");
+        dataMethods.log(`import from file at idx(${appData?.dataWrap?._ctrl?.currentIdx})`);
         dataMethods.saveStore();
       },
       readData: async () => {
@@ -324,7 +324,7 @@ const RootComponent = {
 
         if (!('handleLogs' in appData.dataWrap)) {
           appData.dataWrap.handleLogs = [{
-            time: timeString(),
+            time: JSON.stringify(new Date()),
             person: "App",
             action: "fix",
           }];
@@ -370,7 +370,11 @@ const RootComponent = {
         idx = ctrlMethods.fineIdx(idx);
         appData.ctrl.currentIdx = idx;
         // Object.assign(exampleWrap.example, foolCopy(appData.dataWrap.dataItems[appData.ctrl.currentIdx]));
-        if (!appData.dataWrap.dataItems.length) {return;};
+        if (!appData.dataWrap.dataItems.length) {
+          dataMethods.log(`goIdx(${idx}) returned`);
+          return;
+        };
+        dataMethods.log(`goIdx(${idx})`);
 
         // 覆盖
         exampleWrap.example = foolCopy(appData.dataWrap.dataItems[appData.ctrl.currentIdx]);
