@@ -181,8 +181,8 @@
       /*border-bottom: 1px #0d6efd dotted;*/
     }
     .material-area span.token[data-auto-entity=true][data-pos=s] {
-      color: #20c997;
-      /*border: 1px #20c997 solid;*/
+      color: #198754;
+      /*border: 1px #198754 solid;*/
     }
     .material-area span.token[data-auto-spatial=true] {
       /*border: 1px #198754 solid;*/
@@ -195,7 +195,7 @@
     }*/
     .material-area span.token[data-pos=f] {
       /*color: #0dcaf0;*/
-      color: #198754;
+      color: #20c997;
     }
     /*.material-area span.token[data-pos=r] {
       color: #adb5bd;
