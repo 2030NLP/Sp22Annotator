@@ -137,7 +137,7 @@
                   :key="token.idx"
                   class="token"
                   :class="{'right-space': true}"
-                  :title="`${token.idx}, ${token.pos}`"
+                  :data-title="`${token.idx}, ${token.pos}`"
                   :data-idx="token.idx"
                   :data-pos="token.pos"
                   :data-auto-entity="token.autoEntity"
@@ -488,10 +488,10 @@
         <!-- 标注结果展示模块 开始 -->
         <div class="row mt-1 mb-3 carded" id="annotations-area">
               <div class="col col-12 my-1" v-show="!example?.annotations?.length">
-                <div class="text-muted small">标注好的内容将显示在这里。</div>
+                <div class="text-muted">标注好的内容将显示在这里</div>
               </div>
               <div class="col col-12 my-1" v-show="example?.annotations?.length">
-                <div class="text-muted small">标注结果：</div>
+                <div class="text-muted">标注结果：</div>
                 <div
                   class="col col-12 col-lg-12"
                   v-for="anno in example.annotations"
@@ -499,8 +499,8 @@
                   :data-mode="anno.mode"
                   :data-label="anno.label"
                 >
-                  <span class="badge bg-light text-dark my-1 me-2">{{anno.desc}}</span>
-                  <span class="badge bg-light text-dark my-1 me-2">
+                  <span class="badge rounded-pill bg-light text-dark my-1 me-2">{{anno.desc}}</span>
+                  <span class="badge rounded-pill bg-light text-dark my-1 me-2">
 
                     <template v-if="anno.mode=='multiSpans'">
                       <span>错误原因：</span>
@@ -586,7 +586,7 @@
     <!-- Alert -->
     <div class="alert-wrap" style="display: block;" ref="alert_wrap">
       <transition name = "fade" v-for="alert in theAlert.alerts">
-        <div v-show="alert?.show" class="alert alert-dismissible alert-info" :class="'alert-'+alert?.type">
+        <div v-show="alert?.show" class="alert alert-dismissible" :class="'alert-'+(alert?.type ?? 'info')">
           <button type="button" class="btn-close" @click="theAlert.removeAlert(alert?.idx)"></button>
           <div>{{alert?.content}}</div>
         </div>
