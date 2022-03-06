@@ -1,6 +1,6 @@
 {
   "name": "SpaCE2022",
-  "version": "220304v1",
+  "version": "220306",
   "using": "第1期",
   "第0期": {
     "startStep": "start",
@@ -388,7 +388,7 @@
         "name": "评估材料的空间关系",
         "mode": "selectValue",
         "props": {
-          "instruction": "这段材料中的空间关系____。",
+          "instruction": "这段话中的空间关系__________。",
           "optionBtns": [
             {
               "text": "完全正常",
@@ -427,11 +427,21 @@
               "style": "outline-primary"
             },
             {
-              "text": "存在与空间关系无关的其他问题",
+              "text": "这段话中存在用字用词错误",
+              "data": {
+                "label": "otherErrorWord",
+                "isDropping": true,
+                "desc": "这段话中存在用字用词错误"
+              },
+              "go": "end",
+              "style": "outline-dark"
+            },
+            {
+              "text": "这段话并不涉及明显的空间方位语义",
               "data": {
                 "label": "otherError",
                 "isDropping": true,
-                "desc": "这段话存在与空间关系无关的其他问题"
+                "desc": "这段话并不涉及明显的空间方位语义"
               },
               "go": "end",
               "style": "outline-dark"
