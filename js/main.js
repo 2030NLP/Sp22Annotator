@@ -324,7 +324,7 @@ const RootComponent = {
 
         if (!('handleLogs' in appData.dataWrap)) {
           appData.dataWrap.handleLogs = [{
-            time: JSON.stringify(new Date()),
+            time: JSON.parse(JSON.stringify(new Date())),
             person: "App",
             action: "fix",
           }];
