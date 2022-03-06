@@ -136,7 +136,7 @@
                   v-for="token in example?.material?.tokenList"
                   :key="token.idx"
                   class="token"
-                  :class="{'right-space': true}"
+                  :class="{'right-space': true, 'should-notice': token.word=='前'||token.word=='后'}"
                   :data-title="`${token.idx}, ${token.pos}`"
                   :data-idx="token.idx"
                   :data-pos="token.pos"

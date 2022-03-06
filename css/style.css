@@ -157,9 +157,6 @@
       transition: all 0.2s;
       white-space: nowrap;
     }
-    /*.material-area span.token.right-space {
-      /*margin-right: 3px;*/
-    }*/
     .material-area span.token:hover {
       background: #fee;
     }
@@ -211,6 +208,11 @@
       border-bottom: 2px dotted #faa;
       border-radius: 5px;
     }*/
+    .material-area span.token[data-replaced=true].should-notice {
+      /*border: 1px #ff0000 solid;*/
+      color: #f00;
+      font-weight: bold;
+    }
     .material-area span.token[data-selecting=true] {
       background: #eef;
     }
