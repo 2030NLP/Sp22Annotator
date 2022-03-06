@@ -20,6 +20,25 @@ const RootComponent = {
     // ↑ 参看 js/components/TheReader.js
 
 
+    const theClipboard = ref(null);
+
+
+    onMounted(()=>{
+      theClipboard.value = new ClipboardJS(".btn-copy-selection");
+      theClipboard.value.on('success', function (e) {
+        // console.info('Action:', e.action);
+        // console.info('Text:', e.text);
+        // console.info('Trigger:', e.trigger);
+        theAlert.pushAlert(`成功拷贝文本【${e.text}】`, "success");
+        e.clearSelection();
+      });
+      theClipboard.value.on('error', function (e) {
+        // console.info('Action:', e.action);
+        // console.info('Trigger:', e.trigger);
+        theAlert.pushAlert(`拷贝失败！`, "danger");
+      });
+    });
+
 
     const selection = reactive({
       isSelecting: false,
@@ -37,6 +56,19 @@ const RootComponent = {
     // ↑ 参看 js/components/TheSelector.js
 
     const selectionMethods = {
+      selectedReplacedText: () => {
+        if (!selection?.array?.length) {return "";};
+        const text = selection.array.map(idx=>getReplacedToken(idx)).join("");
+        return text;
+      },
+      selectedOriginText: () => {
+        if (!selection?.array?.length) {return "";};
+        const text = selection.array.map(idx=>getOriginToken(idx)).join("");
+        return text;
+      },
+      copySelection: () => {
+        //
+      },
       clearSelection: () => {
         if (!selection.array.length) {return;};
         Object.assign(selection, {
@@ -605,6 +637,10 @@ const RootComponent = {
     const getReplacedToken = (idx) => {
       let tokenList = exampleWrap.example.material.tokenList;
       return tokenList[idx]?.replaced ? tokenList[idx]?.to?.word : tokenList[idx].word;
+    };
+    const getOriginToken = (idx) => {
+      let tokenList = exampleWrap.example.material.tokenList;
+      return tokenList[idx].word;
     };
 
 

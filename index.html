@@ -183,6 +183,21 @@
             <div class="row my-2" v-show="selection.array.length" id="convenient-ctrl">
               <div class="col col-12 col-lg-12">
                 <button v-if=" 'multiSpans' == (currentStep.mode) && currentStep?.props?.addBtn" type="button" v-on:click="currentStep?.props?.data.tokenarrays.push(selection.array)" class="btn btn-sm my-1 me-1" :class="`btn-outline-primary`">{{ currentStep.props.addBtn.text }}</button>
+                <button
+                  type="button"
+                  v-on:click="copySelection"
+                  class="btn btn-sm my-1 me-1"
+                  :class="`btn-outline-info btn-copy-selection`"
+                  :data-clipboard-text="selectedReplacedText()"
+                >拷贝选区{{ctrl.showOrigin ? "（1）" : ""}}</button>
+                <button
+                  type="button"
+                  v-show="ctrl.showOrigin"
+                  v-on:click="copySelection"
+                  class="btn btn-sm my-1 me-1"
+                  :class="`btn-outline-info btn-copy-selection`"
+                  :data-clipboard-text="selectedOriginText()"
+                >拷贝选区（2）</button>
                 <button type="button" v-on:click="clearSelection" class="btn btn-sm my-1 me-1" :class="`btn-outline-info`">清除选区</button>
               </div>
             </div>
@@ -597,6 +612,8 @@
   <!-- bodywrap end -->
 
   <!-- scripts start -->
+  <!-- <script src="https://cdn.bootcdn.net/ajax/libs/clipboard.js/2.0.10/clipboard.min.js"></script> -->
+  <script type="text/javascript" src="lib/clipboard_2.0.10_.min.js"></script>
   <script type="text/javascript" src="lib/store_2.0.9_.legacy.min.js"></script>
   <script type="text/javascript" src="lib/vue_3.2.26_.global.prod.min.js"></script>
   <script type="text/javascript" src="lib/axios_0.25.0_.min.js"></script>
