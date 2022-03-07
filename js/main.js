@@ -9,6 +9,12 @@ const PROJ_DESC = "SpaCE2022";
 const PROJ_PREFIX = "Sp22";
 
 
+const API_BASE_DEV = "http://127.0.0.1:5000";
+const API_BASE_PROD = "http://101.43.244.203";
+const DEVELOPING = false;
+const API_BASE = DEVELOPING ? API_BASE_DEV : API_BASE_PROD;
+
+
 const sourceID_to_name = { "A01": { "genre": "中小学语文课本", "file": "人教版_课标教材初中语文原始语料.txt", "用户显示名称": "初中语文课本" }, "A02":{ "genre":"中小学语文课本", "file": "人教版_课标教材高中语文原始语料.txt", "用户显示名称": "高中语文课本" }, "A03":{ "genre":"中小学语文课本", "file": "人教版_课标教材小学语文原始语料.txt", "用户显示名称": "小学语文课本" }, "A04":{ "genre":"中小学语文课本", "file": "人教版_全日制普通高中语文原始语料.txt", "用户显示名称": "高中语文课本" }, "A05":{ "genre":"中小学语文课本", "file": "人教版_义务教育教材_3年_初中语文原始语料.txt", "用户显示名称": "初中语文课本" }, "A06":{ "genre":"中小学语文课本", "file": "人教版_义务教育教材_6年_小学语文原始语料.txt", "用户显示名称": "小学语文课本" }, "B01": { "genre": "体育训练人体动作", "file": "shentiyundongxunlian.txt", "用户显示名称": "身体运动训练" }, "B02":{ "genre":"体育训练人体动作", "file": "tushouxunlian.txt", "用户显示名称": "儿童徒手训练" }, "B03":{ "genre":"体育训练人体动作", "file": "yujia.txt", "用户显示名称": "瑜伽" }, "B04":{ "genre":"体育训练人体动作", "file": "qingshaoniantushou.txt", "用户显示名称": "青少年徒手训练" }, "B05":{ "genre":"体育训练人体动作", "file": "lashen131.txt", "用户显示名称": "儿童拉伸训练" }, "B06":{ "genre":"体育训练人体动作", "file": "lashen130.txt", "用户显示名称": "青少年拉伸训练" }, "C01": { "genre": "人民日报", "file": "rmrb_2020-2021.txt", "用户显示名称": "人民日报" }, "D01": { "genre": "文学", "file": "似水流年_王小波.txt", "用户显示名称": "人民日报" }, "D02": { "genre": "文学", "file": "洗澡_杨绛.txt", "用户显示名称": "文学" }, "D03":{ "genre":"文学", "file": "天狗.txt", "用户显示名称": "文学" }, "D04":{ "genre":"文学", "file": "北京北京.txt", "用户显示名称": "文学" }, "D05":{ "genre":"文学", "file": "草房子.txt", "用户显示名称": "文学" }, "D06":{ "genre":"文学", "file": "兄弟.txt", "用户显示名称": "文学" }, "E01":{ "genre":"地理百科全书", "file": "geography.txt", "用户显示名称": "地理百科全书" }, "F01":{ "genre":"交通事故判决书", "file": "上海_交通判决书.txt", "用户显示名称": "交通事故判决书" }, "F02":{ "genre":"交通事故判决书", "file": "北京_交通判决书.txt", "用户显示名称": "交通事故判决书" }, "G01":{ "genre":"语言学论文例句", "file": "wenxian.txt", "用户显示名称": "语言学论文例句" }};
 
 const RootComponent = {
@@ -36,6 +42,14 @@ const RootComponent = {
 
 
     const theClipboard = ref(null);
+
+
+    const theApi = axios.create({
+      baseURL: `${API_BASE}/api/`,
+      timeout: 10000,
+      headers: {'Catch-Cotrol': 'no-cache'},
+    });
+
 
 
     onMounted(()=>{
@@ -70,97 +84,97 @@ const RootComponent = {
     // const selectionMethods = theSelector.selectionMethods;
     // ↑ 参看 js/components/TheSelector.js
     const back_new = {
-        back_task:() =>{
-               axios.get('http://127.0.0.1:5000/api/alltask/'+appData.ctrl.currentWorker)
-               .then(function (response) {
-                    appData.ctrl.doneNum=response.data.annotated.length;
-                    appData.ctrl.totalNum=response.data.task.length;
-                    var data1=response.data.task
-                    var data2=[];
-                    for (var i in data1) {
-                         axios.post('http://127.0.0.1:5000/api/task/' + data1[i], {
-                        'user_id': appData.ctrl.currentWorker
-                        })
-                       .then(function (response) {
-                            if(response.data.err==''){
-                                data2.push(response.data.task.eId)
-                            }
-                        })
-                    }
-                    exampleWrap.example3=data2
-               })
-//               back_new.back_word1();
-        },
-        back_tasks:(id) =>{
-               if(id=='222'){
-                   var data1=exampleWrap.example3
-                   for (var i in data1) {
-                       axios.post('http://127.0.0.1:5000/api/annotation/1' , {
-                        'user_id': appData.ctrl.currentWorker
-                      })
-                       .then(function (response) {
-//                            console.log(response.data)
-                            if (response.data.annotation.skipped||!response.data.annotation.skipped){
-                                   back_new.back_work();
-                            }
-                       })
-                   }
-               }
-
-        },
-        back_work:() =>{
-               axios.get('http://127.0.0.1:5000/api/entry/3')
-               .then(function (response) {
-                    let obj=JSON.stringify(response.data.entry.content);
-                    exampleWrap.example1.push(JSON.parse(obj));
-               })
-               axios.post('http://127.0.0.1:5000/api/annotation/1', {
-                'user_id': '1'
+      back_task: () => {
+        theApi.get('/alltask/' + appData.ctrl.currentWorker)
+          .then(function (response) {
+            appData.ctrl.doneNum = response.data.annotated.length;
+            appData.ctrl.totalNum = response.data.task.length;
+            var data1 = response.data.task
+            var data2 = [];
+            for (var i in data1) {
+              theApi.post('/task/' + data1[i], {
+                'user_id': appData.ctrl.currentWorker
               })
-               .then(function (response) {
-                    let obj=JSON.stringify(response.data.annotation.content);
-                    exampleWrap.example2.push(JSON.parse(obj));
-               })
-        },
-        back_write:()=>{
-                back_new.back_word1();
-        },
-        back_word1:()=>{
-               data1=exampleWrap.example1;
-               var data2=[];
-               let newobj={}
-               Object.assign(newobj,exampleWrap.example1[0],exampleWrap.example2[0]);
-               data2.push(newobj);
-               exampleWrap.example=newobj;
-               console.log(newobj)
-//               for (var i in data1) {
-//                   let newobj={}
-//                   Object.assign(newobj,exampleWrap.example1[i],exampleWrap.example2[i]);
-//                   data2.push(newobj);
-//                   exampleWrap.example=newobj;
-//                   console.log(newobj)
-//               }
-               exampleWrap.example = newobj;
-        },
-        back_renew:() =>{
-             axios.post('http://127.0.0.1:5000/api/init/', {
-                'user_id': 'admin',
-                'password': 'admin2022',
-                'topic': '第⼀期'
-              })
+                .then(function (response) {
+                  if (response.data.err == '') {
+                    data2.push(response.data.task.eId)
+                  }
+                })
+            }
+            exampleWrap.example3 = data2
+          })
+        // back_new.back_word1();
+      },
+      back_tasks: (id) => {
+        if (id == '222') {
+          var data1 = exampleWrap.example3
+          for (var i in data1) {
+            theApi.post('/annotation/1', {
+              'user_id': appData.ctrl.currentWorker
+            })
               .then(function (response) {
-                console.log(response);
+                // console.log(response.data)
+                if (response.data.annotation.skipped || !response.data.annotation.skipped) {
+                  back_new.back_work();
+                }
               })
-             axios.post('http://127.0.0.1:5000/api/newtask/', {
-                'user_id': appData.ctrl.currentWorker,
-                'password': appData.ctrl.currentWorkerSecret,
-                'count': appData.ctrl.currentWorkerTarget,
-                'topic': '第一期'
-              })
-              .then(function (response) {
-                console.log(response);
-              })
+          }
         }
+
+      },
+      back_work: () => {
+        theApi.get('/entry/3')
+          .then(function (response) {
+            let obj = JSON.stringify(response.data.entry.content);
+            exampleWrap.example1.push(JSON.parse(obj));
+          })
+        theApi.post('/annotation/1', {
+          'user_id': '1'
+        })
+          .then(function (response) {
+            let obj = JSON.stringify(response.data.annotation.content);
+            exampleWrap.example2.push(JSON.parse(obj));
+          })
+      },
+      back_write: () => {
+        back_new.back_word1();
+      },
+      back_word1: () => {
+        data1 = exampleWrap.example1;
+        var data2 = [];
+        let newobj = {}
+        Object.assign(newobj, exampleWrap.example1[0], exampleWrap.example2[0]);
+        data2.push(newobj);
+        exampleWrap.example = newobj;
+        console.log(newobj)
+        // for (var i in data1) {
+        //   let newobj = {}
+        //   Object.assign(newobj, exampleWrap.example1[i], exampleWrap.example2[i]);
+        //   data2.push(newobj);
+        //   exampleWrap.example = newobj;
+        //   console.log(newobj)
+        // }
+        exampleWrap.example = newobj;
+      },
+      back_renew: () => {
+        theApi.post('/init/', {
+          'user_id': 'admin',
+          'password': 'admin2022',
+          'topic': '第⼀期'
+        })
+          .then(function (response) {
+            console.log(response);
+          })
+        theApi.post('/newtask/', {
+          'user_id': appData.ctrl.currentWorker,
+          'password': appData.ctrl.currentWorkerSecret,
+          'count': appData.ctrl.currentWorkerTarget,
+          'topic': '第一期'
+        })
+          .then(function (response) {
+            console.log(response);
+          })
+      }
     };
 
     const selectionMethods = {
@@ -595,41 +609,41 @@ const RootComponent = {
           // 在 exampleWrap?.example?._ctrl 中记录 这条语料是 dropped
           // 在 update 时，构造 post 参数时检查 _ctrl 有没有 dropped，并写到 post 参数里
           // 注意检查 _ctrl 的更新，避免影响其他 entry
-              axios.post('http://127.0.0.1:5000/api/update/', {
-                "id": "2",
-                "topic": "第一期",
-                "task_id": "2",
-                "user": "1",
-                "content": {
-                    "annotations": [
-                      {
-                        "label": "fine",
-                        "desc": "这段话中的空间信息完全正常",
-                        "idx": 0,
-                        "mode": "selectValue",
-                        "_schema": [
-                          "SpaCE2022",
-                          "220304v1",
-                          "第1期"
-                        ]
-                      }
-                    ],
-                    "_ctrl": {
-                      "currentStepRef": "end",
-                      "currentSchema": {
-                        "name": "SpaCE2022",
-                        "version": "220304v1",
-                        "using": "第1期"
-                      }
-                    }
-                  },
-                "dropped": false,
-                "skipped": false,
-                "valid": true
-              })
-              .then(function (response) {
-                console.log(response);
-              })
+          theApi.post('/update/', {
+            "id": "2",
+            "topic": "第一期",
+            "task_id": "2",
+            "user": "1",
+            "content": {
+              "annotations": [
+                {
+                  "label": "fine",
+                  "desc": "这段话中的空间信息完全正常",
+                  "idx": 0,
+                  "mode": "selectValue",
+                  "_schema": [
+                    "SpaCE2022",
+                    "220304v1",
+                    "第1期"
+                  ]
+                }
+              ],
+              "_ctrl": {
+                "currentStepRef": "end",
+                "currentSchema": {
+                  "name": "SpaCE2022",
+                  "version": "220304v1",
+                  "using": "第1期"
+                }
+              }
+            },
+            "dropped": false,
+            "skipped": false,
+            "valid": true
+          })
+            .then(function (response) {
+              console.log(response);
+            })
         };
 
         // 消除 stepObj 的引用关系
@@ -741,28 +755,28 @@ const RootComponent = {
         let aa = data.tokenarrays.flat(Infinity);
         let should = (aa.length == Array.from(new Set(aa)).length);
 
-        let flag=0;
+        let flag = 0;
         for (i = 0; i < exampleWrap.example.annotations.length; i++) {
-           if((exampleWrap.example.annotations[i].mode=="multiSpans")&&(exampleWrap.example.annotations[i].label==data.label)){
-               let flag1=0;
-               for (j = 0; j < exampleWrap.example.annotations[i].tokenarrays.length; j++) {
-                   for (k = 0; k < data.tokenarrays.length; k++) {
-                        if(exampleWrap.example.annotations[i].tokenarrays[j].toString()==data.tokenarrays[k].toString()){
-                            flag1=flag1+1;
-                        }
-                        for (t = 0; t < data.tokenarrays[k].length; t++) {
-                            if((exampleWrap.example.annotations[i].tokenarrays[j].indexOf(data.tokenarrays[k][t]))!=-1){
-                                flag=1;
-                            }
-                        }
-                   }
-                   if(flag1){
-                       if((flag1==exampleWrap.example.annotations[i].tokenarrays.length)&&(flag1==data.tokenarrays.length)){
-                            flag=2;
-                       }
-                   }
-               }
-           }
+          if ((exampleWrap.example.annotations[i].mode == "multiSpans") && (exampleWrap.example.annotations[i].label == data.label)) {
+            let flag1 = 0;
+            for (j = 0; j < exampleWrap.example.annotations[i].tokenarrays.length; j++) {
+              for (k = 0; k < data.tokenarrays.length; k++) {
+                if (exampleWrap.example.annotations[i].tokenarrays[j].toString() == data.tokenarrays[k].toString()) {
+                  flag1 = flag1 + 1;
+                }
+                for (t = 0; t < data.tokenarrays[k].length; t++) {
+                  if ((exampleWrap.example.annotations[i].tokenarrays[j].indexOf(data.tokenarrays[k][t])) != -1) {
+                    flag = 1;
+                  }
+                }
+              }
+              if (flag1) {
+                if ((flag1 == exampleWrap.example.annotations[i].tokenarrays.length) && (flag1 == data.tokenarrays.length)) {
+                  flag = 2;
+                }
+              }
+            }
+          }
         }
 
         if (!should) {
@@ -771,20 +785,20 @@ const RootComponent = {
           return;
         };
 
-        if(flag==1){
-            if(!confirm("与之前标注相比有部分重复，点击取消即重新选择，反之则点击确定。")){
-                data.tokenarrays = [];
-                return;
-            }
+        if (flag == 1) {
+          if (!confirm("与之前标注相比有部分重复，点击取消即重新选择，反之则点击确定。")) {
+            data.tokenarrays = [];
+            return;
+          }
         }
 
-        if(flag==2){
-              alert("与之前标注相比完全重复，请重新选择");
-              data.tokenarrays = [];
-              return;
+        if (flag == 2) {
+          alert("与之前标注相比完全重复，请重新选择");
+          data.tokenarrays = [];
+          return;
         }
 
-        let fn = (da)=>{
+        let fn = (da) => {
           return da;
         };
         await stepMethods.handleTemplate(ref, data, fn);
@@ -792,12 +806,14 @@ const RootComponent = {
 
     };
 
+    const anotherAxios = axios.create({
+      headers: {'Catch-Cotrol': 'no-cache'},
+    });
 
     const updateSteps = async () => {
-      let response = await axios.request({
+      let response = await anotherAxios.request({
         url: "schema/steps.schema.json",
         method: 'get',
-        headers: {'Catch-Cotrol': 'no-cache'},
       });
       let wrap = (response.data);
       // console.debug(wrap);
@@ -857,7 +873,10 @@ const RootComponent = {
       //
       getReplacedToken,
       //
-      fileInfo
+      fileInfo,
+      //
+      theApi,
+      anotherAxios,
       //
       // formFiles,
       // getAnnoBtnClass,
