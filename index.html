@@ -72,7 +72,7 @@
               id="nav_list"
               class="btn btn-sm me-2"
               :class="ctrl.currentPage=='list'?'btn-primary':'btn-outline-primary'"
-              @click="ctrl.currentPage='list'"
+              @click="ctrl.currentPage='list';back_task()"
             >清单</button>
             <button
               type="button"
@@ -80,7 +80,7 @@
               id="nav_anno"
               class="btn btn-sm me-2"
               :class="ctrl.currentPage=='anno'?'btn-primary':'btn-outline-primary'"
-              @click="ctrl.currentPage='anno'"
+              @click="ctrl.currentPage='anno';back_write()"
             >标注</button>
           </div>
         </div>
@@ -108,6 +108,14 @@
               <input class="form-control form-control-sm" type="text" v-model="ctrl.currentWorkerTarget" placeholder="请输入您的标注目标">
               <label class="form-label">标注目标数量</label>
             </div>
+          </div>
+          <div class="col col-12 col-md-3 col-lg-3 my-2">
+            <button
+                type="button"
+                id="nav_anno1"
+                class="form-floating"
+                v-on:click="back_renew"
+              >更新</button>
           </div>
         </div>
       </div>
@@ -147,7 +155,7 @@
               v-for="task in tasks"
               class="btn btn-sm me-2 my-1"
               :class="`btn-outline-${task.valid?'info':task.dropped?'dark':task.skipped?'primary':'primary'}`"
-              @click=""
+              @click="back_tasks(task.id)"
             >{{task.id}}</button>
           </div>
         </div>
