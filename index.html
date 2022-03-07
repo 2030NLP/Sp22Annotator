@@ -689,7 +689,7 @@
   <!-- Alert -->
   <div class="alert-wrap" style="display: block;" ref="alert_wrap">
     <transition name = "fade" v-for="alert in theAlert.alerts">
-      <div v-show="alert?.show" class="alert alert-dismissible alert-info" :class="'alert-'+alert?.type">
+      <div v-show="alert?.show" class="alert alert-dismissible" :class="'alert-'+(alert?.type ?? 'info')">
         <button type="button" class="btn-close" @click="theAlert.removeAlert(alert?.idx)"></button>
         <div>{{alert?.content}}</div>
       </div>
