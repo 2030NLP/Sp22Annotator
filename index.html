@@ -180,6 +180,9 @@
           <!-- 内容区 开始 -->
           <div class="col col-12 col-lg-7 my-2">
 
+            <div class="row my-2">
+              <p class="text-muted small">{{example?.originId}}　{{`类型：${fileInfo(example?.originId).genre}`}}　{{`原始文件名：${fileInfo(example?.originId).file}.txt`}}</p>
+            </div>
             <!-- 替换后文本区 开始 -->
             <div class="row my-2 material-area" id="material-replaced">
               <p>
@@ -187,8 +190,8 @@
                   v-for="token in example?.material?.tokenList"
                   :key="token.idx"
                   class="token"
-                  :class="{'right-space': true}"
-                  :title="`${token.idx}, ${token.pos}`"
+                  :class="{'right-space': true, 'should-notice': token.word=='前'||token.word=='后'}"
+                  :data-title="`${token.idx}, ${token.pos}`"
                   :data-idx="token.idx"
                   :data-pos="token.pos"
                   :data-auto-entity="token.autoEntity"
@@ -214,7 +217,7 @@
                   :key="token.idx"
                   class="token"
                   :class="{'right-space': true}"
-                  :title="`${token.idx}, ${token.pos}`"
+                  :data-title="`${token.idx}, ${token.pos}`"
                   :data-idx="token.idx"
                   :data-pos="token.pos"
                   :data-auto-entity="token.autoEntity"
@@ -234,6 +237,21 @@
             <div class="row my-2" v-show="selection.array.length" id="convenient-ctrl">
               <div class="col col-12 col-lg-12">
                 <button v-if=" 'multiSpans' == (currentStep.mode) && currentStep?.props?.addBtn" type="button" v-on:click="currentStep?.props?.data.tokenarrays.push(selection.array)" class="btn btn-sm my-1 me-1" :class="`btn-outline-primary`">{{ currentStep.props.addBtn.text }}</button>
+                <button
+                  type="button"
+                  v-on:click="copySelection"
+                  class="btn btn-sm my-1 me-1"
+                  :class="`btn-outline-info btn-copy-selection`"
+                  :data-clipboard-text="selectedReplacedText()"
+                >拷贝选区{{ctrl.showOrigin ? "（1）" : ""}}</button>
+                <button
+                  type="button"
+                  v-show="ctrl.showOrigin"
+                  v-on:click="copySelection"
+                  class="btn btn-sm my-1 me-1"
+                  :class="`btn-outline-info btn-copy-selection`"
+                  :data-clipboard-text="selectedOriginText()"
+                >拷贝选区（2）</button>
                 <button type="button" v-on:click="clearSelection" class="btn btn-sm my-1 me-1" :class="`btn-outline-info`">清除选区</button>
               </div>
             </div>
@@ -541,10 +559,10 @@
         <!-- 标注结果展示模块 开始 -->
         <div class="row mt-1 mb-3 carded" id="annotations-area">
               <div class="col col-12 my-1" v-show="!example?.annotations?.length">
-                <div class="text-muted small">标注好的内容将显示在这里。</div>
+                <div class="text-muted">标注好的内容将显示在这里</div>
               </div>
               <div class="col col-12 my-1" v-show="example?.annotations?.length">
-                <div class="text-muted small">标注结果：</div>
+                <div class="text-muted">标注结果：</div>
                 <div
                   class="col col-12 col-lg-12"
                   v-for="anno in example.annotations"
@@ -552,8 +570,8 @@
                   :data-mode="anno.mode"
                   :data-label="anno.label"
                 >
-                  <span class="badge bg-light text-dark my-1 me-2">{{anno.desc}}</span>
-                  <span class="badge bg-light text-dark my-1 me-2">
+                  <span class="badge rounded-pill bg-light text-dark my-1 me-2">{{anno.desc}}</span>
+                  <span class="badge rounded-pill bg-light text-dark my-1 me-2">
 
                     <template v-if="anno.mode=='multiSpans'">
                       <span>错误原因：</span>
@@ -708,6 +726,8 @@
   <!-- bodywrap end -->
 
   <!-- scripts start -->
+  <!-- <script src="https://cdn.bootcdn.net/ajax/libs/clipboard.js/2.0.10/clipboard.min.js"></script> -->
+  <script type="text/javascript" src="lib/clipboard_2.0.10_.min.js"></script>
   <script type="text/javascript" src="lib/store_2.0.9_.legacy.min.js"></script>
   <script type="text/javascript" src="lib/vue_3.2.26_.global.prod.min.js"></script>
   <script type="text/javascript" src="lib/axios_0.25.0_.min.js"></script>

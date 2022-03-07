@@ -8,8 +8,16 @@ const APP_VERSION = "22-0216-00";
 const PROJ_DESC = "SpaCE2022";
 const PROJ_PREFIX = "Sp22";
 
+
+const sourceID_to_name = { "F02": { "genre": "traffic", "file": "02_北京-交通判决书" }, "F01": { "genre": "traffic", "file": "01_上海-交通判决书" }, "B05": { "genre": "sports", "file": "05_lashen131" }, "B06": { "genre": "sports", "file": "06_lashen130" }, "B04": { "genre": "sports", "file": "04_qingshaoniantushou" }, "B03": { "genre": "sports", "file": "03_yujia" }, "B02": { "genre": "sports", "file": "02_tushouxunlian" }, "B01": { "genre": "sports", "file": "01_shentiyundongxunlian" }, "D05": { "genre": "literature", "file": "05_草房子" }, "D04": { "genre": "literature", "file": "04_北京北京" }, "D02": { "genre": "literature", "file": "02_洗澡_杨绛" }, "D03": { "genre": "literature", "file": "03_天狗" }, "D06": { "genre": "literature", "file": "06_兄弟" }, "D01": { "genre": "literature", "file": "01_似水流年_王小波" }, "C01": { "genre": "rmrb20-21", "file": "01_rmrb_2020-2021" }, "A05": { "genre": "chinesebook", "file": "05_人教版_义务教育教材_3年_初中语文原始语料" }, "A02": { "genre": "chinesebook", "file": "02_人教版_课标教材高中语文原始语料" }, "A03": { "genre": "chinesebook", "file": "03_人教版_课标教材小学语文原始语料" }, "A04": { "genre": "chinesebook", "file": "04_人教版_全日制普通高中语文原始语料" }, "A06": { "genre": "chinesebook", "file": "06_人教版_义务教育教材_6年_小学语文原始语料" }, "A01": { "genre": "chinesebook", "file": "01_人教版_课标教材初中语文原始语料" }, "E01": { "genre": "geography", "file": "01_geography" }, "G01": { "genre": "article", "file": "01_wenxian" } };
+
 const RootComponent = {
   setup() {
+
+    const fileInfo = (originId) => {
+      const fileId = originId.split("-")[0];
+      return sourceID_to_name[fileId];
+    };
 
     // ↓ 参看 js/components/BaseSaver.js
     const theSaver = BaseSaver();
@@ -26,6 +34,25 @@ const RootComponent = {
       theAlert.pushAlert(`您好！`, 'success', 3000);
     });
 
+
+    const theClipboard = ref(null);
+
+
+    onMounted(()=>{
+      theClipboard.value = new ClipboardJS(".btn-copy-selection");
+      theClipboard.value.on('success', function (e) {
+        // console.info('Action:', e.action);
+        // console.info('Text:', e.text);
+        // console.info('Trigger:', e.trigger);
+        theAlert.pushAlert(`成功拷贝文本【${e.text}】`, "success");
+        e.clearSelection();
+      });
+      theClipboard.value.on('error', function (e) {
+        // console.info('Action:', e.action);
+        // console.info('Trigger:', e.trigger);
+        theAlert.pushAlert(`拷贝失败！`, "danger");
+      });
+    });
 
 
     const selection = reactive({
@@ -137,6 +164,19 @@ const RootComponent = {
     };
 
     const selectionMethods = {
+      selectedReplacedText: () => {
+        if (!selection?.array?.length) {return "";};
+        const text = selection.array.map(idx=>getReplacedToken(idx)).join("");
+        return text;
+      },
+      selectedOriginText: () => {
+        if (!selection?.array?.length) {return "";};
+        const text = selection.array.map(idx=>getOriginToken(idx)).join("");
+        return text;
+      },
+      copySelection: () => {
+        //
+      },
       clearSelection: () => {
         if (!selection.array.length) {return;};
         Object.assign(selection, {
@@ -326,7 +366,7 @@ const RootComponent = {
       log: (action) => {
         let worker = appData.ctrl.currentWorker;
         let info = {
-          time: timeString(),
+          time: JSON.parse(JSON.stringify(new Date())),
           person: worker,
           action: action,
         };
@@ -348,12 +388,12 @@ const RootComponent = {
       loadStore: async () => {
         appData.dataWrap = store.get(`${APP_NAME}:dataWrap`);
         await dataMethods.fixData();
-        dataMethods.log("load from store");
+        dataMethods.log(`load from store at idx(${appData?.dataWrap?._ctrl?.currentIdx})`);
       },
       onExport: async () => {
         if (!appData?.dataWrap?.dataItems?.length) {return;};
         await dataMethods.beforeSave();
-        dataMethods.log("export to file");
+        dataMethods.log(`export to file at idx(${appData?.dataWrap?._ctrl?.currentIdx})`);
         let worker = appData.ctrl.currentWorker;
         let fid = appData.dataWrap.fID;
         let using = stepsDictWrap.using;
@@ -385,7 +425,7 @@ const RootComponent = {
         await dataMethods.readData();
 
 
-        dataMethods.log("import from file");
+        dataMethods.log(`import from file at idx(${appData?.dataWrap?._ctrl?.currentIdx})`);
         dataMethods.saveStore();
       },
       readData: async () => {
@@ -431,7 +471,7 @@ const RootComponent = {
 
         if (!('handleLogs' in appData.dataWrap)) {
           appData.dataWrap.handleLogs = [{
-            time: timeString(),
+            time: JSON.parse(JSON.stringify(new Date())),
             person: "App",
             action: "fix",
           }];
@@ -477,7 +517,11 @@ const RootComponent = {
         idx = ctrlMethods.fineIdx(idx);
         appData.ctrl.currentIdx = idx;
         // Object.assign(exampleWrap.example, foolCopy(appData.dataWrap.dataItems[appData.ctrl.currentIdx]));
-        if (!appData.dataWrap.dataItems.length) {return;};
+        if (!appData.dataWrap.dataItems.length) {
+          dataMethods.log(`goIdx(${idx}) returned`);
+          return;
+        };
+        dataMethods.log(`goIdx(${idx})`);
 
         // 覆盖
         exampleWrap.example = foolCopy(appData.dataWrap.dataItems[appData.ctrl.currentIdx]);
@@ -778,6 +822,10 @@ const RootComponent = {
       let tokenList = exampleWrap.example.material.tokenList;
       return tokenList[idx]?.replaced ? tokenList[idx]?.to?.word : tokenList[idx].word;
     };
+    const getOriginToken = (idx) => {
+      let tokenList = exampleWrap.example.material.tokenList;
+      return tokenList[idx].word;
+    };
 
 
     return {
@@ -808,6 +856,8 @@ const RootComponent = {
       theSaver,
       //
       getReplacedToken,
+      //
+      fileInfo
       //
       // formFiles,
       // getAnnoBtnClass,
