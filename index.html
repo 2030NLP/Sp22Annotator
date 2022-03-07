@@ -235,37 +235,6 @@
           <!-- 内容区 结束 -->
 
 
-          <!-- 0228的新版功能区 开始 -->
-          <div class="col col-12 col-lg-5 my-2" id="func-ctrl">
-
-
-
-
-
-
-
-
-
-
-
-            <!-- 按钮组包裹 -->
-            <div class="row" v-if="currentStep?.props?.btnGroups?.length">
-              <!-- 按钮组 -->
-              <div class="col col-12 my-1" v-for="btnGroup in currentStep.props.btnGroups">
-                <!-- 按钮 -->
-                <button v-for="btn in btnGroup" type="button" v-on:click="stepBtnFunc(btn, currentStep.props)" class="btn btn-sm my-1 me-1" :class="`btn-${btn.style}`">{{ btn.text }}</button>
-              </div>
-            </div>
-          </div>
-          <!-- 0228的新版功能区 结束 -->
-
-
-
-
-
-
-
-
 
 
           <!-- 0228之前的旧版功能区 开始 -->
