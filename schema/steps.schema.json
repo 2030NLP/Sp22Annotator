@@ -1,7 +1,7 @@
 {
   "name": "SpaCE2022",
-  "version": "220302v1",
-  "using": "示例",
+  "version": "220306v2",
+  "using": "第1期",
   "第0期": {
     "startStep": "start",
     "endStep": "end",
@@ -388,7 +388,7 @@
         "name": "评估材料的空间关系",
         "mode": "selectValue",
         "props": {
-          "instruction": "这段材料中的空间关系____。",
+          "instruction": "这段话中的空间关系__________。",
           "optionBtns": [
             {
               "text": "完全正常",
@@ -427,10 +427,31 @@
               "style": "outline-primary"
             },
             {
-              "text": "存在错别字等其他问题",
+              "text": "这段话中存在用字用词错误",
+              "data": {
+                "label": "otherErrorWord",
+                "isDropping": true,
+                "desc": "这段话中存在用字用词错误"
+              },
+              "go": "end",
+              "style": "outline-dark"
+            },
+            {
+              "text": "这段话并不涉及明显的空间方位语义",
               "data": {
                 "label": "otherError",
-                "desc": "这段话存在错别字等其他问题"
+                "isDropping": true,
+                "desc": "这段话并不涉及明显的空间方位语义"
+              },
+              "go": "end",
+              "style": "outline-dark"
+            },
+            {
+              "text": "这段话中红色高亮词语（如果有的话）不表示方位义",
+              "data": {
+                "label": "otherErrorNotice",
+                "isDropping": true,
+                "desc": "这段话中红色高亮词语不表示方位义"
               },
               "go": "end",
               "style": "outline-dark"
