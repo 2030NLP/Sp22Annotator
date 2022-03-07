@@ -1,3 +1,4 @@
+
 // import { reactive, readonly, ref, toRef, toRefs, computed, onMounted, onUpdated } from 'vue';
 const { reactive, readonly, ref, toRef, toRefs, computed, onMounted, onUpdated } = Vue;
 
@@ -41,6 +42,99 @@ const RootComponent = {
     // const theSelector = TheSelector(exampleWrap, selection);
     // const selectionMethods = theSelector.selectionMethods;
     // ↑ 参看 js/components/TheSelector.js
+    const back_new = {
+        back_task:() =>{
+               axios.get('http://127.0.0.1:5000/api/alltask/'+appData.ctrl.currentWorker)
+               .then(function (response) {
+                    appData.ctrl.doneNum=response.data.annotated.length;
+                    appData.ctrl.totalNum=response.data.task.length;
+                    var data1=response.data.task
+                    var data2=[];
+                    for (var i in data1) {
+                         axios.post('http://127.0.0.1:5000/api/task/' + data1[i], {
+                        'user_id': appData.ctrl.currentWorker
+                        })
+                       .then(function (response) {
+                            if(response.data.err==''){
+                                data2.push(response.data.task.eId)
+                            }
+                        })
+                    }
+                    exampleWrap.example3=data2
+               })
+//               back_new.back_word1();
+        },
+        back_tasks:(id) =>{
+               if(id=='222'){
+                   var data1=exampleWrap.example3
+                   for (var i in data1) {
+                       axios.post('http://127.0.0.1:5000/api/annotation/1' , {
+                        'user_id': appData.ctrl.currentWorker
+                      })
+                       .then(function (response) {
+//                            console.log(response.data)
+                            if (response.data.annotation.skipped||!response.data.annotation.skipped){
+                                   back_new.back_work();
+                            }
+                       })
+                   }
+               }
+
+        },
+        back_work:() =>{
+               axios.get('http://127.0.0.1:5000/api/entry/3')
+               .then(function (response) {
+                    let obj=JSON.stringify(response.data.entry.content);
+                    exampleWrap.example1.push(JSON.parse(obj));
+               })
+               axios.post('http://127.0.0.1:5000/api/annotation/1', {
+                'user_id': '1'
+              })
+               .then(function (response) {
+                    let obj=JSON.stringify(response.data.annotation.content);
+                    exampleWrap.example2.push(JSON.parse(obj));
+               })
+        },
+        back_write:()=>{
+                back_new.back_word1();
+        },
+        back_word1:()=>{
+               data1=exampleWrap.example1;
+               var data2=[];
+               let newobj={}
+               Object.assign(newobj,exampleWrap.example1[0],exampleWrap.example2[0]);
+               data2.push(newobj);
+               exampleWrap.example=newobj;
+               console.log(newobj)
+//               for (var i in data1) {
+//                   let newobj={}
+//                   Object.assign(newobj,exampleWrap.example1[i],exampleWrap.example2[i]);
+//                   data2.push(newobj);
+//                   exampleWrap.example=newobj;
+//                   console.log(newobj)
+//               }
+               exampleWrap.example = newobj;
+        },
+        back_renew:() =>{
+             axios.post('http://127.0.0.1:5000/api/init/', {
+                'user_id': 'admin',
+                'password': 'admin2022',
+                'topic': '第⼀期'
+              })
+              .then(function (response) {
+                console.log(response);
+              })
+             axios.post('http://127.0.0.1:5000/api/newtask/', {
+                'user_id': appData.ctrl.currentWorker,
+                'password': appData.ctrl.currentWorkerSecret,
+                'count': appData.ctrl.currentWorkerTarget,
+                'topic': '第一期'
+              })
+              .then(function (response) {
+                console.log(response);
+              })
+        }
+    };
 
     const selectionMethods = {
       clearSelection: () => {
@@ -187,7 +281,10 @@ const RootComponent = {
 
 
     const exampleWrap = reactive({
-      example: {}
+      example: {},
+      example1: [],//entry表
+      example2: [],//annotation表
+      example3: []
     });
 
     const appData = reactive({
@@ -449,6 +546,48 @@ const RootComponent = {
           stepMethods.dealWithData(data, da=>da);
         };
 
+        if (data) {
+          // TODO
+          // 在 exampleWrap?.example?._ctrl 中记录 这条语料是 dropped
+          // 在 update 时，构造 post 参数时检查 _ctrl 有没有 dropped，并写到 post 参数里
+          // 注意检查 _ctrl 的更新，避免影响其他 entry
+              axios.post('http://127.0.0.1:5000/api/update/', {
+                "id": "2",
+                "topic": "第一期",
+                "task_id": "2",
+                "user": "1",
+                "content": {
+                    "annotations": [
+                      {
+                        "label": "fine",
+                        "desc": "这段话中的空间信息完全正常",
+                        "idx": 0,
+                        "mode": "selectValue",
+                        "_schema": [
+                          "SpaCE2022",
+                          "220304v1",
+                          "第1期"
+                        ]
+                      }
+                    ],
+                    "_ctrl": {
+                      "currentStepRef": "end",
+                      "currentSchema": {
+                        "name": "SpaCE2022",
+                        "version": "220304v1",
+                        "using": "第1期"
+                      }
+                    }
+                  },
+                "dropped": false,
+                "skipped": false,
+                "valid": true
+              })
+              .then(function (response) {
+                console.log(response);
+              })
+        };
+
         // 消除 stepObj 的引用关系
         let stepObj = {
           ref: stepObj_?.ref ?? null,
@@ -653,6 +792,7 @@ const RootComponent = {
       //
       selection,
       ...selectionMethods,
+      ...back_new,
       //
       stepRecords,
       stepsDict,
@@ -688,3 +828,4 @@ const RootComponent = {
 
 const app = Vue.createApp(RootComponent);
 const the_vue = app.mount('#bodywrap');
+app.config.globalProperties.$axios = axios;
