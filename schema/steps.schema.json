@@ -1,6 +1,6 @@
 {
   "name": "SpaCE2022",
-  "version": "220306v2",
+  "version": "220307",
   "using": "第1期",
   "第0期": {
     "startStep": "start",
@@ -388,7 +388,7 @@
         "name": "评估材料的空间关系",
         "mode": "selectValue",
         "props": {
-          "instruction": "这段话中的空间关系__________。",
+          "instruction": "这段话属于下列两大类中的哪一类，以及哪一小类？<br/>一　这段话描述了一些人或物，以及这些人或物之间的空间方位关系，并且这些空间关系_________<small>（请在蓝色选项中选择）</small>；<br/>二　这段话不能用于分析和讨论人或物的空间方位关系，因为_________<small>（请在黑色选项中选择）</small>",
           "optionBtns": [
             {
               "text": "完全正常",
@@ -427,36 +427,99 @@
               "style": "outline-primary"
             },
             {
-              "text": "这段话中存在用字用词错误",
-              "data": {
-                "label": "otherErrorWord",
-                "isDropping": true,
-                "desc": "这段话中存在用字用词错误"
-              },
-              "go": "end",
+              "text": "句中存在错误的字/词/符号",
+              "go": "handleErrorWord",
               "style": "outline-dark"
             },
             {
-              "text": "这段话并不涉及明显的空间方位语义",
+              "text": "句中没有包含空间方位义",
               "data": {
                 "label": "otherError",
                 "isDropping": true,
-                "desc": "这段话并不涉及明显的空间方位语义"
+                "desc": "句中没有包含空间方位义"
               },
               "go": "end",
               "style": "outline-dark"
             },
             {
-              "text": "这段话中红色高亮词语（如果有的话）不表示方位义",
+              "text": "句中有红色高亮词且它不表达空间方位义",
               "data": {
                 "label": "otherErrorNotice",
                 "isDropping": true,
-                "desc": "这段话中红色高亮词语不表示方位义"
+                "desc": "句中有红色高亮词且它不表达空间方位义"
               },
               "go": "end",
               "style": "outline-dark"
+            },
+            {
+              "text": "句子意思复杂，很难看懂",
+              "data": {
+                "label": "otherErrorHard",
+                "isDropping": true,
+                "desc": "句子意思复杂，很难看懂"
+              },
+              "go": "end",
+              "style": "outline-dark"
+            },
+            {
+              "text": "其他原因",
+              "go": "otherReason",
+              "style": "outline-dark"
             }
           ]
+        }
+      },
+      "handleErrorWord": {
+        "ref": "handleErrorWord",
+        "name": "处理错字",
+        "mode": "text",
+        "props": {
+          "selectInstruction": "请在文中划选出错的字符串；忽略分词错误",
+          "selectedTitle": "当前选中了：",
+          "instruction": "应该修改为：",
+          "data": {
+            "label": "otherErrorString",
+            "desc": "有错，应改为：",
+            "on": [],
+            "withText": ""
+          },
+          "okBtn": {
+            "text": "确定",
+            "go": "end",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "start",
+            "style": "light"
+          }
+        }
+      },
+      "otherReason": {
+        "ref": "otherReason",
+        "name": "处理其他原因",
+        "mode": "text",
+        "props": {
+          "selectInstruction": "请在文中划选相关片段（可忽略）",
+          "canSkipSelection": true,
+          "selectedTitle": "当前选中了：",
+          "instruction": "请填写具体原因：",
+          "data": {
+            "label": "其他原因",
+            "desc": "存在问题，原因是：",
+            "on": [],
+            "withText": ""
+          },
+          "okBtn": {
+            "text": "确定",
+            "go": "end",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "start",
+            "style": "light"
+          }
         }
       }
     }
