@@ -200,11 +200,12 @@
     /*.material-area span.token[data-pos=p] {
       color: #6f42c1;
     }*/
-    /*.material-area span.token[data-replaced=true] {
-      color: #f00;
-      font-weight: bold;
+    .admin .material-area span.token[data-replaced=true] {
+      /*color: #f00;*/
+      /*font-weight: bold;*/
+      border: 2px #ff0000 solid;
     }
-    .material-area span.token[data-have-replace=true] {
+    /*.material-area span.token[data-have-replace=true] {
       border-bottom: 2px dotted #faa;
       border-radius: 5px;
     }*/
