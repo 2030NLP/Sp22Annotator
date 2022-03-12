@@ -1,6 +1,6 @@
 {
   "name": "SpaCE2022",
-  "version": "2203012v0",
+  "version": "2203012v1",
   "using": "清洗",
   "清洗": {
     "startStep": "start",
@@ -18,14 +18,14 @@
             "go": "start",
             "style": "outline-danger"
           },
+          "cancelBtn": {
+            "text": "继续增加标注",
+            "go": "start",
+            "style": "outline-danger"
+          },
           "nextBtn": {
             "text": "下一条",
             "style": "outline-primary"
-          },
-          "__cancelBtn": {
-            "text": "返回并补充标注",
-            "go": "start",
-            "style": "outline-secondary"
           }
         }
       },
