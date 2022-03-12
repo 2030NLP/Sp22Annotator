@@ -1,6 +1,6 @@
 {
   "name": "SpaCE2022",
-  "version": "2203012v1",
+  "version": "2203012v2",
   "using": "清洗",
   "清洗": {
     "startStep": "start",
@@ -48,6 +48,11 @@
             {
               "text": "句中存在错误的字/词/符号",
               "go": "handleErrorWord",
+              "style": "outline-dark"
+            },
+            {
+              "text": "句中存在分词错误",
+              "go": "handleErrorSeg",
               "style": "outline-dark"
             },
             {
@@ -99,6 +104,32 @@
           "data": {
             "label": "otherErrorString",
             "desc": "有错，应改为：",
+            "on": [],
+            "withText": ""
+          },
+          "okBtn": {
+            "text": "确定",
+            "go": "end",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "start",
+            "style": "light"
+          }
+        }
+      },
+      "handleErrorSeg": {
+        "ref": "handleErrorSeg",
+        "name": "处理分词错误",
+        "mode": "text",
+        "props": {
+          "selectInstruction": "请在文中划选出出现分词错误的片段",
+          "selectedTitle": "当前选中了：",
+          "instruction": "应该修改为（用空格分词）：",
+          "data": {
+            "label": "otherErrorSeg",
+            "desc": "分词错误，应改为：",
             "on": [],
             "withText": ""
           },
