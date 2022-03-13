@@ -1,6 +1,6 @@
 {
   "name": "SpaCE2022",
-  "version": "2203012v2",
+  "version": "2203013v0",
   "using": "清洗",
   "清洗": {
     "startStep": "start",
@@ -67,12 +67,12 @@
             },
             {
               "text": "句中存在不表达空间方位义的方位词（如：“前/后/下”等表示时间或抽象意义）",
-              "data": {
+              "__data": {
                 "label": "otherErrorNotice",
                 "isDropping": true,
                 "desc": "句中存在不表达空间方位义的方位词"
               },
-              "go": "end",
+              "go": "handleErrorNotice",
               "style": "outline-dark"
             },
             {
@@ -91,6 +91,32 @@
               "style": "outline-dark"
             }
           ]
+        }
+      },
+      "handleErrorNotice": {
+        "ref": "handleErrorNotice",
+        "name": "处理不合适的方位词",
+        "mode": "text",
+        "props": {
+          "selectInstruction": "请在文中划选非空间义的方位词",
+          "selectedTitle": "当前选中了：",
+          "instruction": "（请勿填写下面的文本框，直接确定即可）",
+          "data": {
+            "label": "otherErrorNotice",
+            "desc": "是非空间义的方位词",
+            "on": [],
+            "withText": " "
+          },
+          "okBtn": {
+            "text": "确定",
+            "go": "end",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "start",
+            "style": "light"
+          }
         }
       },
       "handleErrorWord": {
