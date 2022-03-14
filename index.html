@@ -110,14 +110,19 @@
             </div>
           </div>
         </div>
-        <div class="row align-items-center">
+        <div class="row align-items-center my-1" v-if="newThings?.topic?.length">
+          <div class="col col-12">
+            <div class="small text-muted">任务主题：{{newThings?.topic}}</div>
+          </div>
+        </div>
+        <div class="row align-items-center my-2">
           <div class="col col-12">
             <button
               type="button"
               class="btn btn-sm me-2 my-1 btn-outline-primary"
               v-on:click="apiConnect"
-              title="每次刷新页面后需重新连接并获取任务列表"
-            >连接</button>
+              title="每次刷新页面后需「同步信息」并获取任务列表"
+            >同步信息</button>
             <button
               type="button"
               class="btn btn-sm me-2 my-1 btn-outline-primary"
@@ -158,14 +163,38 @@
     <div class="container page my-4" id="page-list" v-show="ctrl.currentPage=='list'||ctrl.currentPage=='setup' && tasks.length">
       <div class="container py-2">
         <div class="row align-items-center">
+          <div class="col col-12 my-2">
+            <button
+              type="button"
+              class="btn btn-sm me-2 my-1"
+              :class="`btn${newThings.tasksShowUndone?'':'-outline'}-primary`"
+              @click="newThings.tasksShowUndone = !newThings.tasksShowUndone"
+            >显示未标注: {{newThings.tasksShowUndone ?'on':'off'}}</button>
+            <button
+              type="button"
+              class="btn btn-sm me-2 my-1"
+              :class="`btn${newThings.tasksShowDropped?'':'-outline'}-dark`"
+              @click="newThings.tasksShowDropped = !newThings.tasksShowDropped"
+            >显示已丢弃: {{newThings.tasksShowDropped ?'on':'off'}}</button>
+            <button
+              type="button"
+              class="btn btn-sm me-2 my-1"
+              :class="`btn${newThings.tasksShowValid?'':'-outline'}-info`"
+              @click="newThings.tasksShowValid = !newThings.tasksShowValid"
+            >显示有效标注: {{newThings.tasksShowValid ?'on':'off'}}</button>
+          </div>
+          <div class="col col-12 my-2" v-if="newThings?.lastEID!=null">
+            <div class="small text-muted">最近查看的序号：{{newThings?.lastEID}}</div>
+          </div>
           <div class="col col-12 col-md-12 col-lg-12 my-2">
             <button
               type="button"
-              v-for="task in tasks"
+              v-for="taskBtn in tasks"
+              v-show="(taskBtn.valid&&newThings.tasksShowValid)||(taskBtn.dropped&&newThings.tasksShowDropped)||(!taskBtn.valid&&!taskBtn.dropped&&newThings.tasksShowUndone)"
               class="btn btn-sm me-2 my-1"
-              :class="`btn-outline-${task.valid?'info':task.dropped?'dark':task.skipped?'primary':'primary'}`"
-              @click="apiTouchExample(task)"
-            >{{task.eId}}</button>
+              :class="`btn-${taskBtn.valid?'info':taskBtn.dropped?'dark':taskBtn.skipped?'outline-primary':'outline-primary'}`"
+              @click="apiTouchTaskBtn(taskBtn)"
+            >#{{taskBtn.eId}}</button>
           </div>
         </div>
       </div>
@@ -191,7 +220,7 @@
           <div class="col col-12 col-lg-7 my-2">
 
             <div class="row my-2">
-              <p class="text-muted small">{{example?.originId}}　{{`${fileInfo(example?.originId).用户显示名称}`}}</p>
+              <p class="text-muted small">#{{example?._info?.entry_id}}　{{`${fileInfo(example?.originId).用户显示名称}`}}</p>
             </div>
             <!-- 替换后文本区 开始 -->
             <div class="row my-2 material-area" id="material-replaced">
@@ -313,14 +342,41 @@
                   :class="`btn-${currentStep.props.resetBtn.style}`"
                 >{{ currentStep.props.resetBtn.text }}</button>
                 <!-- 下一条按钮 -->
-                <button
+                <!-- <button
                   type="button"
                   v-if="'finalResult'==(currentStep.mode)&&currentStep?.props?.nextBtn"
                   v-on:click="goIdx(ctrl.currentIdx+1)"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-${currentStep.props.nextBtn.style}`"
-                >{{ currentStep.props.nextBtn.text }}</button>
+                >{{ currentStep.props.nextBtn.text }}</button> -->
               </div>
+              <!-- 网络版专用按钮 开始 -->
+              <div class="col col-12 my-1">
+                <button
+                  type="button"
+                  v-if="'finalResult'==(currentStep.mode)"
+                  v-on:click="apiNext(example)"
+                  class="btn btn-sm my-1 me-4"
+                  :class="`btn-danger`"
+                >不保存并前往下一条</button>
+              </div>
+              <div class="col col-12 my-1">
+                <button
+                  type="button"
+                  v-if="'finalResult'==(currentStep.mode)"
+                  v-on:click="apiSave(example)"
+                  class="btn btn-sm my-1 me-1"
+                  :class="`btn-info`"
+                >保存</button>
+                <button
+                  type="button"
+                  v-if="'finalResult'==(currentStep.mode)"
+                  v-on:click="apiSaveAndNext(example)"
+                  class="btn btn-sm my-1 me-1"
+                  :class="`btn-primary`"
+                >保存并前往下一条</button>
+              </div>
+              <!-- 网络版专用按钮 结束 -->
             </div>
             <!-- 结束模块 结束 -->
 
@@ -567,7 +623,7 @@
         </div>
 
         <!-- 标注结果展示模块 开始 -->
-        <div class="row mt-1 mb-3 carded" id="annotations-area">
+        <div class="row my-1 carded" id="annotations-area">
               <div class="col col-12 my-1" v-show="!example?.annotations?.length">
                 <div class="text-muted">标注好的内容将显示在这里</div>
               </div>
@@ -639,12 +695,12 @@
       <div class="container">
         <!-- 页码操作区 开始 -->
         <div class="row page-ctrl">
-          <div class="col col-12">
+          <div class="col col-12 my-1">
             <div class="input-group input-group-sm ">
-              <button class="btn btn-outline-secondary" type="button" @click="touchLastThing">上一条</button>
+              <button class="btn btn-outline-secondary" type="button" @click="apiLast(example)">上一条</button>
               <!-- <span class="input-group-text">3</span> -->
-              <input type="text" class="form-control text-center" disabled :value="example?._info?.entry_id??''">
-              <button class="btn btn-outline-secondary" type="button" @click="touchNextThing">下一条</button>
+              <input type="text" class="form-control text-center" disabled :value="`第 ${example?._info?.btn_idx??'_'} 条: 编号 #${example?._info?.entry_id??'_'}`">
+              <button class="btn btn-outline-secondary" type="button" @click="apiNext(example)">下一条</button>
             </div>
           </div>
         </div>

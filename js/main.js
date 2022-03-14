@@ -240,7 +240,7 @@ const RootComponent = {
 
     const theApi = axios.create({
       baseURL: `${API_BASE}/api/`,
-      timeout: 10000,
+      timeout: 30000,
       headers: {'Catch-Cotrol': 'no-cache'},
     });
     const theApiRequest = async (config) => {
@@ -386,6 +386,45 @@ const RootComponent = {
         // response.data.err === ''
       },
 
+      apiUpdateAnno: async (task_id, anno_wrap) => {
+        // 获取 annotation 信息
+        // 输入：
+        //   task.id  // 该 annotation 所对应的 task
+        //   anno_wrap  // 该 annotation 所包含的内容，具体为 annotations 和 _ctrl
+        //
+        // 获取任务主题
+        let topic = appData?.newThings?.topic;
+        if (topic == null) {
+          let resp = apiMethods.apiGetTopic();
+          if (resp?.data?.topic?.length) {
+            topic = resp.data.topic;
+          };
+        };
+        //
+        let data = {
+          'user': appData.ctrl.currentWorkerId,
+          'task_id': task_id,
+          'topic': topic,
+          'content': anno_wrap,
+        };
+        if (anno_wrap.isDropping) {
+          data.dropped = true;
+        };
+        //
+        // let dropped = false;
+        // let skipped = false;
+        // let valid = true;
+        //
+        let response = await theApiRequest({
+          method: "post",
+          url: `/update/`,
+          data: data,
+        });
+        return response;
+        // 应有输出：
+        // response.data.err === ''
+      },
+
       apiGetEntry: async (entry_id) => {
         // 获取 entry 信息
         // 输入：entry.id
@@ -421,7 +460,7 @@ const RootComponent = {
       },
 
       apiNewTask: async (count, topic) => {
-        theAlert.pushAlert("apiNewTask 开始");
+        // theAlert.pushAlert("apiNewTask 开始");
         // 安排新任务
         // 输入：
         //   count  // 新增加任务的数量
@@ -445,7 +484,7 @@ const RootComponent = {
             'topic': topic,
           },
         });
-        theAlert.pushAlert("apiNewTask 结束");
+        // theAlert.pushAlert("apiNewTask 结束");
         return response;
         // 应有输出：
         // response.data.err === ''
@@ -459,21 +498,27 @@ const RootComponent = {
 
       apiTouchTask: async (task_btn) => {
         try {
-          let resp = await apiMethods.apiGetThing(task_btn.id);
+          let resp = await apiMethods.apiGetThing(task_btn?.id);
           // theAlert.pushAlert(resp?.data);
           return resp?.data?.thing;
         } catch (error) {
           theAlert.pushAlert(error, 'danger');
         };
       },
-      apiTouchExample: async (task_btn) => {
+      apiTouchTaskBtn: async (task_btn) => {
         try {
+          dataMethods.saveStore();
+          await updateSteps();
+          selectionMethods.clearSelection();
+          //
+          exampleWrap.example = {};
           let thing = await apiMethods.apiTouchTask(task_btn);
           if (thing?.entry) {
             let content = thing?.entry?.content;
             content.annotations = thing?.annotation?.content?.annotations ?? [];
             content._ctrl = thing?.annotation?.content?._ctrl ?? {};
             content._info = {
+              btn_idx: task_btn.idx,
               task_id: thing?.task?.id,
               entry_id: thing?.entry?.id,
               anno_id: thing?.annotation?.id,
@@ -481,7 +526,24 @@ const RootComponent = {
             // TODO
             console.debug(content);
             // theAlert.pushAlert(content);
-            exampleWrap.example = content;
+            exampleWrap.example = foolCopy(content);
+
+            // 还原步骤
+            let stepRef;
+            if (!exampleWrap?.example?._ctrl?.currentStepRef?.length) {
+              stepRef = stepsDictWrap?.[stepsDictWrap?.using]?.startStep ?? 'start';
+            } else {
+              stepRef = exampleWrap.example._ctrl.currentStepRef;
+            };
+            if (stepRef in stepsDict) {
+              await stepMethods.goRefStep(stepRef);
+            };
+            selectionMethods.clearSelection();
+
+            //
+            appData.ctrl.currentPage = 'anno';
+            appData.newThings.lastEID = thing?.entry?.id;
+            store.set(`${APP_NAME}:lastEID`, appData.newThings.lastEID);
             return content;
           };
         } catch (error) {
@@ -489,22 +551,97 @@ const RootComponent = {
         };
       },
 
+      apiSave: async (content) => {
+        try {
+          let task_id = content?._info?.task_id;
+          let anno_wrap = {
+            'annotations': exampleWrap?.example?.annotations,
+            '_ctrl': exampleWrap?.example?._ctrl,
+          };
+          if (!anno_wrap?.annotations?.length) {
+            theAlert.pushAlert(`【操作取消】没有标注内容，无需保存`, 'secondary');
+            return false;
+          }
+          if (anno_wrap.annotations.filter(anno => anno.isDropping).length) {
+            anno_wrap.isDropping = true;
+          };
+          let resp = await apiMethods.apiUpdateAnno(task_id, anno_wrap);
+          if (resp?.data?.err?.length) {
+            theAlert.pushAlert(`【发生错误】${resp?.data?.err}`, 'danger');
+            return false;
+          };
+          theAlert.pushAlert(`已保存`, 'success', 500);
+          if (!anno_wrap.isDropping) {
+            appData.tasks[content?._info?.btn_idx].valid = true;
+          } else {
+            appData.tasks[content?._info?.btn_idx].dropped = true;
+          };
+          return true;
+        } catch (error) {
+          theAlert.pushAlert(error, 'danger');
+          return false;
+        };
+      },
+
+      apiGoIdx: async (idx) => {
+        if (idx < appData.tasks.length && idx >= 0) {
+          let btn = appData.tasks[idx];
+          let content = await apiMethods.apiTouchTaskBtn(btn);
+          return content;
+        };
+        return null;
+      },
+
+      apiNext: async (content) => {
+        let next_idx = + content?._info?.btn_idx + 1;
+        let it = await apiMethods.apiGoIdx(next_idx);
+        if (it == null) {
+          theAlert.pushAlert(`没有下一条了`, 'secondary');
+        };
+      },
+
+      apiLast: async (content) => {
+        let last_idx = + content?._info?.btn_idx - 1;
+        let it = await apiMethods.apiGoIdx(last_idx);
+        if (it == null) {
+          theAlert.pushAlert(`没有上一条了`, 'secondary');
+        };
+      },
+
+      apiSaveAndLast: async (content) => {
+        let result = await apiMethods.apiSave(content);
+        if (result) {
+          await apiMethods.apiLast(content);
+        };
+      },
+
+      apiSaveAndNext: async (content) => {
+        let result = await apiMethods.apiSave(content);
+        if (result) {
+          await apiMethods.apiNext(content);
+        };
+      },
+
       apiConnect: async () => {
+        // theAlert.pushAlert("apiConnect 开始", 'secondary');
         try {
           let resp = await apiMethods.apiGetUser(null, appData.ctrl.currentWorker, appData.ctrl.currentWorkerSecret);
           if (resp?.data?.err?.length) {
             theAlert.pushAlert(`【发生错误】${resp?.data?.err}`, 'danger');
             return;
           };
+          appData.newThings.topic = resp?.data?.topic;
           await newMethods.updateUser(resp?.data?.user);
+          theAlert.pushAlert(`${resp?.data?.user?.name}的信息已同步`);
           await apiMethods.apiUpdateTaskList();
-          theAlert.pushAlert(`【操作成功】${resp?.data?.user?.name}的信息已更新`);
         } catch (error) {
           theAlert.pushAlert(error, 'danger');
         };
+        // theAlert.pushAlert("apiConnect 结束", 'secondary');
       },
 
       apiUpdateTarget: async () => {
+        // theAlert.pushAlert("apiUpdateTarget 开始", 'secondary');
         try {
           let oldCount = appData.ctrl.currentWorkerTaskCount;
           let target = appData.ctrl.currentWorkerTarget;
@@ -514,7 +651,11 @@ const RootComponent = {
             appData.ctrl.currentWorkerTarget = appData.ctrl.currentWorkerTaskCount;
             return;
           };
-          let resp = await apiMethods.apiNewTask(delta);
+          if (delta > 50) {
+            delta = 50;
+            theAlert.pushAlert(`【操作调整】新目标比原始目标多过50条，已自动调整`, 'secondary');
+          };
+          let resp = await apiMethods.apiNewTask(delta, appData.newThings.topic||null);
           if (resp?.data?.err?.length) {
             theAlert.pushAlert(`【发生错误】${resp?.data?.err}`, 'danger');
             appData.ctrl.currentWorkerTarget = appData.ctrl.currentWorkerTaskCount;
@@ -523,20 +664,23 @@ const RootComponent = {
           await apiMethods.apiConnect();
           let newDelta = appData.ctrl.currentWorkerTaskCount - oldCount;
           if (newDelta <= 0) {
-            theAlert.pushAlert(`【操作无效】没有更多可分配的任务`, 'info');
+            theAlert.pushAlert(`【操作未果】没有更多可分配的任务`, 'info');
             return
           };
           theAlert.pushAlert(`【操作成功】已为您分配 ${newDelta} 条新任务`, 'success');
         } catch (error) {
           theAlert.pushAlert(error, 'danger');
         };
+        // theAlert.pushAlert("apiUpdateTarget 结束", 'secondary');
       },
 
 
       apiUpdateTaskList: async () => {
         // theAlert.pushAlert("apiUpdateTaskList 开始");
         try {
+          let aa = theAlert.pushAlert("正在获取任务列表，请稍等……", "info", 99999999);
           let resp = await apiMethods.apiGetWorkList(appData.ctrl.currentWorkerSecret);
+          theAlert.removeAlert(aa);
           if (resp?.data?.err?.length) {
             theAlert.pushAlert(`【发生错误】${resp?.data?.err}`, 'danger');
             return;
@@ -556,11 +700,13 @@ const RootComponent = {
             };
             task_btn_list.push(task_btn);
           };
-          appData.tasks = task_btn_list.sort((a,b)=>a.eId-b.eId);
+          task_btn_list = task_btn_list.sort((a,b)=> +a.eId-b.eId);
+          for (let idx in task_btn_list) {
+            task_btn_list[idx].idx = idx;
+          };
+          appData.tasks = task_btn_list;
           //
-          appData.ctrl.doneNum = task_btn_list.filter(it=>it.valid).length ?? 0;
-          appData.ctrl.totalNum = task_btn_list.length ?? 600;
-          appData.ctrl.donePct = `${Math.min(100, appData.ctrl.doneNum / appData.ctrl.totalNum * 100)}%`;
+          ctrlMethods.updateProgress();
 
         } catch (error) {
           theAlert.pushAlert(error, 'danger');
@@ -616,8 +762,8 @@ const RootComponent = {
         //
         haveStore: false,
         //
-        doneNum: 60,
-        totalNum: 600,
+        doneNum: 0,
+        totalNum: 1,
         donePct: "10%",
         //
         currentIdx: 0,
@@ -627,6 +773,12 @@ const RootComponent = {
       },
       newThings: {
         theUser: {},
+        topic: "",
+        lastEID: null,
+        //
+        tasksShowValid: true,
+        tasksShowDropped: true,
+        tasksShowUndone: true,
       },
     });
 
@@ -641,6 +793,7 @@ const RootComponent = {
       appData.ctrl.currentWorkerSecret = stored?.secret;
       appData.ctrl.currentWorkerTarget = stored?.target;
       appData.ctrl.currentWorkerTaskCount = stored?.taskCount;
+      appData.newThings.lastEID = store.get(`${APP_NAME}:lastEID`);
     });
 
     // const formFilesRef = (document?.forms?.["file-form"]?.["file-input"]?.files);
@@ -780,11 +933,16 @@ const RootComponent = {
           exampleWrap.example._ctrl = {};
         };
         exampleWrap.example._ctrl.currentStepRef = currentStep.ref;
-        exampleWrap.example._ctrl.currentSchema = {
-          name: stepsDictWrap.name ?? null,
-          version: stepsDictWrap.version ?? null,
-          using: stepsDictWrap.using ?? null,
-        };
+        // exampleWrap.example._ctrl.currentSchema = {
+        //   name: stepsDictWrap.name ?? null,
+        //   version: stepsDictWrap.version ?? null,
+        //   using: stepsDictWrap.using ?? null,
+        // };
+        // 网络版节约空间
+        exampleWrap.example._ctrl.schema = [
+          stepsDictWrap.version ?? null,
+          stepsDictWrap.using ?? null,
+        ];
       },
       saveExample: () => {
         if (!appData.dataWrap.dataItems.length) {return;};
@@ -836,9 +994,8 @@ const RootComponent = {
         // console.debug(appData.ctrl.showOrigin);
       },
       updateProgress: () => {
-        let endStep = stepsDictWrap?.[stepsDictWrap?.using]?.endStep;
-        appData.ctrl.totalNum = appData.ctrl.currentWorkerTarget;
-        appData.ctrl.doneNum = 60;  // TODO
+        appData.ctrl.doneNum = appData.tasks.filter(it=>it.valid||it.dropped).length ?? 0;
+        appData.ctrl.totalNum = appData.tasks.length ?? 1;
         appData.ctrl.donePct = `${Math.min(100, appData.ctrl.doneNum / appData.ctrl.totalNum * 100)}%`;
       },
       // 0228 之前的旧版函数
@@ -885,41 +1042,6 @@ const RootComponent = {
           // 在 exampleWrap?.example?._ctrl 中记录 这条语料是 dropped
           // 在 update 时，构造 post 参数时检查 _ctrl 有没有 dropped，并写到 post 参数里
           // 注意检查 _ctrl 的更新，避免影响其他 entry
-          theApi.post('/update/', {
-            "id": "2",
-            "topic": "第一期",
-            "task_id": "2",
-            "user": "1",
-            "content": {
-              "annotations": [
-                {
-                  "label": "fine",
-                  "desc": "这段话中的空间信息完全正常",
-                  "idx": 0,
-                  "mode": "selectValue",
-                  "_schema": [
-                    "SpaCE2022",
-                    "220304v1",
-                    "第1期"
-                  ]
-                }
-              ],
-              "_ctrl": {
-                "currentStepRef": "end",
-                "currentSchema": {
-                  "name": "SpaCE2022",
-                  "version": "220304v1",
-                  "using": "第1期"
-                }
-              }
-            },
-            "dropped": false,
-            "skipped": false,
-            "valid": true
-          })
-            .then(function (response) {
-              console.log(response);
-            })
         };
 
         // 消除 stepObj 的引用关系
@@ -959,11 +1081,11 @@ const RootComponent = {
 
         data = fn(data);
 
-        data._schema = [
-          stepsDictWrap.name ?? null,
-          stepsDictWrap.version ?? null,
-          stepsDictWrap.using ?? null,
-        ];
+        // data._schema = [
+        //   stepsDictWrap.name ?? null,
+        //   stepsDictWrap.version ?? null,
+        //   stepsDictWrap.using ?? null,
+        // ];
 
         // 加入 annotations 清单
         exampleWrap.example.annotations.push(foolCopy(data));
