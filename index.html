@@ -211,6 +211,7 @@
       id="page-main-editor"
       v-show="ctrl?.currentWorker?.length && ctrl.currentPage=='anno'"
       v-if="example!=null&&example?.material!=null"
+      :class="ctrl?.currentWorker=='admin'?'admin':''"
     >
       <div class="container">
 
