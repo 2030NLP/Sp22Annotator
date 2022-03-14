@@ -1,3 +1,5 @@
+// modifiedAt: 2022-03-14
+
 const BaseAlert = () => {
   const data = reactive({
     lastIdx: 1,
@@ -18,6 +20,7 @@ const BaseAlert = () => {
       setTimeout(() => {
         methods.removeAlert(idx);
       }, tot);
+      return idx;
     },
     removeAlert(idx) {
       data.alerts.find(alert => alert.idx == idx).show = 0;
