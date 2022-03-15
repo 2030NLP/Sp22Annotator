@@ -18,6 +18,9 @@ import BaseSaver from './modules/BaseSaver.mjs.js';
 import TheReader from './modules/TheReader.mjs.js';
 import AlertBox from './modules/AlertBox.mjs.js';
 import TokenSelector from './modules/TokenSelector.mjs.js';
+import StepControl from './modules/StepControl.mjs.js';
+import BackEnd from './modules/BackEnd.mjs.js';
+// import BackEndUsage from './modules/BackEndUsage.mjs.js';
 
 import axios from './modules_lib/axios_0.26.1_.mjs.js';
 import ClipboardJS from './modules_lib/clipboard_2.0.10_.mjs.js';
@@ -46,19 +49,25 @@ const fildId_to_info = { "A01": { "genre": "中小学语文课本", "file": "人
 const RootComponent = {
   setup() {
 
+    // 语料信息映射 函数
+    const fileInfo = (originId) => {
+      const fileId = originId.split("-")[0];
+      return fildId_to_info[fileId];
+    };
+
     // 初始化 文件保存 模块
-    const theSaver = BaseSaver.new();
+    const theSaver = new BaseSaver();
 
     // 初始化 提示框 模块
-    const alertBox = reactive(AlertBox.new());
+    const alertBox = reactive(new AlertBox());
 
     // 初始化 文件读取 模块
-    const theReader = TheReader.new(alertBox.pushAlert);
+    const theReader = new TheReader(alertBox.pushAlert);
 
 
     // 初始化 剪贴板 插件
     // const theClipboardRef = ref(null);
-    onMounted(()=>{
+    onMounted(() => {
       let theClipboard = new ClipboardJS(".btn-copy-selection");
       theClipboard.on('success', function (e) {
         // console.info('Action:', [e.action, e.text, e.trigger]);
@@ -82,279 +91,59 @@ const RootComponent = {
       again: false,
       hasDown: false,
     });
-    const tokenSelector = TokenSelector.new(selection);
+    const tokenSelector = new TokenSelector(selection);
 
-
-    // 语料信息映射函数
-    const fileInfo = (originId) => {
-      const fileId = originId.split("-")[0];
-      return fildId_to_info[fileId];
-    };
-
-
-
-
+    // 初始化 后端 API
     const theApi = axios.create({
       baseURL: `${API_BASE}/api/`,
       timeout: 30000,
       headers: {'Catch-Cotrol': 'no-cache'},
     });
-    const theApiRequest = async (config) => {
-        try {
-          let response = await theApi.request(config);
-          return response;
-        } catch (error) {
-          console.log({config, error});
-          alertBox.pushAlert(`请求「${config?.url}」出错：${error}`, 'danger');
-          throw error;
-        };
-    };
+    const theBackEnd = new BackEnd(theApi, alertBox.pushAlert);
 
+    const exampleWrap = reactive({
+      example: {},
+    });
+
+    // const backEndData = reactive({
+    //   tasks: [],
+    //   //
+    //   newThings: {
+    //     theUser: {},
+    //     topic: "",
+    //     lastEID: null,
+    //     //
+    //     tasksShowValid: true,
+    //     tasksShowDropped: true,
+    //     tasksShowUndone: true,
+    //   },
+    //   //
+    //   tasksShowValid: true,
+    //   tasksShowDropped: true,
+    //   tasksShowUndone: true,
+    //   //
+    //   ctrl: {
+    //     currentWorker: "",
+    //     currentWorkerId: "",
+    //     currentWorkerSecret: "",
+    //     currentWorkerTarget: 600,
+    //     //
+    //     haveStore: false,
+    //     //
+    //     currentPage: "setup",
+    //     //
+    //     doneNum: 0,
+    //     totalNum: 1,
+    //     donePct: "10%",
+    //   },
+    // });
+
+
+    // 对 后端 API 进行基础的使用 开始
     const apiMethods = {
-
-      // 万能 api 开始
-      apiDB: async (table, operator, kwargs, _$$$) => {
-        let data = {
-          table: `${table??''}`,
-          opt: `${operator??''}`,
-          args: kwargs ?? {},
-          "$$$": `${_$$$??''}`,
-        };
-        let response = await theApiRequest({
-          method: "post",
-          url: `/db`,
-          data: data,
-        });
-        return response;
-      },
-      // 万能 api 结束
-
-      // 几个最基本的 api 开始
-
-      apiGetUser: async (user_id, name, password) => {
-        // 获取 user 信息
-        // 输入：id或姓名至少其一，外加序列号（密码）
-        let data = {
-          'password': password,
-        };
-        if (user_id?.length) {
-          data.user_id = user_id;
-        } else if (name?.length) {
-          data.name = name;
-        };
-        let response = await theApiRequest({
-          method: "post",
-          url: `/user/`,
-          data: data,
-        });
-        return response;
-        // 应有输出：
-        // response.data.user: {
-        //   id,
-        //   name,
-        //   password,
-        //   task: [task.id],        // 该用户有哪些 task
-        //   annotated: [entry.id],  // 该用户已经标注过了哪些 entry  // 其实有点多余
-        // }
-        // response.data.err === ''
-      },
-
-      apiGetWorkList: async (password) => {
-        // 获取 当前 user 的 任务清单
-        let response = await theApiRequest({
-          method: "post",
-          url: `/work-list/`,
-          data: {
-            'user_id': appData.ctrl.currentWorkerId,
-            'password': password,
-          },
-        });
-        return response;
-        // 应有输出：
-        // response.data.work_list: [{
-        //   id,
-        // }]
-        // response.data.err === ''
-      },
-
-      apiGetThing: async (task_id) => {
-        // 获取 task.id 对应的 task, entry, annotation
-        // 输入：task.id
-        let response = await theApiRequest({
-          method: "post",
-          url: `/thing/${task_id}`,
-          data: {
-            'user_id': appData.ctrl.currentWorkerId,
-          },
-        });
-        return response;
-        // 应有输出：
-        // response.data.thing: {
-        //   task,
-        //   entry,
-        //   annotation,
-        // }
-        // response.data.err === ''
-      },
-
-      apiGetTask: async (task_id) => {
-        // 获取 task 信息
-        // 输入：task.id
-        let response = await theApiRequest({
-          method: "post",
-          url: `/task/${task_id}`,
-          data: {
-            'user_id': appData.ctrl.currentWorkerId,
-          },
-        });
-        return response;
-        // 应有输出：
-        // response.data.task: {
-        //   id,
-        //   topic,
-        //   eId: entry.id,          // 该 task 所对应的 entry.id
-        //   to: [user.id],          // 该 task 分配给了哪些 user
-        //   submitters: [user.id],  // 哪些 user 已经提交了该 task 的 annotation
-        // }
-        // response.data.err === ''
-      },
-
-      apiGetAnno: async (task_id) => {
-        // 获取 annotation 信息
-        // 输入：task.id  // 该 annotation 所对应的 task
-        let response = await theApiRequest({
-          method: "post",
-          url: `/annotation/`,
-          data: {
-            'user_id': appData.ctrl.currentWorkerId,
-            'task_id': task_id,
-          },
-        });
-        return response;
-        // 应有输出：
-        // response.data.annotation: {
-        //   id,
-        //   eId,      // 该 annotation 所对应的 entry.id
-        //   user,     // 该 annotation 所对应的 user.id
-        //   task_id,  // 该 annotation 所对应的 task.id
-        //   content,  // 该 annotation 的具体内容
-        // }
-        // response.data.err === ''
-      },
-
-      apiUpdateAnno: async (task_id, anno_wrap) => {
-        // 获取 annotation 信息
-        // 输入：
-        //   task.id  // 该 annotation 所对应的 task
-        //   anno_wrap  // 该 annotation 所包含的内容，具体为 annotations 和 _ctrl
-        //
-        // 获取任务主题
-        let topic = appData?.newThings?.topic;
-        if (topic == null) {
-          let resp = apiMethods.apiGetTopic();
-          if (resp?.data?.topic?.length) {
-            topic = resp.data.topic;
-          };
-        };
-        //
-        let data = {
-          'user': appData.ctrl.currentWorkerId,
-          'task_id': task_id,
-          'topic': topic,
-          'content': anno_wrap,
-        };
-        if (anno_wrap.isDropping) {
-          data.dropped = true;
-        };
-        //
-        // let dropped = false;
-        // let skipped = false;
-        // let valid = true;
-        //
-        let response = await theApiRequest({
-          method: "post",
-          url: `/update/`,
-          data: data,
-        });
-        return response;
-        // 应有输出：
-        // response.data.err === ''
-      },
-
-      apiGetEntry: async (entry_id) => {
-        // 获取 entry 信息
-        // 输入：entry.id
-        let response = await theApiRequest({
-          method: "get",
-          url: `/entry/${entry_id}`,
-        });
-        return response;
-        // 应有输出：
-        // response.data.entry: {
-        //   id,
-        //   originId,      // 该 entry 的语料的原始句子的编号
-        //   content: {},   // 该 entry 的具体内容
-        //   results: {},   // 该 entry 在当前 topic 之前已经确定下来的标注内容
-        // }
-        // response.data.err === ''
-      },
-
-      // 几个最基本的 api 结束
-
-      // 几个功能性的 api 开始
-
-      apiGetTopic: async () => {
-        // 获取当前任务主题
-        let response = await theApiRequest({
-          method: "get",
-          url: `/topic/`,
-        });
-        return response;
-        // 应有输出：
-        // response.data.topic:String // 当前任务主题
-        // response.data.err === ''
-      },
-
-      apiNewTask: async (count, topic) => {
-        // alertBox.pushAlert("apiNewTask 开始");
-        // 安排新任务
-        // 输入：
-        //   count  // 新增加任务的数量
-        //   topic  // 任务主题
-
-        // 如果任务主题未知，则从服务器获取
-        topic = `${topic}`
-        if (!topic.length) {
-          let resp = await apiMethods.apiGetTopic();
-          if (resp?.data?.topic?.length) {
-            topic = resp.data.topic;
-          };
-        };
-        //
-        let response = await theApiRequest({
-          method: "post",
-          url: `/new-task/`,
-          data: {
-            'user_id': appData.ctrl.currentWorkerId,
-            'count': count,
-            'topic': topic,
-          },
-        });
-        // alertBox.pushAlert("apiNewTask 结束");
-        return response;
-        // 应有输出：
-        // response.data.err === ''
-      },
-
-      // 几个功能性的 api 结束
-
-
-
-      // 对 api 进行基础的使用 开始
-
       apiTouchTask: async (task_btn) => {
         try {
-          let resp = await apiMethods.apiGetThing(task_btn?.id);
+          let resp = await theBackEnd.getThing(appData.ctrl.currentWorkerId, task_btn?.id);
           // alertBox.pushAlert(resp?.data);
           if (resp?.data?.err?.length) {
             alertBox.pushAlert(`【发生错误】${resp?.data?.err}`, 'danger');
@@ -367,8 +156,8 @@ const RootComponent = {
       },
       apiTouchTaskBtn: async (task_btn) => {
         try {
-          dataMethods.saveStore();
-          await updateSteps();
+          saveStore();
+          await updateSchema();
           tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
           //
           exampleWrap.example = {};
@@ -399,7 +188,7 @@ const RootComponent = {
               stepRef = exampleWrap.example._ctrl.currentStepRef;
             };
             if (stepRef in stepsDict) {
-              await stepMethods.goRefStep(stepRef);
+              await stepCtrl.goRefStep(stepRef);
             };
             tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
 
@@ -414,87 +203,16 @@ const RootComponent = {
         };
       },
 
-      apiSave: async (content) => {
-        try {
-          let task_id = content?._info?.task_id;
-          let anno_wrap = {
-            'annotations': exampleWrap?.example?.annotations,
-            '_ctrl': exampleWrap?.example?._ctrl,
-          };
-          if (!anno_wrap?.annotations?.length) {
-            alertBox.pushAlert(`【操作取消】没有标注内容，无需保存`, 'secondary');
-            return false;
-          }
-          if (anno_wrap.annotations.filter(anno => anno.isDropping).length) {
-            anno_wrap.isDropping = true;
-          };
-          let resp = await apiMethods.apiUpdateAnno(task_id, anno_wrap);
-          if (resp?.data?.err?.length) {
-            alertBox.pushAlert(`【发生错误】${resp?.data?.err}`, 'danger');
-            return false;
-          };
-          alertBox.pushAlert(`已保存`, 'success', 500);
-          if (!anno_wrap.isDropping) {
-            appData.tasks[content?._info?.btn_idx].valid = true;
-          } else {
-            appData.tasks[content?._info?.btn_idx].dropped = true;
-          };
-          return true;
-        } catch (error) {
-          alertBox.pushAlert(error, 'danger');
-          return false;
-        };
-      },
-
-      apiGoIdx: async (idx) => {
-        if (idx < appData.tasks.length && idx >= 0) {
-          let btn = appData.tasks[idx];
-          let content = await apiMethods.apiTouchTaskBtn(btn);
-          return content;
-        };
-        return null;
-      },
-
-      apiNext: async (content) => {
-        let next_idx = + content?._info?.btn_idx + 1;
-        let it = await apiMethods.apiGoIdx(next_idx);
-        if (it == null) {
-          alertBox.pushAlert(`没有下一条了`, 'secondary');
-        };
-      },
-
-      apiLast: async (content) => {
-        let last_idx = + content?._info?.btn_idx - 1;
-        let it = await apiMethods.apiGoIdx(last_idx);
-        if (it == null) {
-          alertBox.pushAlert(`没有上一条了`, 'secondary');
-        };
-      },
-
-      apiSaveAndLast: async (content) => {
-        let result = await apiMethods.apiSave(content);
-        if (result) {
-          await apiMethods.apiLast(content);
-        };
-      },
-
-      apiSaveAndNext: async (content) => {
-        let result = await apiMethods.apiSave(content);
-        if (result) {
-          await apiMethods.apiNext(content);
-        };
-      },
-
       apiConnect: async () => {
         // alertBox.pushAlert("apiConnect 开始", 'secondary');
         try {
-          let resp = await apiMethods.apiGetUser(null, appData.ctrl.currentWorker, appData.ctrl.currentWorkerSecret);
+          let resp = await theBackEnd.getUser(null, appData.ctrl.currentWorker, appData.ctrl.currentWorkerSecret);
           if (resp?.data?.err?.length) {
             alertBox.pushAlert(`【发生错误】${resp?.data?.err}`, 'danger');
             return;
           };
           appData.newThings.topic = resp?.data?.topic;
-          await newMethods.updateUser(resp?.data?.user);
+          await apiMethods.apiUpdateUser(resp?.data?.user);
           alertBox.pushAlert(`${resp?.data?.user?.name}的信息已同步`);
           await apiMethods.apiUpdateTaskList();
         } catch (error) {
@@ -518,7 +236,7 @@ const RootComponent = {
             delta = 50;
             alertBox.pushAlert(`【操作调整】新目标比原始目标多过50条，已自动调整`, 'secondary');
           };
-          let resp = await apiMethods.apiNewTask(delta, appData.newThings.topic||null);
+          let resp = await theBackEnd.newTask(appData.ctrl.currentWorkerId, delta, appData.newThings.topic||null);
           if (resp?.data?.err?.length) {
             alertBox.pushAlert(`【发生错误】${resp?.data?.err}`, 'danger');
             appData.ctrl.currentWorkerTarget = appData.ctrl.currentWorkerTaskCount;
@@ -537,12 +255,11 @@ const RootComponent = {
         // alertBox.pushAlert("apiUpdateTarget 结束", 'secondary');
       },
 
-
       apiUpdateTaskList: async () => {
         // alertBox.pushAlert("apiUpdateTaskList 开始");
         try {
           let aa = alertBox.pushAlert("正在获取任务列表，请稍等……", "info", 99999999);
-          let resp = await apiMethods.apiGetWorkList(appData.ctrl.currentWorkerSecret);
+          let resp = await theBackEnd.getWorkList(appData.ctrl.currentWorkerId, appData.ctrl.currentWorkerSecret);
           alertBox.removeAlert(aa);
           if (resp?.data?.err?.length) {
             alertBox.pushAlert(`【发生错误】${resp?.data?.err}`, 'danger');
@@ -569,7 +286,7 @@ const RootComponent = {
           };
           appData.tasks = task_btn_list;
           //
-          ctrlMethods.updateProgress();
+          updateProgress();
 
         } catch (error) {
           alertBox.pushAlert(error, 'danger');
@@ -577,12 +294,7 @@ const RootComponent = {
         // alertBox.pushAlert("apiUpdateTaskList 结束");
       },
 
-      // 对 api 进行基础的使用 结束
-
-    };
-
-    const newMethods = {
-      updateUser: (user) => {
+      apiUpdateUser: (user) => {
         console.log(user);
         let it = {
           worker: user.name,
@@ -600,14 +312,84 @@ const RootComponent = {
         store.set(`${APP_NAME}:it`, it);
         store.set(`${APP_NAME}:theUser`, user);
       },
+
+
+
+      apiSave: async (content) => {
+        try {
+          let task_id = content?._info?.task_id;
+          let anno_wrap = {
+            'annotations': exampleWrap?.example?.annotations,
+            '_ctrl': exampleWrap?.example?._ctrl,
+          };
+          if (!anno_wrap?.annotations?.length) {
+            alertBox.pushAlert(`【操作取消】没有标注内容，无需保存`, 'secondary');
+            return false;
+          }
+          if (anno_wrap.annotations.filter(anno => anno.isDropping).length) {
+            anno_wrap.isDropping = true;
+          };
+          let resp = await theBackEnd.updateAnno(appData.ctrl.currentWorkerId, task_id, anno_wrap, appData?.newThings?.topic);
+          if (resp?.data?.err?.length) {
+            alertBox.pushAlert(`【发生错误】${resp?.data?.err}`, 'danger');
+            return false;
+          };
+          alertBox.pushAlert(`已保存`, 'success', 500);
+          if (!anno_wrap.isDropping) {
+            appData.tasks[content?._info?.btn_idx].valid = true;
+          } else {
+            appData.tasks[content?._info?.btn_idx].dropped = true;
+          };
+          return true;
+        } catch (error) {
+          alertBox.pushAlert(error, 'danger');
+          return false;
+        };
+      },
+
+      apiGoIdx: async (idx) => {
+        if (idx < appData.tasks.length && idx >= 0) {
+          let btn = appData.tasks[idx];
+          let content = await apiMethods.apiTouchTaskBtn(btn);
+          return content;
+        };
+        return null;
+      },
+
+      apiLast: async (content) => {
+        let last_idx = + content?._info?.btn_idx - 1;
+        let it = await apiMethods.apiGoIdx(last_idx);
+        if (it == null) {
+          alertBox.pushAlert(`没有上一条了`, 'secondary');
+        };
+      },
+
+      apiNext: async (content) => {
+        let next_idx = + content?._info?.btn_idx + 1;
+        let it = await apiMethods.apiGoIdx(next_idx);
+        if (it == null) {
+          alertBox.pushAlert(`没有下一条了`, 'secondary');
+        };
+      },
+
+      apiSaveAndLast: async (content) => {
+        let result = await apiMethods.apiSave(content);
+        if (result) {
+          await apiMethods.apiLast(content);
+        };
+      },
+
+      apiSaveAndNext: async (content) => {
+        let result = await apiMethods.apiSave(content);
+        if (result) {
+          await apiMethods.apiNext(content);
+        };
+      },
+
     };
+    // 对 后端 API 进行基础的使用 结束
 
 
-    const exampleWrap = reactive({
-      example: {},
-      example1: [],//entry表
-      example2: [],//annotation表
-    });
 
     const appData = reactive({
       fileWrapWrap: {
@@ -648,7 +430,12 @@ const RootComponent = {
       },
     });
 
-    onMounted(()=>{
+
+
+
+
+
+    onMounted(() => {
       let storedVersion = store.get(`${APP_NAME}:version`);
       if (storedVersion == APP_VERSION) {
         appData.ctrl.haveStore = true;
@@ -661,6 +448,28 @@ const RootComponent = {
       appData.ctrl.currentWorkerTaskCount = stored?.taskCount;
       appData.newThings.lastEID = store.get(`${APP_NAME}:lastEID`);
     });
+
+
+
+
+
+    const saveStore = () => {
+      store.set(`${APP_NAME}:dataWrap`, foolCopy(appData.dataWrap));
+      store.set(`${APP_NAME}:version`, APP_VERSION);
+      // let worker = appData.ctrl.currentWorker;
+      // store.set(`${APP_NAME}:worker`, worker);
+      store.set(`${APP_NAME}:it`, {
+        worker: appData.ctrl.currentWorker,
+        workerId: appData.ctrl.currentWorkerId,
+        secret: appData.ctrl.currentWorkerSecret,
+        target: appData.ctrl.currentWorkerTarget,
+        taskCount: appData.ctrl.currentWorkerTaskCount,
+      });
+    };
+
+
+
+
 
     // const formFilesRef = (document?.forms?.["file-form"]?.["file-input"]?.files);
     // const formFiles = computed(() => formFilesRef);
@@ -677,23 +486,7 @@ const RootComponent = {
         appData.dataWrap.appVersion = APP_VERSION;
       },
 
-      onClose: async () => {},
-      beforeSave: async () => {
-      },
-      saveStore: async () => {
-        await dataMethods.beforeSave();
-        store.set(`${APP_NAME}:dataWrap`, foolCopy(appData.dataWrap));
-        store.set(`${APP_NAME}:version`, APP_VERSION);
-        // let worker = appData.ctrl.currentWorker;
-        // store.set(`${APP_NAME}:worker`, worker);
-        store.set(`${APP_NAME}:it`, {
-          worker: appData.ctrl.currentWorker,
-          workerId: appData.ctrl.currentWorkerId,
-          secret: appData.ctrl.currentWorkerSecret,
-          target: appData.ctrl.currentWorkerTarget,
-          taskCount: appData.ctrl.currentWorkerTaskCount,
-        });
-      },
+
       loadStore: async () => {
         appData.dataWrap = store.get(`${APP_NAME}:dataWrap`);
         await dataMethods.fixData();
@@ -735,7 +528,7 @@ const RootComponent = {
 
 
         dataMethods.log(`import from file at idx(${appData?.dataWrap?._ctrl?.currentIdx})`);
-        dataMethods.saveStore();
+        saveStore();
       },
       readData: async () => {
         let fileWrap = appData.fileWrapWrap.fileWrap;
@@ -789,7 +582,7 @@ const RootComponent = {
         console.debug(foolCopy(appData.dataWrap));
         console.debug("结束 fixData");
 
-        ctrlMethods.updateProgress();
+        updateProgress();
         await ctrlMethods.goIdx(appData.dataWrap._ctrl.currentIdx);
       },
 
@@ -817,6 +610,19 @@ const RootComponent = {
         appData.dataWrap.dataItems[appData.ctrl.currentIdx] = foolCopy(exampleWrap.example);
       },
     };
+
+
+
+
+
+      const updateProgress = () => {
+        appData.ctrl.doneNum = appData.tasks.filter(it=>it.valid||it.dropped).length ?? 0;
+        appData.ctrl.totalNum = appData.tasks.length ?? 1;
+        appData.ctrl.donePct = `${Math.min(100, appData.ctrl.doneNum / appData.ctrl.totalNum * 100)}%`;
+      };
+
+
+
     const ctrlMethods = {
       fineIdx: (idx) => {
         idx = Math.min(idx, appData.dataWrap.dataItems.length-1);
@@ -824,8 +630,8 @@ const RootComponent = {
         return idx;
       },
       goIdx: async (idx) => {
-        dataMethods.saveStore();
-        await updateSteps();
+        saveStore();
+        await updateSchema();
         tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
 
         idx = ctrlMethods.fineIdx(idx);
@@ -850,7 +656,7 @@ const RootComponent = {
           stepRef = exampleWrap.example._ctrl.currentStepRef;
         };
         if (stepRef in stepsDict) {
-          await stepMethods.goRefStep(stepRef);
+          await stepCtrl.goRefStep(stepRef);
         };
 
         tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
@@ -858,11 +664,6 @@ const RootComponent = {
       toogleShowOrigin: () => {
         appData.ctrl.showOrigin = !appData.ctrl.showOrigin;
         // console.debug(appData.ctrl.showOrigin);
-      },
-      updateProgress: () => {
-        appData.ctrl.doneNum = appData.tasks.filter(it=>it.valid||it.dropped).length ?? 0;
-        appData.ctrl.totalNum = appData.tasks.length ?? 1;
-        appData.ctrl.donePct = `${Math.min(100, appData.ctrl.doneNum / appData.ctrl.totalNum * 100)}%`;
       },
       // 0228 之前的旧版函数
       // __updateProgress: () => {
@@ -877,204 +678,19 @@ const RootComponent = {
 
 
 
-    // // ↓ 参看 js/components/TheSteps.js
-    // const currentStep = reactive(RootStep);
-    // const theSteps = TheSteps(appData.ctrl, currentStep);
-    // const stepsDict = readonly(theSteps.stepsDict);
-    // const stepRecords = reactive(theSteps.stepRecords);
-    // const stepMethods = theSteps.stepMethods;
-    // // ↑ 参看 js/components/TheSteps.js
 
-
-
+    const RootStep = reactive({});
+    const currentStep = reactive({});
+    const stepsDict = reactive({});
     const stepsDictWrap = reactive({
       version: "00",
     });
-    const stepsDict = reactive({});
-    const RootStep = reactive({});
-    const currentStep = reactive({});
-    // console.debug(currentStep);
 
-    const stepRecords = {list:[]};
-    const stepMethods = {
-      goStep: async (stepObj_, data) => {
-        // await updateSteps();
-        if (data!=null) {
-          stepMethods.dealWithData(data, da=>da);
-        };
-
-        if (data) {
-          // TODO
-          // 在 exampleWrap?.example?._ctrl 中记录 这条语料是 dropped
-          // 在 update 时，构造 post 参数时检查 _ctrl 有没有 dropped，并写到 post 参数里
-          // 注意检查 _ctrl 的更新，避免影响其他 entry
-        };
-
-        // 消除 stepObj 的引用关系
-        let stepObj = {
-          ref: stepObj_?.ref ?? null,
-          name: stepObj_?.name ?? null,
-          mode: stepObj_?.mode ?? null,
-          props: foolCopy(stepObj_?.props ?? null),
-        };
-        appData.ctrl.showOrigin = stepObj?.props?.showOrigin ?? false;
-        Object.assign(currentStep, stepObj);
-
-        dataMethods.ensureExampleStep();
-        dataMethods.saveExample();
-        ctrlMethods.updateProgress();
-        dataMethods.saveStore();
-      },
-      goRefStep: async (ref, data) => {
-        let stepObj = foolCopy(stepsDict?.[ref] ?? null);
-        await stepMethods.goStep(stepObj, data);
-      },
-      cancelStep: async (ref) => {
-        await stepMethods.goRefStep(ref, null);  // 不要把 data 放进去，避免重复标记
-        stepRecords.list = [];
-        tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
-      },
-      resetStep: async (ref) => {
-        exampleWrap.example.annotations = [];
-        stepMethods.cancelStep(ref);
-      },
-
-      dealWithData: (data, fn) => {
-        // 按照 schema 补充必要的数据字段
-        let idx = exampleWrap.example.annotations.length;
-        data.idx = idx;
-        data.mode = currentStep.mode;
-
-        data = fn(data);
-
-        // data._schema = [
-        //   stepsDictWrap.name ?? null,
-        //   stepsDictWrap.version ?? null,
-        //   stepsDictWrap.using ?? null,
-        // ];
-
-        // 加入 annotations 清单
-        exampleWrap.example.annotations.push(foolCopy(data));
-
-        return data;
-      },
-
-      handleTemplate: async (ref, data, fn) => {
-        // 这个函数是一个抽象出来的通用流程框架
-        // 之前的 value 改成了 data
-
-        stepMethods.dealWithData(data, fn);
-
-        tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
-        await stepMethods.goRefStep(ref);  // 不要把 data 放进去，避免重复标记
-      },
-
-      handleChooseOrText: async (ref, data) => {
-        // 这个函数就是之前的「goRefStepChoose」
-        // 之前的 value 改成了 data
-
-        let fn = (da)=>{
-          da.on = selection.array;
-          return da;
-        };
-        await stepMethods.handleTemplate(ref, data, fn);
-      },
-
-      handleWord: async (ref, data) => {
-        let fn = (da)=>{
-          da.source = selection.array[0];
-          return da;
-        };
-        await stepMethods.handleTemplate(ref, data, fn);
-      },
-
-      handleAdd: async (ref, data) => {
-        // TODO 这个函数还没写好，想用来试试替换法
-        let tokenList = exampleWrap.example.material.tokenList;
-        let fn = (da)=>{
-          da.source = selection.array[0];
-          da.targetText = da.side==1 ? `${da.target}${da.source}` : `${da.source}${da.target}`;
-
-          if (da?._pattern?.length) {
-            let face = da._pattern;
-            for (let kk of ["source", "target", "targetText", "side"]) {
-              face = face.replace(`<[%${kk}%]>`, da[kk]??" [?] ");
-            };
-            da._face = face;
-          };
-
-          return da;
-        };
-        await stepMethods.handleTemplate(ref, data, fn);
-      },
-
-      handleQita: async (ref, data) => {
-        let fn = (da)=>{
-          return da;
-        };
-        await stepMethods.handleTemplate(ref, data, fn);
-      },
-
-      handleMultiSpans: async (ref, data) => {
-        let aa = data.tokenarrays.flat(Infinity);
-        let should = (aa.length == Array.from(new Set(aa)).length);
-
-        let flag = 0;
-        for (i = 0; i < exampleWrap.example.annotations.length; i++) {
-          if ((exampleWrap.example.annotations[i].mode == "multiSpans") && (exampleWrap.example.annotations[i].label == data.label)) {
-            let flag1 = 0;
-            for (j = 0; j < exampleWrap.example.annotations[i].tokenarrays.length; j++) {
-              for (k = 0; k < data.tokenarrays.length; k++) {
-                if (exampleWrap.example.annotations[i].tokenarrays[j].toString() == data.tokenarrays[k].toString()) {
-                  flag1 = flag1 + 1;
-                }
-                for (t = 0; t < data.tokenarrays[k].length; t++) {
-                  if ((exampleWrap.example.annotations[i].tokenarrays[j].indexOf(data.tokenarrays[k][t])) != -1) {
-                    flag = 1;
-                  }
-                }
-              }
-              if (flag1) {
-                if ((flag1 == exampleWrap.example.annotations[i].tokenarrays.length) && (flag1 == data.tokenarrays.length)) {
-                  flag = 2;
-                }
-              }
-            }
-          }
-        }
-
-        if (!should) {
-          alert("存在重复的片段，请重新选择");
-          data.tokenarrays = [];
-          return;
-        };
-
-        if (flag == 1) {
-          if (!confirm("与之前标注相比有部分重复，点击取消即重新选择，反之则点击确定。")) {
-            data.tokenarrays = [];
-            return;
-          }
-        }
-
-        if (flag == 2) {
-          alert("与之前标注相比完全重复，请重新选择");
-          data.tokenarrays = [];
-          return;
-        }
-
-        let fn = (da) => {
-          return da;
-        };
-        await stepMethods.handleTemplate(ref, data, fn);
-      },
-
-    };
 
     const anotherAxios = axios.create({
       headers: {'Catch-Cotrol': 'no-cache'},
     });
-
-    const updateSteps = async () => {
+    const updateSchema = async () => {
       let response = await anotherAxios.request({
         url: "schema/steps.schema.json",
         method: 'get',
@@ -1093,9 +709,36 @@ const RootComponent = {
       Object.assign(currentStep, RootStep);
     };
 
-    onMounted(async ()=>{
-      await updateSteps();
+    onMounted(async () => {
+      await updateSchema();
     });
+
+
+    const appPack = {
+      reactive_data: appData,
+      reactive_exam_wrap: exampleWrap,
+      tokenSelector: tokenSelector,
+      theBackEnd: theBackEnd,
+      pushAlertFn: alertBox.pushAlert,
+      appName: APP_NAME,
+      storeTool: store,
+      updateSchemaFn: updateSchema,
+      stepsDictWrap: stepsDictWrap,
+
+      reactive_currentStep: currentStep,
+      reactive_stepsDict: stepsDict,
+      reactive_stepsDictWrap: stepsDictWrap,
+
+      ioControl: dataMethods,
+      updateProgressFn: updateProgress,
+      saveStoreFn: saveStore,
+    };
+
+    const stepCtrl = new StepControl(appPack);
+
+    appPack.stepCtrl = stepCtrl;
+
+    const bEU = new BackEndUsage(appPack);
 
 
     const getReplacedToken = (idx) => {
@@ -1123,16 +766,19 @@ const RootComponent = {
       tokenSelector,
       selection,
       //
+      theBackEnd,
       ...apiMethods,
+      bEU,
       //
-      stepRecords,
+      // stepRecords,
       stepsDict,
       RootStep,
       currentStep,
-      ...stepMethods,
+      //
+      stepCtrl,
       //
       stepsDictWrap,
-      updateSteps,
+      updateSchema,
       //
       alertBox,
       //
@@ -1144,10 +790,10 @@ const RootComponent = {
       fileInfo,
       //
       theApi,
-      theApiRequest,
       anotherAxios,
       //
-      ...newMethods,
+      saveStore,
+      updateProgress,
       //
     };
   },
@@ -1157,7 +803,7 @@ const RootComponent = {
 const the_app = Vue_createApp(RootComponent);
 const app = the_app.mount('#bodywrap');
 window.app = app;
-// the_app.config.globalProperties.$axios = axios;  // 用 app.theApi 或 app.theApiRequest 就可以调试了。
+// the_app.config.globalProperties.$axios = axios;  // 用 app.theBackEnd 就可以调试了。
 
 export default app;
 
