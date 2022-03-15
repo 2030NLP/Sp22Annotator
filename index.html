@@ -241,10 +241,10 @@
                   :data-replaced="token?.replaced ?? false"
                   :data-word="token.word"
                   :data-to-word="token?.to?.word"
-                  @mousedown="onMouseDown(token, $event)"
-                  @mouseenter="onMouseEnter(token)"
-                  @mouseout="onMouseOut(token)"
-                  @mouseup="onMouseUp(token)"
+                  @mousedown="tokenSelector.onMouseDown(token, $event, example.material.tokenList)"
+                  @mouseenter="tokenSelector.onMouseEnter(token, example.material.tokenList)"
+                  @mouseout="tokenSelector.onMouseOut(token)"
+                  @mouseup="tokenSelector.onMouseUp(token, example.material.tokenList)"
                 >{{ token?.replaced ? token?.to?.word : token.word }}<!-- <sub>{{ token.idx }}</sub> --></span>
               </p>
             </div>
@@ -265,10 +265,10 @@
                   :data-selecting="token?._ctrl?.selecting"
                   :data-selected="token?._ctrl?.selected"
                   :data-have-replace="token?.replaced ?? false"
-                  @mousedown="onMouseDown(token)"
-                  @mouseenter="onMouseEnter(token)"
-                  @mouseout="onMouseOut(token)"
-                  @mouseup="onMouseUp(token)"
+                  @mousedown="tokenSelector.onMouseDown(token, $event, example.material.tokenList)"
+                  @mouseenter="tokenSelector.onMouseEnter(token, example.material.tokenList)"
+                  @mouseout="tokenSelector.onMouseOut(token)"
+                  @mouseup="tokenSelector.onMouseUp(token, example.material.tokenList)"
                 >{{ token.word }}<!-- <sub>{{ token.idx }}</sub> --></span>
               </p>
             </div>
@@ -282,7 +282,7 @@
                   v-on:click="copySelection"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-outline-info btn-copy-selection`"
-                  :data-clipboard-text="selectedReplacedText()"
+                  :data-clipboard-text="tokenSelector.selectedReplacedText(example?.material?.tokenList)"
                 >拷贝选区{{ctrl.showOrigin ? "（1）" : ""}}</button>
                 <button
                   type="button"
@@ -290,9 +290,9 @@
                   v-on:click="copySelection"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-outline-info btn-copy-selection`"
-                  :data-clipboard-text="selectedOriginText()"
+                  :data-clipboard-text="tokenSelector.selectedOriginText(example?.material?.tokenList)"
                 >拷贝选区（2）</button>
-                <button type="button" v-on:click="clearSelection" class="btn btn-sm my-1 me-1" :class="`btn-outline-info`">清除选区</button>
+                <button type="button" v-on:click="tokenSelector.clear(example?.material?.tokenList)" class="btn btn-sm my-1 me-1" :class="`btn-outline-info`">清除选区</button>
               </div>
             </div>
             <!-- 便捷选择操作区 结束 -->
@@ -450,9 +450,9 @@
               <!-- --- -->
               <div class="col col-12 my-1">
                 <!-- addBtn -->
-                <button v-if="currentStep?.props?.addBtn" type="button" v-on:click="currentStep?.props?.data.tokenarrays.push(selection.array);clearSelection();" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.addBtn.style}`" :disabled="selection.array.length<1">{{ currentStep.props.addBtn.text }}</button>
+                <button v-if="currentStep?.props?.addBtn" type="button" v-on:click="currentStep?.props?.data.tokenarrays.push(selection.array);tokenSelector.clear(example?.material?.tokenList);" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.addBtn.style}`" :disabled="selection.array.length<1">{{ currentStep.props.addBtn.text }}</button>
                 <!-- clearBtn -->
-                <button v-if="currentStep?.props?.clearBtn" type="button" v-on:click="clearSelection" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.clearBtn.style}`">{{ currentStep.props.clearBtn.text }}</button>
+                <button v-if="currentStep?.props?.clearBtn" type="button" v-on:click="tokenSelector.clear(example?.material?.tokenList)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.clearBtn.style}`">{{ currentStep.props.clearBtn.text }}</button>
               </div>
               <!-- 已选列表 开始 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.listTitle">
@@ -472,11 +472,11 @@
               <!-- --- -->
               <div class="col col-12 my-1">
                 <!-- okBtn -->
-                <button v-if="currentStep?.props?.okBtn" type="button" v-on:click="handleMultiSpans(currentStep.props.okBtn.go, currentStep.props.data);clearSelection();" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`" :disabled="currentStep.props.data.tokenarrays.length<2">{{ currentStep.props.okBtn.text }}</button>
+                <button v-if="currentStep?.props?.okBtn" type="button" v-on:click="handleMultiSpans(currentStep.props.okBtn.go, currentStep.props.data);tokenSelector.clear(example?.material?.tokenList);" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`" :disabled="currentStep.props.data.tokenarrays.length<2">{{ currentStep.props.okBtn.text }}</button>
                 <!-- cleanBtn -->
                 <!-- <button v-if="currentStep?.props?.cleanBtn" type="button" v-on:click="cleanSpans" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.clearBtn.style}`">{{ currentStep.props.cleanBtn.text }}</button> -->
                 <!-- cancelBtn -->
-                <button v-if="currentStep?.props?.cancelBtn" type="button" v-on:click="cancelStep(currentStep.props.cancelBtn.go);clearSelection();" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.cancelBtn.style}`">{{ currentStep.props.cancelBtn.text }}</button>
+                <button v-if="currentStep?.props?.cancelBtn" type="button" v-on:click="cancelStep(currentStep.props.cancelBtn.go);tokenSelector.clear(example?.material?.tokenList);" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.cancelBtn.style}`">{{ currentStep.props.cancelBtn.text }}</button>
               </div>
             </div>
             <!-- multiSpans 模式 结束 -->

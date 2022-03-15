@@ -1,24 +1,25 @@
 // modifiedAt: 2022-03-15
 
 class TokenSelector {
-  constructor() {
-    this.selection = {
-      isSelecting: false,
-      start: null,
-      end: null,
-      end: null,
-      array: [],
-      again: false,
-      hasDown: false,
-    };
+  constructor(selection) {
+    this.selection = selection;
+    // this.selection = reactive({
+    //   isSelecting: false,
+    //   start: null,
+    //   end: null,
+    //   end: null,
+    //   array: [],
+    //   again: false,
+    //   hasDown: false,
+    // });
   }
-  static new() {
-    return new TokenSelector();
+  static new(selection) {
+    return new TokenSelector(selection);
   }
 
 
-  clearSelection(tokenList) {
-    if (!this.selection.array.length) {return;};
+  clear(tokenList) {
+    if (!this?.selection?.array?.length) {return;};
     Object.assign(this.selection, {
       isSelecting: false,
       start: null,
@@ -123,15 +124,15 @@ class TokenSelector {
     return tokenList[idx].word;
   }
 
-  selectedReplacedText() {
+  selectedReplacedText(tokenList) {
     if (!this.selection?.array?.length) {return "";};
-    const text = this.selection.array.map(idx => this.getReplacedToken(idx)).join("");
+    const text = this.selection.array.map(idx => this.getReplacedToken(idx, tokenList)).join("");
     return text;
   }
 
-  selectedOriginText() {
+  selectedOriginText(tokenList) {
     if (!this.selection?.array?.length) {return "";};
-    const text = this.selection.array.map(idx => this.getOriginToken(idx)).join("");
+    const text = this.selection.array.map(idx => this.getOriginToken(idx, tokenList)).join("");
     return text;
   }
 

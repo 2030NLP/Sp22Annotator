@@ -17,6 +17,7 @@ import { timeString, foolCopy } from './util.mjs.js';
 import BaseSaver from './modules/BaseSaver.mjs.js';
 import TheReader from './modules/TheReader.mjs.js';
 import AlertBox from './modules/AlertBox.mjs.js';
+import TokenSelector from './modules/TokenSelector.mjs.js';
 
 import axios from './modules_lib/axios_0.26.1_.mjs.js';
 import ClipboardJS from './modules_lib/clipboard_2.0.10_.mjs.js';
@@ -56,24 +57,22 @@ const RootComponent = {
 
 
     // 初始化 剪贴板 插件
-    const theClipboardRef = ref(null);
+    // const theClipboardRef = ref(null);
     onMounted(()=>{
-      theClipboardRef.value = new ClipboardJS(".btn-copy-selection");
-      theClipboardRef.value.on('success', function (e) {
-        // console.info('Action:', e.action);
-        // console.info('Text:', e.text);
-        // console.info('Trigger:', e.trigger);
+      let theClipboard = new ClipboardJS(".btn-copy-selection");
+      theClipboard.on('success', function (e) {
+        // console.info('Action:', [e.action, e.text, e.trigger]);
         alertBox.pushAlert(`成功拷贝文本【${e.text}】`, "success");
         e.clearSelection();
       });
-      theClipboardRef.value.on('error', function (e) {
-        // console.info('Action:', e.action);
-        // console.info('Trigger:', e.trigger);
+      theClipboard.on('error', function (e) {
+        // console.info('Action:', [e.action, e.trigger]);
         alertBox.pushAlert(`拷贝失败！`, "danger");
       });
     });
 
 
+    // 初始化 文本片段选择 模块
     const selection = reactive({
       isSelecting: false,
       start: null,
@@ -83,166 +82,167 @@ const RootComponent = {
       again: false,
       hasDown: false,
     });
+    const tokenSelector = TokenSelector.new(selection);
 
     // ↓ 参看 js/components/TheSelector.js
     // const theSelector = TheSelector(exampleWrap, selection);
     // const selectionMethods = theSelector.selectionMethods;
     // ↑ 参看 js/components/TheSelector.js
 
-    const selectionMethods = {
-      selectedReplacedText: () => {
-        if (!selection?.array?.length) {return "";};
-        const text = selection.array.map(idx=>getReplacedToken(idx)).join("");
-        return text;
-      },
-      selectedOriginText: () => {
-        if (!selection?.array?.length) {return "";};
-        const text = selection.array.map(idx=>getOriginToken(idx)).join("");
-        return text;
-      },
-      copySelection: () => {
-        //
-      },
-      clearSelection: () => {
-        if (!selection.array.length) {return;};
-        Object.assign(selection, {
-          isSelecting: false,
-          start: null,
-          end: null,
-          end: null,
-          array: [],
-          again: false,
-          hasDown: false,
-        });
-        for (let tkn of exampleWrap?.example?.material?.tokenList) {
-          if (tkn._ctrl != null) {
-            Object.assign(tkn._ctrl, {
-              selecting: false,
-              selected: false,
-            })
-          };
-        };
-      },
-      onMouseDown:  (token, event) => {
-        // console.log(['mouseDown', token.word]);
-        //
-        if (event.buttons == 2) {
-          console.log("右键");
-          return;
-        };
-        //
-        if (selection.hasDown) {
-          return;
-        };
-        //
-        selection.hasDown = true;
-        for (let tkn of exampleWrap?.example?.material?.tokenList) {
-          tkn._ctrl = tkn._ctrl ?? {};
-          tkn._ctrl.selected = false;
-        };
-        token._ctrl.selecting = true;
-        //
-        selection.isSelecting = true;
-        selection.start = token.idx;
-        selection.current = token.idx;
-        selection.end = null;
-      },
-      onMouseEnter: (token) => {
-        // console.log(['mouseEnter', token.word]);
-        if (!selection.isSelecting) { return; };
-        selection.current = token.idx;
-        let [aa, bb] = [selection.start, selection.current];
-        if (bb < aa) {
-          [bb, aa] = [aa, bb];
-        };
-        let array = []
-        for (let idx = aa; idx<=bb; idx++) {
-          array.push(idx);
-          for (let tkn of exampleWrap?.example?.material?.tokenList) {
-            tkn._ctrl.selecting = (array.includes(tkn.idx));
-          };
-        };
-      },
-      onMouseOut:   (token) => {
-        selection.current = null;
-        // console.log(['mouseOut', token.word]);
-      },
-      onMouseUp:    (token) => {
-        // console.log(['mouseUp', token.word]);
-        //
-        if (selection.start == null) {return;};
-        //
-        //
-        selection.end = token.idx;
-        let [aa, bb] = [selection.start, selection.end];
-        if (bb < aa) {
-          [bb, aa] = [aa, bb];
-        };
-        selection.isSelecting = false;
-        selection.array = [];
-        for (let idx = aa; idx<=bb; idx++) {
-          selection.array.push(idx);
-          for (let tkn of exampleWrap?.example?.material?.tokenList) {
-            if (selection.array.includes(tkn.idx)) {
-              // tkn._ctrl = tkn._ctrl ?? {};
-              tkn._ctrl.selecting = false;
-              tkn._ctrl.selected = true;
-            }
-          };
-        };
-        selection.hasDown = false;
-        // console.log(selection.array);
-      },
-      onMouseDown_Old:  (token) => {
-        // console.log(['mouseDown', token.word]);
-        //
-        if (selection.isSelecting) {
-          selection.again = true;
-          return;
-        };
-        //
-        selection.again = false;
-        for (let tkn of exampleWrap?.example?.material?.tokenList) {
-          tkn._ctrl = tkn._ctrl ?? {};
-          tkn._ctrl.selected = false;
-        };
-        token._ctrl.selecting = true;
-        //
-        selection.isSelecting = true;
-        selection.start = token.idx;
-        selection.current = token.idx;
-        selection.end = null;
-      },
-      onMouseUp_Old:    (token) => {
-        // console.log(['mouseUp', token.word]);
-        //
-        if (selection.start == null) {return;};
-        //
-        if (selection.start == token.idx) {
-          if (!selection.again) {return;};
-          selection.again = false;
-        };
-        //
-        selection.end = token.idx;
-        let [aa, bb] = [selection.start, selection.end];
-        if (bb < aa) {
-          [bb, aa] = [aa, bb];
-        };
-        selection.isSelecting = false;
-        selection.array = [];
-        for (let idx = aa; idx<=bb; idx++) {
-          selection.array.push(idx);
-          for (let tkn of exampleWrap?.example?.material?.tokenList) {
-            if (selection.array.includes(tkn.idx)) {
-              // tkn._ctrl = tkn._ctrl ?? {};
-              tkn._ctrl.selecting = false;
-              tkn._ctrl.selected = true;
-            }
-          };
-        };
-        // console.log(selection.array);
-      },
-    };
+    // const selectionMethods = {
+    //   selectedReplacedText: () => {
+    //     if (!selection?.array?.length) {return "";};
+    //     const text = selection.array.map(idx=>getReplacedToken(idx)).join("");
+    //     return text;
+    //   },
+    //   selectedOriginText: () => {
+    //     if (!selection?.array?.length) {return "";};
+    //     const text = selection.array.map(idx=>getOriginToken(idx)).join("");
+    //     return text;
+    //   },
+    //   copySelection: () => {
+    //     //
+    //   },
+    //   clearSelection: () => {
+    //     if (!selection.array.length) {return;};
+    //     Object.assign(selection, {
+    //       isSelecting: false,
+    //       start: null,
+    //       end: null,
+    //       end: null,
+    //       array: [],
+    //       again: false,
+    //       hasDown: false,
+    //     });
+    //     for (let tkn of exampleWrap?.example?.material?.tokenList) {
+    //       if (tkn._ctrl != null) {
+    //         Object.assign(tkn._ctrl, {
+    //           selecting: false,
+    //           selected: false,
+    //         })
+    //       };
+    //     };
+    //   },
+    //   onMouseDown:  (token, event) => {
+    //     // console.log(['mouseDown', token.word]);
+    //     //
+    //     if (event.buttons == 2) {
+    //       console.log("右键");
+    //       return;
+    //     };
+    //     //
+    //     if (selection.hasDown) {
+    //       return;
+    //     };
+    //     //
+    //     selection.hasDown = true;
+    //     for (let tkn of exampleWrap?.example?.material?.tokenList) {
+    //       tkn._ctrl = tkn._ctrl ?? {};
+    //       tkn._ctrl.selected = false;
+    //     };
+    //     token._ctrl.selecting = true;
+    //     //
+    //     selection.isSelecting = true;
+    //     selection.start = token.idx;
+    //     selection.current = token.idx;
+    //     selection.end = null;
+    //   },
+    //   onMouseEnter: (token) => {
+    //     // console.log(['mouseEnter', token.word]);
+    //     if (!selection.isSelecting) { return; };
+    //     selection.current = token.idx;
+    //     let [aa, bb] = [selection.start, selection.current];
+    //     if (bb < aa) {
+    //       [bb, aa] = [aa, bb];
+    //     };
+    //     let array = []
+    //     for (let idx = aa; idx<=bb; idx++) {
+    //       array.push(idx);
+    //       for (let tkn of exampleWrap?.example?.material?.tokenList) {
+    //         tkn._ctrl.selecting = (array.includes(tkn.idx));
+    //       };
+    //     };
+    //   },
+    //   onMouseOut:   (token) => {
+    //     selection.current = null;
+    //     // console.log(['mouseOut', token.word]);
+    //   },
+    //   onMouseUp:    (token) => {
+    //     // console.log(['mouseUp', token.word]);
+    //     //
+    //     if (selection.start == null) {return;};
+    //     //
+    //     //
+    //     selection.end = token.idx;
+    //     let [aa, bb] = [selection.start, selection.end];
+    //     if (bb < aa) {
+    //       [bb, aa] = [aa, bb];
+    //     };
+    //     selection.isSelecting = false;
+    //     selection.array = [];
+    //     for (let idx = aa; idx<=bb; idx++) {
+    //       selection.array.push(idx);
+    //       for (let tkn of exampleWrap?.example?.material?.tokenList) {
+    //         if (selection.array.includes(tkn.idx)) {
+    //           // tkn._ctrl = tkn._ctrl ?? {};
+    //           tkn._ctrl.selecting = false;
+    //           tkn._ctrl.selected = true;
+    //         }
+    //       };
+    //     };
+    //     selection.hasDown = false;
+    //     // console.log(selection.array);
+    //   },
+    //   onMouseDown_Old:  (token) => {
+    //     // console.log(['mouseDown', token.word]);
+    //     //
+    //     if (selection.isSelecting) {
+    //       selection.again = true;
+    //       return;
+    //     };
+    //     //
+    //     selection.again = false;
+    //     for (let tkn of exampleWrap?.example?.material?.tokenList) {
+    //       tkn._ctrl = tkn._ctrl ?? {};
+    //       tkn._ctrl.selected = false;
+    //     };
+    //     token._ctrl.selecting = true;
+    //     //
+    //     selection.isSelecting = true;
+    //     selection.start = token.idx;
+    //     selection.current = token.idx;
+    //     selection.end = null;
+    //   },
+    //   onMouseUp_Old:    (token) => {
+    //     // console.log(['mouseUp', token.word]);
+    //     //
+    //     if (selection.start == null) {return;};
+    //     //
+    //     if (selection.start == token.idx) {
+    //       if (!selection.again) {return;};
+    //       selection.again = false;
+    //     };
+    //     //
+    //     selection.end = token.idx;
+    //     let [aa, bb] = [selection.start, selection.end];
+    //     if (bb < aa) {
+    //       [bb, aa] = [aa, bb];
+    //     };
+    //     selection.isSelecting = false;
+    //     selection.array = [];
+    //     for (let idx = aa; idx<=bb; idx++) {
+    //       selection.array.push(idx);
+    //       for (let tkn of exampleWrap?.example?.material?.tokenList) {
+    //         if (selection.array.includes(tkn.idx)) {
+    //           // tkn._ctrl = tkn._ctrl ?? {};
+    //           tkn._ctrl.selecting = false;
+    //           tkn._ctrl.selected = true;
+    //         }
+    //       };
+    //     };
+    //     // console.log(selection.array);
+    //   },
+    // };
 
 
 
@@ -532,7 +532,7 @@ const RootComponent = {
         try {
           dataMethods.saveStore();
           await updateSteps();
-          selectionMethods.clearSelection();
+          tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
           //
           exampleWrap.example = {};
           //
@@ -564,7 +564,7 @@ const RootComponent = {
             if (stepRef in stepsDict) {
               await stepMethods.goRefStep(stepRef);
             };
-            selectionMethods.clearSelection();
+            tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
 
             //
             appData.ctrl.currentPage = 'anno';
@@ -989,7 +989,7 @@ const RootComponent = {
       goIdx: async (idx) => {
         dataMethods.saveStore();
         await updateSteps();
-        selectionMethods.clearSelection();
+        tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
 
         idx = ctrlMethods.fineIdx(idx);
         appData.ctrl.currentIdx = idx;
@@ -1016,7 +1016,7 @@ const RootComponent = {
           await stepMethods.goRefStep(stepRef);
         };
 
-        selectionMethods.clearSelection();
+        tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
       },
       toogleShowOrigin: () => {
         appData.ctrl.showOrigin = !appData.ctrl.showOrigin;
@@ -1095,7 +1095,7 @@ const RootComponent = {
       cancelStep: async (ref) => {
         await stepMethods.goRefStep(ref, null);  // 不要把 data 放进去，避免重复标记
         stepRecords.list = [];
-        selectionMethods.clearSelection();
+        tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
       },
       resetStep: async (ref) => {
         exampleWrap.example.annotations = [];
@@ -1128,7 +1128,7 @@ const RootComponent = {
 
         stepMethods.dealWithData(data, fn);
 
-        selectionMethods.clearSelection();
+        tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
         await stepMethods.goRefStep(ref);  // 不要把 data 放进去，避免重复标记
       },
 
@@ -1263,11 +1263,13 @@ const RootComponent = {
 
     const getReplacedToken = (idx) => {
       let tokenList = exampleWrap.example.material.tokenList;
-      return tokenList[idx]?.replaced ? tokenList[idx]?.to?.word : tokenList[idx].word;
+      return tokenSelector.getReplacedToken(idx, tokenList);
+      // return tokenList[idx]?.replaced ? tokenList[idx]?.to?.word : tokenList[idx].word;
     };
     const getOriginToken = (idx) => {
       let tokenList = exampleWrap.example.material.tokenList;
-      return tokenList[idx].word;
+      return tokenSelector.getOriginToken(idx, tokenList);
+      // return tokenList[idx].word;
     };
 
 
@@ -1281,8 +1283,9 @@ const RootComponent = {
       ...dataMethods,
       ...ctrlMethods,
       //
+      tokenSelector,
       selection,
-      ...selectionMethods,
+      //
       ...apiMethods,
       //
       stepRecords,
