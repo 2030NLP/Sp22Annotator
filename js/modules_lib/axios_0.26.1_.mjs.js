@@ -2288,7 +2288,6 @@ module.exports = {
 });
 //# not # sourceMappingURL=axios.map
 
-const axios = Wrap.default
+const axios = Wrap.default;
 
 export default axios;
-

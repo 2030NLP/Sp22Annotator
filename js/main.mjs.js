@@ -21,6 +21,7 @@ import TokenSelector from './modules/TokenSelector.mjs.js';
 import StepControl from './modules/StepControl.mjs.js';
 import BackEnd from './modules/BackEnd.mjs.js';
 import BackEndUsage from './modules/BackEndUsage.mjs.js';
+import IoControl from './modules/IoControl.mjs.js';
 
 import axios from './modules_lib/axios_0.26.1_.mjs.js';
 import ClipboardJS from './modules_lib/clipboard_2.0.10_.mjs.js';
@@ -48,6 +49,9 @@ const fildId_to_info = { "A01": { "genre": "中小学语文课本", "file": "人
 
 const RootComponent = {
   setup() {
+
+    // 备用的窗口，作为 "ioC.onImport(win.document)" 的参数
+    const win = reactive(window);
 
     // 语料信息映射 函数
     const fileInfo = (originId) => {
@@ -107,48 +111,13 @@ const RootComponent = {
     });
     const theBackEnd = new BackEnd(theApi, alertBox_pushAlert);
 
+
+    // 初始化 标注工具当下正在标注的语料 数据
     const exampleWrap = reactive({
       example: {},
     });
 
-    // const backEndData = reactive({
-    //   tasks: [],
-    //   //
-    //   newThings: {
-    //     theUser: {},
-    //     topic: "",
-    //     lastEID: null,
-    //     //
-    //     tasksShowValid: true,
-    //     tasksShowDropped: true,
-    //     tasksShowUndone: true,
-    //   },
-    //   //
-    //   tasksShowValid: true,
-    //   tasksShowDropped: true,
-    //   tasksShowUndone: true,
-    //   //
-    //   ctrl: {
-    //     currentWorker: "",
-    //     currentWorkerId: "",
-    //     currentWorkerSecret: "",
-    //     currentWorkerTarget: 600,
-    //     //
-    //     haveStore: false,
-    //     //
-    //     currentPage: "setup",
-    //     //
-    //     doneNum: 0,
-    //     totalNum: 1,
-    //     donePct: "10%",
-    //   },
-    // });
-
-
-
-
-
-
+    // 初始化 应用 数据
     const appData = reactive({
       fileWrapWrap: {
         fileWrap: {},
@@ -188,11 +157,7 @@ const RootComponent = {
       },
     });
 
-
-
-
-
-
+    // 启动时 加载缓存的 应用信息 及 用户信息
     onMounted(() => {
       let storedVersion = store.get(`${APP_NAME}:version`);
       if (storedVersion == APP_VERSION) {
@@ -225,219 +190,16 @@ const RootComponent = {
       });
     };
 
-
-
-
-
-    // const formFilesRef = (document?.forms?.["file-form"]?.["file-input"]?.files);
-    // const formFiles = computed(() => formFilesRef);
-    const dataMethods = {
-      log: (action) => {
-        let worker = appData.ctrl.currentWorker;
-        let info = {
-          time: JSON.parse(JSON.stringify(new Date())),
-          person: worker,
-          action: action,
-        };
-        appData.dataWrap.handleLogs.push(info);
-        appData.dataWrap.lastModifiedAt = info.time;
-        appData.dataWrap.appVersion = APP_VERSION;
-      },
-
-
-      loadStore: async () => {
-        appData.dataWrap = store.get(`${APP_NAME}:dataWrap`);
-        await dataMethods.fixData();
-        dataMethods.log(`load from store at idx(${appData?.dataWrap?._ctrl?.currentIdx})`);
-      },
-      onExport: async () => {
-        if (!appData?.dataWrap?.dataItems?.length) {return;};
-        await dataMethods.beforeSave();
-        dataMethods.log(`export to file at idx(${appData?.dataWrap?._ctrl?.currentIdx})`);
-        let worker = appData.ctrl.currentWorker;
-        let fid = appData.dataWrap.fID;
-        let using = stepsDictWrap.using;
-        let fileName = `${PROJ_PREFIX}-${using} [${fid}] @${worker} (${timeString()}).json`;
-        theSaver.saveJson(appData.dataWrap, fileName);
-      },
-      onImport: async () => {
-        let fileItem = document.forms["file-form"]["file-input"].files[0];
-        console.debug(fileItem);
-
-        if (fileItem == null) {return;};
-
-        let fileWrap = {};
-        fileWrap.file = fileItem;
-        fileWrap.name = fileItem.name;
-        fileWrap.isUsable = true;
-        fileWrap.readed = false;
-        fileWrap.readed2 = false;
-        fileWrap.tmp = false;
-        fileWrap.encodingGot = false;
-        fileWrap.encoding = null;
-
-        await theReader.readFileAsBinaryString(fileWrap, fileWrap.encoding);
-        await theReader.readFile(fileWrap);
-        // Object.assign(appData.fileWrapWrap, {fileWrap: fileWrap});
-        appData.fileWrapWrap.fileWrap = fileWrap;
-        // console.debug(appData.fileWrapWrap.fileWrap);
-
-        await dataMethods.readData();
-
-
-        dataMethods.log(`import from file at idx(${appData?.dataWrap?._ctrl?.currentIdx})`);
-        saveStore();
-      },
-      readData: async () => {
-        let fileWrap = appData.fileWrapWrap.fileWrap;
-        let obj = JSON.parse(fileWrap.content);
-        // fileWrap.obj = obj;
-
-        // 看是不是用于这次评测的数据
-        // TODO: 未来如果版本有大改，可能要针对 appVersion 做某些判断和处理。
-        if (obj?.desc != PROJ_DESC) {
-          appData.fileError = true;
-          return;
-        };
-        appData.fileError = false;
-
-        // ↓ 读取数据
-        // Object.assign(appData.dataWrap, foolCopy(obj));
-        appData.dataWrap = foolCopy(obj);
-
-        await dataMethods.fixData();
-      },
-      fixData: async () => {
-        console.debug("开始 fixData");
-        console.debug(foolCopy(appData.dataWrap));
-
-        // 更新当前要标注的材料的序号
-        if (!('_ctrl' in appData.dataWrap)) {
-          appData.dataWrap._ctrl = {};
-        };
-        if (!('currentIdx' in appData.dataWrap._ctrl)) {
-          appData.dataWrap._ctrl.currentIdx = 0;
-        };
-        // console.debug(appData.dataWrap._ctrl.currentIdx);
-
-        for (item of appData.dataWrap.dataItems) {
-          if (!('annotations' in item)) {
-            item.annotations = [];
-          };
-          if (!('_ctrl' in item)) {
-            item._ctrl = {};
-          };
-        };
-
-        if (!('handleLogs' in appData.dataWrap)) {
-          appData.dataWrap.handleLogs = [{
-            time: JSON.parse(JSON.stringify(new Date())),
-            person: "App",
-            action: "fix",
-          }];
-        };
-
-        console.debug(foolCopy(appData.dataWrap));
-        console.debug("结束 fixData");
-
-        updateProgress();
-        await ctrlMethods.goIdx(appData.dataWrap._ctrl.currentIdx);
-      },
-
-      ensureExampleStep: () => {
-        // 保存当前步骤
-        if (!('_ctrl' in exampleWrap.example)) {
-          exampleWrap.example._ctrl = {};
-        };
-        exampleWrap.example._ctrl.currentStepRef = currentStep.ref;
-        // exampleWrap.example._ctrl.currentSchema = {
-        //   name: stepsDictWrap.name ?? null,
-        //   version: stepsDictWrap.version ?? null,
-        //   using: stepsDictWrap.using ?? null,
-        // };
-        // 网络版节约空间
-        exampleWrap.example._ctrl.schema = [
-          stepsDictWrap.version ?? null,
-          stepsDictWrap.using ?? null,
-        ];
-      },
-      saveExample: () => {
-        if (!appData.dataWrap.dataItems.length) {return;};
-        dataMethods.ensureExampleStep();
-        // 覆盖
-        appData.dataWrap.dataItems[appData.ctrl.currentIdx] = foolCopy(exampleWrap.example);
-      },
+    const toogleShowOrigin = () => {
+      appData.ctrl.showOrigin = !appData.ctrl.showOrigin;
+      // console.debug(appData.ctrl.showOrigin);
     };
 
 
 
 
 
-    const updateProgress = () => {
-      appData.ctrl.doneNum = appData.tasks.filter(it=>it.valid||it.dropped).length ?? 0;
-      appData.ctrl.totalNum = appData.tasks.length ?? 1;
-      appData.ctrl.donePct = `${Math.min(100, appData.ctrl.doneNum / appData.ctrl.totalNum * 100)}%`;
-    };
-
-
-
-    const ctrlMethods = {
-      fineIdx: (idx) => {
-        idx = Math.min(idx, appData.dataWrap.dataItems.length-1);
-        idx = Math.max(idx, 0);
-        return idx;
-      },
-      goIdx: async (idx) => {
-        saveStore();
-        await updateSchema();
-        tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
-
-        idx = ctrlMethods.fineIdx(idx);
-        appData.ctrl.currentIdx = idx;
-        // Object.assign(exampleWrap.example, foolCopy(appData.dataWrap.dataItems[appData.ctrl.currentIdx]));
-        if (!appData.dataWrap.dataItems.length) {
-          dataMethods.log(`goIdx(${idx}) returned`);
-          return;
-        };
-        dataMethods.log(`goIdx(${idx})`);
-
-        // 覆盖
-        exampleWrap.example = foolCopy(appData.dataWrap.dataItems[appData.ctrl.currentIdx]);
-        appData.dataWrap._ctrl.currentIdx = idx;
-        appData.ctrl.targetIdx = null;
-
-        // 还原步骤
-        let stepRef;
-        if (!exampleWrap?.example?._ctrl?.currentStepRef?.length) {
-          stepRef = stepsDictWrap?.[stepsDictWrap?.using]?.startStep ?? 'start';
-        } else {
-          stepRef = exampleWrap.example._ctrl.currentStepRef;
-        };
-        if (stepRef in stepsDict) {
-          await stepCtrl.goRefStep(stepRef);
-        };
-
-        tokenSelector.clear(exampleWrap?.example?.material?.tokenList);
-      },
-      toogleShowOrigin: () => {
-        appData.ctrl.showOrigin = !appData.ctrl.showOrigin;
-        // console.debug(appData.ctrl.showOrigin);
-      },
-      // 0228 之前的旧版函数
-      // __updateProgress: () => {
-      //   let endStep = stepsDictWrap?.[stepsDictWrap?.using]?.endStep;
-      //   appData.ctrl.totalNum = appData.dataWrap.dataItems.length;
-      //   appData.ctrl.doneNum = appData.dataWrap.dataItems.filter(it=>{
-      //     return it?._ctrl?.currentStepRef == endStep && endStep?.length;
-      //   }).length;
-      //   appData.ctrl.donePct = `${Math.min(100, appData.ctrl.doneNum / appData.ctrl.totalNum * 100)}%`;
-      // },
-    };
-
-
-
-
-    const RootStep = reactive({});
+    const rootStep = reactive({});
     const currentStep = reactive({});
     const stepsDict = reactive({});
     const stepsDictWrap = reactive({
@@ -445,26 +207,58 @@ const RootComponent = {
     });
 
 
+
+    const appPack = {
+      reactive_data: appData,
+      reactive_exam_wrap: exampleWrap,
+
+      tokenSelector: tokenSelector,
+
+      reactive_rootStep: rootStep,
+      reactive_currentStep: currentStep,
+      reactive_stepsDict: stepsDict,
+      reactive_stepsDictWrap: stepsDictWrap,
+
+      theBackEnd: theBackEnd,
+      pushAlertFn: alertBox_pushAlert,
+      removeAlertFn: alertBox_removeAlert,
+      appName: APP_NAME,
+      appVersion: APP_VERSION,
+      projDesc: PROJ_DESC,
+      projPrefix: PROJ_PREFIX,
+      storeTool: store,
+
+      saveStoreFn: saveStore,
+
+      reader: theReader,
+    };
+
+    // 初始化 标注步骤 控制器
+    const stepCtrl = new StepControl(appPack);
+    appPack.stepCtrl = stepCtrl;
+
+
+
     const anotherAxios = axios.create({
       headers: {'Catch-Cotrol': 'no-cache'},
     });
     const updateSchema = async () => {
-      let response = await anotherAxios.request({
-        url: "schema/steps.schema.json",
-        method: 'get',
-      });
-      let wrap = (response.data);
-      // console.debug(wrap);
-      if (stepsDictWrap.name == wrap.name &&
-        stepsDictWrap.version == wrap.version &&
-        stepsDictWrap.using == wrap.using) {
+      let wrap;
+      try {
+        let response = await anotherAxios.request({
+          url: "schema/steps.schema.json",
+          method: 'get',
+        });
+        wrap = (response.data);
+      } catch (error) {
+        alertBox_pushAlert(`获取 schema 时出错！`, "danger");
         return;
       };
-      alertBox_pushAlert(`收到 schema（版本：${wrap.version}，规范：${wrap.using}）`, "warning");
-      Object.assign(stepsDictWrap, wrap);
-      Object.assign(stepsDict, stepsDictWrap?.[stepsDictWrap?.using]?.steps??null);
-      Object.assign(RootStep, stepsDictWrap?.[stepsDictWrap?.using]?.steps?.[stepsDictWrap?.[stepsDictWrap?.using]?.startStep]??null);
-      Object.assign(currentStep, RootStep);
+      // console.debug(wrap);
+      let got = stepCtrl.touchSchema(wrap);
+      if (got) {
+        alertBox_pushAlert(`收到 schema（版本：${wrap.version}，规范：${wrap.using}）`, "warning");
+      };
     };
 
     onMounted(async () => {
@@ -472,38 +266,20 @@ const RootComponent = {
     });
 
 
-    const appPack = {
-      reactive_data: appData,
-      reactive_exam_wrap: exampleWrap,
+    appPack.updateSchemaFn = updateSchema;
 
-      updateSchemaFn: updateSchema,
 
-      tokenSelector: tokenSelector,
+    // 初始化 离线版 的 主要逻辑
+    const ioC = new IoControl(appPack);
 
-      reactive_stepsDictWrap: stepsDictWrap,
-      reactive_currentStep: currentStep,
-      reactive_stepsDict: stepsDict,
+    appPack.ioControl = ioC;
 
-      theBackEnd: theBackEnd,
-      pushAlertFn: alertBox_pushAlert,
-      removeAlertFn: alertBox_removeAlert,
-      appName: APP_NAME,
-      appVersion: APP_VERSION,
-      storeTool: store,
-
-      ioControl: dataMethods,
-
-      updateProgressFn: updateProgress,
-      saveStoreFn: saveStore,
-    };
-
-    const stepCtrl = new StepControl(appPack);
-
-    appPack.stepCtrl = stepCtrl;
-
+    // 初始化 网络版 的 主要逻辑
     const bEU = new BackEndUsage(appPack);
+    stepCtrl.updateProgress = () => { bEU.updateProgress(); };
 
 
+    // 一些便捷函数，免得前端代码写得太长
     const getReplacedToken = (idx) => {
       let tokenList = exampleWrap.example.material.tokenList;
       return tokenSelector.getReplacedToken(idx, tokenList);
@@ -514,50 +290,50 @@ const RootComponent = {
       return tokenSelector.getOriginToken(idx, tokenList);
       // return tokenList[idx].word;
     };
+    const getTokenList = () => exampleWrap?.example?.material?.tokenList;
+
+
 
 
     return {
       //
-      ...toRefs(exampleWrap),  // 提供 example
-      // ...toRefs(data),
-      alertBox,
+      win,
       //
+      fileInfo,
+      //
+      ...toRefs(exampleWrap),
       ...toRefs(appData),
-      ...dataMethods,
-      ...ctrlMethods,
-      //
-      tokenSelector,
-      selection,
-      //
-      theBackEnd,
-      bEU,
-      // ...apiMethods,
-      //
-      // stepRecords,
-      stepsDict,
-      RootStep,
-      currentStep,
-      //
-      stepCtrl,
-      //
-      stepsDictWrap,
-      updateSchema,
       //
       alertData,
       alertBox,
       //
+      selection,
+      tokenSelector,
+      //
       theSaver,
+      //
+      theApi,
+      theBackEnd,
+      //
+      saveStore,
+      toogleShowOrigin,
+      //
+      rootStep,
+      currentStep,
+      stepsDict,
+      stepsDictWrap,
+      //
+      anotherAxios,
+      updateSchema,
+      //
+      stepCtrl,
+      ioC,
+      bEU,
+      //
       //
       getReplacedToken,
       getOriginToken,
-      //
-      fileInfo,
-      //
-      theApi,
-      anotherAxios,
-      //
-      saveStore,
-      updateProgress,
+      getTokenList,
       //
     };
   },

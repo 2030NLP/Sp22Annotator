@@ -7,17 +7,16 @@ class StepControl {
     this.data = appPack.reactive_data;
     this.ewp = appPack.reactive_exam_wrap;
 
-    this.updateSchema = appPack.updateSchemaFn;
+    // this.updateSchema = appPack.updateSchemaFn;
 
     this.tokenSelector = appPack.tokenSelector;
 
-    this.stepsDictWrap = appPack.reactive_stepsDictWrap;
+    this.rootStep = appPack.reactive_rootStep;
     this.currentStep = appPack.reactive_currentStep;
     this.stepsDict = appPack.reactive_stepsDict;
+    this.stepsDictWrap = appPack.reactive_stepsDictWrap;
 
-    this.ioControl = appPack.ioControl;
-
-    this.updateProgress = appPack.updateProgressFn;
+    this.updateProgress = () => {};
     this.saveStore = appPack.saveStoreFn;
   }
   static new(appPack) {
@@ -25,7 +24,18 @@ class StepControl {
   }
 
 
-
+  touchSchema(wrap) {
+    if (this.stepsDictWrap.name == wrap.name &&
+      this.stepsDictWrap.version == wrap.version &&
+      this.stepsDictWrap.using == wrap.using) {
+      return false;
+    };
+    Object.assign(this.stepsDictWrap, wrap);
+    Object.assign(this.stepsDict, this.stepsDictWrap?.[this.stepsDictWrap?.using]?.steps??null);
+    Object.assign(this.rootStep, this.stepsDictWrap?.[this.stepsDictWrap?.using]?.steps?.[this.stepsDictWrap?.[this.stepsDictWrap?.using]?.startStep]??null);
+    Object.assign(this.currentStep, this.rootStep);
+    return true;
+  }
 
 
   ensureExampleStep() {
@@ -60,7 +70,7 @@ class StepControl {
 
 
   async goStep(stepObj_, data) {
-    // await this.updateSchema();
+    // await this.touchSchema();
     if (data!=null) {
       this.dealWithData(data, da=>da);
     };
@@ -232,9 +242,6 @@ class StepControl {
     };
     await this.handleTemplate(ref, data, fn);
   }
-
-
-
 
 
 }

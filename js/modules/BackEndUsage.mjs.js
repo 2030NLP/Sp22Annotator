@@ -7,27 +7,31 @@ class BackEndUsage {
     this.data = appPack.reactive_data;
     this.ewp = appPack.reactive_exam_wrap;
 
-    this.updateSchema = appPack.updateSchemaFn;
-
     this.tokenSelector = appPack.tokenSelector;
 
-    this.stepsDictWrap = appPack.reactive_stepsDictWrap;
-    this.currentStep = appPack.reactive_currentStep;
-    this.stepsDict = appPack.reactive_stepsDict;
-
     this.stepCtrl = appPack.stepCtrl;
+
+    this.updateSchema = appPack.updateSchemaFn;
 
     this.backEnd = appPack.theBackEnd;
     this.pushAlert = appPack.pushAlertFn ?? function(){console.log([...arguments])};
     this.removeAlert = appPack.removeAlertFn ?? function(){console.log([...arguments])};
+
     this.appName = appPack.appName;
     this.appVersion = appPack.appVersion;
+
     this.storeTool = appPack.storeTool;
 
     console.log(this);
   }
   static new(appPack) {
     return new BackEndUsage(appPack);
+  }
+
+  updateProgress() {
+    this.data.ctrl.doneNum = this.data.tasks.filter(it=>it.valid||it.dropped).length ?? 0;
+    this.data.ctrl.totalNum = this.data.tasks.length ?? 1;
+    this.data.ctrl.donePct = `${Math.min(100, this.data.ctrl.doneNum / this.data.ctrl.totalNum * 100)}%`;
   }
 
 
@@ -88,11 +92,11 @@ class BackEndUsage {
         // 还原步骤
         let stepRef;
         if (!this.ewp.example?._ctrl?.currentStepRef?.length) {
-          stepRef = this.stepsDictWrap?.[this.stepsDictWrap?.using]?.startStep ?? 'start';
+          stepRef = this.stepCtrl.stepsDictWrap?.[this.stepCtrl.stepsDictWrap?.using]?.startStep ?? 'start';
         } else {
           stepRef = this.ewp.example._ctrl.currentStepRef;
         };
-        if (stepRef in this.stepsDict) {
+        if (stepRef in this.stepCtrl.stepsDict) {
           await this.stepCtrl.goRefStep(stepRef);
         };
         this.tokenSelector.clear(this.ewp.example?.material?.tokenList);
@@ -248,7 +252,9 @@ class BackEndUsage {
       this.pushAlert(`已保存`, 'success', 500);
       if (!anno_wrap.isDropping) {
         this.data.tasks[content?._info?.btn_idx].valid = true;
+        this.data.tasks[content?._info?.btn_idx].dropped = false;
       } else {
+        this.data.tasks[content?._info?.btn_idx].valid = false;
         this.data.tasks[content?._info?.btn_idx].dropped = true;
       };
       return true;
@@ -295,15 +301,6 @@ class BackEndUsage {
     if (result) {
       await this.apiNext(content);
     };
-  }
-
-
-
-
-  updateProgress() {
-    this.data.ctrl.doneNum = this.data.tasks.filter(it=>it.valid||it.dropped).length ?? 0;
-    this.data.ctrl.totalNum = this.data.tasks.length ?? 1;
-    this.data.ctrl.donePct = `${Math.min(100, this.data.ctrl.doneNum / this.data.ctrl.totalNum * 100)}%`;
   }
 
 

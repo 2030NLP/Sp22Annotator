@@ -227,7 +227,7 @@
             <div class="row my-2 material-area" id="material-replaced">
               <p>
                 <span
-                  v-for="token in example?.material?.tokenList"
+                  v-for="token in getTokenList()"
                   :key="token.idx"
                   class="token"
                   :class="{'right-space': true, 'should-notice': token.word=='前'||token.word=='后'}"
@@ -241,10 +241,10 @@
                   :data-replaced="token?.replaced ?? false"
                   :data-word="token.word"
                   :data-to-word="token?.to?.word"
-                  @mousedown="tokenSelector.onMouseDown(token, $event, example.material.tokenList)"
-                  @mouseenter="tokenSelector.onMouseEnter(token, example.material.tokenList)"
+                  @mousedown="tokenSelector.onMouseDown(token, $event, getTokenList())"
+                  @mouseenter="tokenSelector.onMouseEnter(token, getTokenList())"
                   @mouseout="tokenSelector.onMouseOut(token)"
-                  @mouseup="tokenSelector.onMouseUp(token, example.material.tokenList)"
+                  @mouseup="tokenSelector.onMouseUp(token, getTokenList())"
                 >{{ token?.replaced ? token?.to?.word : token.word }}<!-- <sub>{{ token.idx }}</sub> --></span>
               </p>
             </div>
@@ -253,7 +253,7 @@
             <div class="row my-2 material-area" id="material-origin" :data-show="ctrl.showOrigin" v-show="ctrl.showOrigin">
               <p>
                 <span
-                  v-for="token in example?.material?.tokenList"
+                  v-for="token in getTokenList()"
                   :key="token.idx"
                   class="token"
                   :class="{'right-space': true}"
@@ -265,10 +265,10 @@
                   :data-selecting="token?._ctrl?.selecting"
                   :data-selected="token?._ctrl?.selected"
                   :data-have-replace="token?.replaced ?? false"
-                  @mousedown="tokenSelector.onMouseDown(token, $event, example.material.tokenList)"
-                  @mouseenter="tokenSelector.onMouseEnter(token, example.material.tokenList)"
+                  @mousedown="tokenSelector.onMouseDown(token, $event, getTokenList())"
+                  @mouseenter="tokenSelector.onMouseEnter(token, getTokenList())"
                   @mouseout="tokenSelector.onMouseOut(token)"
-                  @mouseup="tokenSelector.onMouseUp(token, example.material.tokenList)"
+                  @mouseup="tokenSelector.onMouseUp(token, getTokenList())"
                 >{{ token.word }}<!-- <sub>{{ token.idx }}</sub> --></span>
               </p>
             </div>
@@ -281,16 +281,16 @@
                   type="button"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-outline-info btn-copy-selection`"
-                  :data-clipboard-text="tokenSelector.selectedReplacedText(example?.material?.tokenList)"
+                  :data-clipboard-text="tokenSelector.selectedReplacedText(getTokenList())"
                 >拷贝选区{{ctrl.showOrigin ? "（1）" : ""}}</button>
                 <button
                   type="button"
                   v-show="ctrl.showOrigin"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-outline-info btn-copy-selection`"
-                  :data-clipboard-text="tokenSelector.selectedOriginText(example?.material?.tokenList)"
+                  :data-clipboard-text="tokenSelector.selectedOriginText(getTokenList())"
                 >拷贝选区（2）</button>
-                <button type="button" @click="tokenSelector.clear(example?.material?.tokenList)" class="btn btn-sm my-1 me-1" :class="`btn-outline-info`">清除选区</button>
+                <button type="button" @click="tokenSelector.clear(getTokenList())" class="btn btn-sm my-1 me-1" :class="`btn-outline-info`">清除选区</button>
               </div>
             </div>
             <!-- 便捷选择操作区 结束 -->
@@ -344,7 +344,7 @@
                 <!-- <button
                   type="button"
                   v-if="'finalResult'==(currentStep.mode)&&currentStep?.props?.nextBtn"
-                  @click="goIdx(ctrl.currentIdx+1)"
+                  @click="ioC.goIdx(ctrl.currentIdx+1)"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-${currentStep.props.nextBtn.style}`"
                 >{{ currentStep.props.nextBtn.text }}</button> -->
@@ -448,9 +448,9 @@
               <!-- --- -->
               <div class="col col-12 my-1">
                 <!-- addBtn -->
-                <button v-if="currentStep?.props?.addBtn" type="button" @click="currentStep?.props?.data.tokenarrays.push(selection.array);tokenSelector.clear(example?.material?.tokenList);" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.addBtn.style}`" :disabled="selection.array.length<1">{{ currentStep.props.addBtn.text }}</button>
+                <button v-if="currentStep?.props?.addBtn" type="button" @click="currentStep?.props?.data.tokenarrays.push(selection.array);tokenSelector.clear(getTokenList());" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.addBtn.style}`" :disabled="selection.array.length<1">{{ currentStep.props.addBtn.text }}</button>
                 <!-- clearBtn -->
-                <button v-if="currentStep?.props?.clearBtn" type="button" @click="tokenSelector.clear(example?.material?.tokenList)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.clearBtn.style}`">{{ currentStep.props.clearBtn.text }}</button>
+                <button v-if="currentStep?.props?.clearBtn" type="button" @click="tokenSelector.clear(getTokenList())" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.clearBtn.style}`">{{ currentStep.props.clearBtn.text }}</button>
               </div>
               <!-- 已选列表 开始 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.listTitle">
@@ -470,11 +470,11 @@
               <!-- --- -->
               <div class="col col-12 my-1">
                 <!-- okBtn -->
-                <button v-if="currentStep?.props?.okBtn" type="button" @click="stepCtrl.handleChooseOrTextMultiSpans(currentStep.props.okBtn.go, currentStep.props.data);tokenSelector.clear(example?.material?.tokenList);" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`" :disabled="currentStep.props.data.tokenarrays.length<2">{{ currentStep.props.okBtn.text }}</button>
+                <button v-if="currentStep?.props?.okBtn" type="button" @click="stepCtrl.handleChooseOrTextMultiSpans(currentStep.props.okBtn.go, currentStep.props.data);tokenSelector.clear(getTokenList());" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`" :disabled="currentStep.props.data.tokenarrays.length<2">{{ currentStep.props.okBtn.text }}</button>
                 <!-- cleanBtn 弃用 -->
                 <!-- <button v-if="currentStep?.props?.cleanBtn" type="button" @click="cleanSpans" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.clearBtn.style}`">{{ currentStep.props.cleanBtn.text }}</button> -->
                 <!-- cancelBtn -->
-                <button v-if="currentStep?.props?.cancelBtn" type="button" @click="stepCtrl.cancelStep(currentStep.props.cancelBtn.go);tokenSelector.clear(example?.material?.tokenList);" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.cancelBtn.style}`">{{ currentStep.props.cancelBtn.text }}</button>
+                <button v-if="currentStep?.props?.cancelBtn" type="button" @click="stepCtrl.cancelStep(currentStep.props.cancelBtn.go);tokenSelector.clear(getTokenList());" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.cancelBtn.style}`">{{ currentStep.props.cancelBtn.text }}</button>
               </div>
             </div>
             <!-- multiSpans 模式 结束 -->
@@ -722,10 +722,10 @@
         <div class="row page-ctrl">
           <div class="col col-12 col-md-4 my-1">
             <div class="input-group input-group-sm ">
-              <button class="btn btn-outline-secondary" type="button" @click="saveExample();goIdx(ctrl.currentIdx-1)">上一条</button>
+              <button class="btn btn-outline-secondary" type="button" @click="saveExample();ioC.goIdx(ctrl.currentIdx-1)">上一条</button>
               <!-- <span class="input-group-text">3</span> -->
               <input type="text" class="form-control text-center" disabled :value="ctrl.currentIdx+1">
-              <button class="btn btn-outline-secondary" type="button" @click="saveExample();goIdx(ctrl.currentIdx+1)">下一条</button>
+              <button class="btn btn-outline-secondary" type="button" @click="saveExample();ioC.goIdx(ctrl.currentIdx+1)">下一条</button>
             </div>
           </div>
           <div class="col-md-4 my-0">
@@ -735,7 +735,7 @@
               <span class="input-group-text">前往第</span>
               <input type="number" class="form-control text-center" v-model="ctrl.targetIdx">
               <span class="input-group-text">条</span>
-              <button class="btn btn-outline-secondary" type="button" @click="saveExample();goIdx(ctrl.targetIdx-1)">GO</button>
+              <button class="btn btn-outline-secondary" type="button" @click="saveExample();ioC.goIdx(ctrl.targetIdx-1)">GO</button>
             </div>
           </div>
           <!-- <div class="col-md-1 my-0">
@@ -746,7 +746,7 @@
     </div>
 
 
-    <div v-if="false" class="container page my-4 hiddent" id="page-import">
+    <div __v-if="false" class="container page my-4 hiddent" id="page-import">
       <div class="container py-2">
         <!-- progressCtrl start -->
         <div class="row align-items-center">
@@ -776,7 +776,7 @@
               type="button"
               name="do_import"
               id="do_import"
-              @click="onImport"
+              @click="ioC.onImport(win.document)"
               class="btn btn-primary"
             >导入</button>
             <button
@@ -784,7 +784,7 @@
               type="button"
               name="do_loadStore"
               id="do_loadStore"
-              @click="loadStore"
+              @click="ioC.loadStore()"
               class="btn btn-success"
             >加载缓存数据</button>
             <button
@@ -792,7 +792,7 @@
               type="button"
               name="do_export"
               id="do_export"
-              @click="onExport"
+              @click="ioC.onExport()"
               class="btn btn-info"
             >导出</button>
           </div>
