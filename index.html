@@ -120,13 +120,13 @@
             <button
               type="button"
               class="btn btn-sm me-2 my-1 btn-outline-primary"
-              @click="()=>{bEU.apiConnect()}"
+              @click="()=>{bEU.connect()}"
               title="每次刷新页面后需「同步信息」并获取任务列表"
             >同步信息</button>
             <button
               type="button"
               class="btn btn-sm me-2 my-1 btn-outline-primary"
-              @click="()=>{bEU.apiUpdateTarget()}"
+              @click="()=>{bEU.updateTarget()}"
               title="所有任务完成后，可为自己设置新的标注目标，增加总任务量"
             >更新目标</button>
           </div>
@@ -193,7 +193,7 @@
               v-show="(taskBtn.valid&&newThings.tasksShowValid)||(taskBtn.dropped&&newThings.tasksShowDropped)||(!taskBtn.valid&&!taskBtn.dropped&&newThings.tasksShowUndone)"
               class="btn btn-sm me-2 my-1"
               :class="`btn-${taskBtn.valid?'info':taskBtn.dropped?'dark':taskBtn.skipped?'outline-primary':'outline-primary'}`"
-              @click="bEU.apiTouchTaskBtn(taskBtn)"
+              @click="bEU.touchTaskBtn(taskBtn)"
             >#{{taskBtn.eId}}</button>
           </div>
         </div>
@@ -354,7 +354,7 @@
                 <button
                   type="button"
                   v-if="'finalResult'==(currentStep.mode)"
-                  @click="bEU.apiNext(example)"
+                  @click="bEU.next(example)"
                   class="btn btn-sm my-1 me-4"
                   :class="`btn-danger`"
                 >不保存并前往下一条</button>
@@ -363,14 +363,14 @@
                 <button
                   type="button"
                   v-if="'finalResult'==(currentStep.mode)"
-                  @click="bEU.apiSave(example)"
+                  @click="bEU.save(example)"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-success`"
                 >保存</button>
                 <button
                   type="button"
                   v-if="'finalResult'==(currentStep.mode)"
-                  @click="bEU.apiSaveAndNext(example)"
+                  @click="bEU.saveAndNext(example)"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-primary`"
                 >保存并前往下一条</button>
@@ -702,10 +702,10 @@
         <div class="row page-ctrl">
           <div class="col col-12 my-1">
             <div class="input-group input-group-sm ">
-              <button class="btn btn-outline-secondary" type="button" @click="bEU.apiLast(example)">上一条</button>
+              <button class="btn btn-outline-secondary" type="button" @click="bEU.prev(example)">上一条</button>
               <!-- <span class="input-group-text">3</span> -->
               <input type="text" class="form-control text-center" disabled :value="`第 ${example?._info?.btn_idx??'_'} 条: 编号 #${example?._info?.entry_id??'_'}`">
-              <button class="btn btn-outline-secondary" type="button" @click="bEU.apiNext(example)">下一条</button>
+              <button class="btn btn-outline-secondary" type="button" @click="bEU.next(example)">下一条</button>
             </div>
           </div>
         </div>

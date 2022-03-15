@@ -51,7 +51,7 @@ class BackEndUsage {
 
   // 对 后端 API 进行基础的使用 开始
 
-  async apiTouchTask(task_btn) {
+  async touchTask(task_btn) {
     try {
       let resp = await this.backEnd.getThing(this.data.ctrl.currentWorkerId, task_btn?.id);
       // this.pushAlert(resp?.data);
@@ -64,7 +64,7 @@ class BackEndUsage {
       this.pushAlert(error, 'danger');
     };
   }
-  async apiTouchTaskBtn(task_btn) {
+  async touchTaskBtn(task_btn) {
     try {
       this.saveStore();
       await this.updateSchema();
@@ -72,7 +72,7 @@ class BackEndUsage {
       //
       this.ewp.example = {};
       //
-      let thing = await this.apiTouchTask(task_btn);
+      let thing = await this.touchTask(task_btn);
       if (thing?.entry) {
         let content = thing?.entry?.content;
         content.annotations = thing?.annotation?.content?.annotations ?? [];
@@ -114,8 +114,8 @@ class BackEndUsage {
     };
   }
 
-  async apiConnect() {
-    // this.pushAlert("apiConnect 开始", 'secondary');
+  async connect() {
+    // this.pushAlert("connect 开始", 'secondary');
     console.log(this);
     try {
       console.log(this);
@@ -125,18 +125,18 @@ class BackEndUsage {
         return;
       };
       this.data.newThings.topic = resp?.data?.topic;
-      await this.apiUpdateUser(resp?.data?.user);
+      await this.async updateUser(resp?.data?.user);
       this.pushAlert(`${resp?.data?.user?.name}的信息已同步`);
-      await this.apiUpdateTaskList();
+      await this.updateTaskList();
     } catch (error) {
       console.log(error);
       this.pushAlert(error, 'danger');
     };
-    // this.pushAlert("apiConnect 结束", 'secondary');
+    // this.pushAlert("connect 结束", 'secondary');
   }
 
-  async apiUpdateTarget() {
-    // this.pushAlert("apiUpdateTarget 开始", 'secondary');
+  async updateTarget() {
+    // this.pushAlert("updateTarget 开始", 'secondary');
     try {
       let oldCount = this.data.ctrl.currentWorkerTaskCount;
       let target = this.data.ctrl.currentWorkerTarget;
@@ -156,7 +156,7 @@ class BackEndUsage {
         this.data.ctrl.currentWorkerTarget = this.data.ctrl.currentWorkerTaskCount;
         return;
       };
-      await this.apiConnect();
+      await this.connect();
       let newDelta = this.data.ctrl.currentWorkerTaskCount - oldCount;
       if (newDelta <= 0) {
         this.pushAlert(`【操作未果】没有更多可分配的任务`, 'info');
@@ -166,11 +166,11 @@ class BackEndUsage {
     } catch (error) {
       this.pushAlert(error, 'danger');
     };
-    // this.pushAlert("apiUpdateTarget 结束", 'secondary');
+    // this.pushAlert("updateTarget 结束", 'secondary');
   }
 
-  async apiUpdateTaskList() {
-    // this.pushAlert("apiUpdateTaskList 开始");
+  async updateTaskList() {
+    // this.pushAlert("updateTaskList 开始");
     try {
       let aa = this.pushAlert("正在获取任务列表，请稍等……", "info", 99999999);
       let resp = await this.backEnd.getWorkList(this.data.ctrl.currentWorkerId, this.data.ctrl.currentWorkerSecret);
@@ -205,10 +205,10 @@ class BackEndUsage {
     } catch (error) {
       this.pushAlert(error, 'danger');
     };
-    // this.pushAlert("apiUpdateTaskList 结束");
+    // this.pushAlert("updateTaskList 结束");
   }
 
-  apiUpdateUser(user) {
+  async updateUser(user) {
     console.log(user);
     let it = {
       worker: user.name,
@@ -230,7 +230,7 @@ class BackEndUsage {
 
 
 
-  async apiSave(content) {
+  async save(content) {
     try {
       let task_id = content?._info?.task_id;
       let anno_wrap = {
@@ -264,42 +264,42 @@ class BackEndUsage {
     };
   }
 
-  async apiGoIdx(idx) {
+  async goIdx(idx) {
     if (idx < this.data.tasks.length && idx >= 0) {
       let btn = this.data.tasks[idx];
-      let content = await this.apiTouchTaskBtn(btn);
+      let content = await this.touchTaskBtn(btn);
       return content;
     };
     return null;
   }
 
-  async apiLast(content) {
+  async prev(content) {
     let last_idx = + content?._info?.btn_idx - 1;
-    let it = await this.apiGoIdx(last_idx);
+    let it = await this.goIdx(last_idx);
     if (it == null) {
       this.pushAlert(`没有上一条了`, 'secondary');
     };
   }
 
-  async apiNext(content) {
+  async next(content) {
     let next_idx = + content?._info?.btn_idx + 1;
-    let it = await this.apiGoIdx(next_idx);
+    let it = await this.goIdx(next_idx);
     if (it == null) {
       this.pushAlert(`没有下一条了`, 'secondary');
     };
   }
 
-  async apiSaveAndLast(content) {
-    let result = await this.apiSave(content);
+  async saveAndPrev(content) {
+    let result = await this.save(content);
     if (result) {
-      await this.apiLast(content);
+      await this.prev(content);
     };
   }
 
-  async apiSaveAndNext(content) {
-    let result = await this.apiSave(content);
+  async saveAndNext(content) {
+    let result = await this.save(content);
     if (result) {
-      await this.apiNext(content);
+      await this.next(content);
     };
   }
 
