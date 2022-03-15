@@ -716,7 +716,8 @@
 
 
 
-    <div class="position-fixed bottom-0 w-100 p-2 z-1030" v-if="false && dataWrap.dataItems.length">
+    <!-- 离线版版 的 页码操作区 开始 -->
+    <div class="position-fixed bottom-0 w-100 p-2 z-1030" v-if="false && dfWrap.dataItems.length">
       <div class="container">
         <!-- 页码操作区 开始 -->
         <div class="row page-ctrl">
@@ -744,8 +745,11 @@
         <!-- 页码操作区 结束 -->
       </div>
     </div>
+    <!-- 离线版版 的 页码操作区 结束 -->
 
 
+
+    <!-- 离线版版 的 配置区 开始 -->
     <div __v-if="false" class="container page my-4 hiddent" id="page-import">
       <div class="container py-2">
         <!-- progressCtrl start -->
@@ -780,7 +784,7 @@
               class="btn btn-primary"
             >导入</button>
             <button
-              v-if="!dataWrap?.dataItems?.length && ctrl.haveStore && ctrl?.currentWorker?.length"
+              v-if="!dfWrap?.dataItems?.length && ctrl.haveStore && ctrl?.currentWorker?.length"
               type="button"
               name="do_loadStore"
               id="do_loadStore"
@@ -788,7 +792,7 @@
               class="btn btn-success"
             >加载缓存数据</button>
             <button
-              :disabled="!dataWrap?.dataItems?.length"
+              :disabled="!dfWrap?.dataItems?.length"
               type="button"
               name="do_export"
               id="do_export"
@@ -800,6 +804,7 @@
         <!-- fileCtrl end -->
       </div>
     </div>
+    <!-- 离线版版 的 配置区 结束 -->
 
 
 

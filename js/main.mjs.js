@@ -117,6 +117,10 @@ const RootComponent = {
       example: {},
     });
 
+    const dfWrap = reactive({
+      dataItems: [],
+    });
+
     // 初始化 应用 数据
     const appData = reactive({
       fileWrapWrap: {
@@ -175,21 +179,6 @@ const RootComponent = {
 
 
 
-
-    const saveStore = () => {
-      store.set(`${APP_NAME}:dataWrap`, foolCopy(appData.dataWrap));
-      store.set(`${APP_NAME}:version`, APP_VERSION);
-      // let worker = appData.ctrl.currentWorker;
-      // store.set(`${APP_NAME}:worker`, worker);
-      store.set(`${APP_NAME}:it`, {
-        worker: appData.ctrl.currentWorker,
-        workerId: appData.ctrl.currentWorkerId,
-        secret: appData.ctrl.currentWorkerSecret,
-        target: appData.ctrl.currentWorkerTarget,
-        taskCount: appData.ctrl.currentWorkerTaskCount,
-      });
-    };
-
     const toogleShowOrigin = () => {
       appData.ctrl.showOrigin = !appData.ctrl.showOrigin;
       // console.debug(appData.ctrl.showOrigin);
@@ -211,6 +200,7 @@ const RootComponent = {
     const appPack = {
       reactive_data: appData,
       reactive_exam_wrap: exampleWrap,
+      reactive_df_wrap: dfWrap,
 
       tokenSelector: tokenSelector,
 
@@ -228,8 +218,6 @@ const RootComponent = {
       projPrefix: PROJ_PREFIX,
       storeTool: store,
 
-      saveStoreFn: saveStore,
-
       reader: theReader,
     };
 
@@ -238,7 +226,7 @@ const RootComponent = {
     appPack.stepCtrl = stepCtrl;
 
 
-
+    // 另一个 axios 实例，方便在控制台调试
     const anotherAxios = axios.create({
       headers: {'Catch-Cotrol': 'no-cache'},
     });
@@ -265,18 +253,25 @@ const RootComponent = {
       await updateSchema();
     });
 
-
     appPack.updateSchemaFn = updateSchema;
 
 
     // 初始化 离线版 的 主要逻辑
     const ioC = new IoControl(appPack);
 
-    appPack.ioControl = ioC;
+    // 离线版 使用 离线版相应函数
+    // stepCtrl.updateProgress = () => { ioC.updateProgress(); };
+    // stepCtrl.saveStore = () => { ioC.saveStore(); };
+    // stepCtrl.saveExample = () => { ioC.saveExample(); };
+
+    // appPack.ioControl = ioC;
 
     // 初始化 网络版 的 主要逻辑
     const bEU = new BackEndUsage(appPack);
+
+    // 网络版 使用 网络版相应函数
     stepCtrl.updateProgress = () => { bEU.updateProgress(); };
+    stepCtrl.saveStore = () => { bEU.saveStore(); };
 
 
     // 一些便捷函数，免得前端代码写得太长
@@ -303,6 +298,7 @@ const RootComponent = {
       //
       ...toRefs(exampleWrap),
       ...toRefs(appData),
+      dfWrap,
       //
       alertData,
       alertBox,
@@ -315,7 +311,6 @@ const RootComponent = {
       theApi,
       theBackEnd,
       //
-      saveStore,
       toogleShowOrigin,
       //
       rootStep,

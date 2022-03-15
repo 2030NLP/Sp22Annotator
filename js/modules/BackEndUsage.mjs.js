@@ -22,7 +22,7 @@ class BackEndUsage {
 
     this.storeTool = appPack.storeTool;
 
-    console.log(this);
+    // console.log(this);
   }
   static new(appPack) {
     return new BackEndUsage(appPack);
@@ -34,9 +34,7 @@ class BackEndUsage {
     this.data.ctrl.donePct = `${Math.min(100, this.data.ctrl.doneNum / this.data.ctrl.totalNum * 100)}%`;
   }
 
-
   saveStore() {
-    this.storeTool.set(`${this.appName}:dataWrap`, foolCopy(this.data.dataWrap));
     this.storeTool.set(`${this.appName}:version`, this.appVersion);
     // let worker = this.data.ctrl.currentWorker;
     // this.storeTool.set(`${this.appName}:worker`, worker);
@@ -125,7 +123,7 @@ class BackEndUsage {
         return;
       };
       this.data.newThings.topic = resp?.data?.topic;
-      await this.async updateUser(resp?.data?.user);
+      await this.updateUser(resp?.data?.user);
       this.pushAlert(`${resp?.data?.user?.name}的信息已同步`);
       await this.updateTaskList();
     } catch (error) {

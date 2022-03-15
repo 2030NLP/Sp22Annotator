@@ -11,16 +11,17 @@ class IoControl {
 
     this.data = appPack.reactive_data;
     this.ewp = appPack.reactive_exam_wrap;
+    this.dfWrap = appPack.reactive_df_wrap;
 
     this.tokenSelector = appPack.tokenSelector;
 
     this.reader = appPack.reader;
 
-    this.saveStore = appPack.saveStoreFn;
-
     this.stepCtrl = appPack.stepCtrl;
 
     this.updateSchema = appPack.updateSchemaFn;
+
+    this.storeTool = appPack.storeTool;
   }
   static new(appPack) {
     return new IoControl(appPack);
@@ -28,13 +29,26 @@ class IoControl {
 
   updateProgress() {
     let endStep = this.stepCtrl.stepsDictWrap?.[this.stepCtrl.stepsDictWrap?.using]?.endStep;
-    this.data.ctrl.totalNum = this.data.dataWrap.dataItems.length;
-    this.data.ctrl.doneNum = this.data.dataWrap.dataItems.filter(it=>{
+    this.data.ctrl.totalNum = this.dfWrap.dataItems.length;
+    this.data.ctrl.doneNum = this.dfWrap.dataItems.filter(it=>{
       return it?._ctrl?.currentStepRef == endStep && endStep?.length;
     }).length;
     this.data.ctrl.donePct = `${this.data.ctrl.doneNum / this.data.ctrl.totalNum * 100}%`;
   }
 
+  saveStore() {
+    this.storeTool.set(`${this.appName}:dataWrap`, foolCopy(this.dfWrap));
+    this.storeTool.set(`${this.appName}:version`, this.appVersion);
+    // let worker = this.data.ctrl.currentWorker;
+    // this.storeTool.set(`${this.appName}:worker`, worker);
+    this.storeTool.set(`${this.appName}:it`, {
+      worker: this.data.ctrl.currentWorker,
+      workerId: this.data.ctrl.currentWorkerId,
+      secret: this.data.ctrl.currentWorkerSecret,
+      target: this.data.ctrl.currentWorkerTarget,
+      taskCount: this.data.ctrl.currentWorkerTaskCount,
+    });
+  }
 
 
 
@@ -46,28 +60,27 @@ class IoControl {
       person: worker,
       action: action,
     };
-    this.data.dataWrap.handleLogs.push(info);
-    this.data.dataWrap.lastModifiedAt = info.time;
-    this.data.dataWrap.appVersion = this.appVersion;
+    this.dfWrap.handleLogs.push(info);
+    this.dfWrap.lastModifiedAt = info.time;
+    this.dfWrap.appVersion = this.appVersion;
   }
-
 
 
   async loadStore () {
-    this.data.dataWrap = store.get(`${APP_NAME}:dataWrap`);
+    this.dfWrap = this.storeTool.get(`${APP_NAME}:dataWrap`);
     await this.fixData();
-    this.log(`load from store at idx(${this.data?.dataWrap?._ctrl?.currentIdx})`);
+    this.log(`load from store at idx(${this.dfWrap?._ctrl?.currentIdx})`);
   }
 
   async onExport () {
-    if (!this.data?.dataWrap?.dataItems?.length) {return;};
+    if (!this.dfWrap?.dataItems?.length) {return;};
     await this.beforeSave();
-    this.log(`export to file at idx(${this.data?.dataWrap?._ctrl?.currentIdx})`);
+    this.log(`export to file at idx(${this.dfWrap?._ctrl?.currentIdx})`);
     let worker = this.data.ctrl.currentWorker;
-    let fid = this.data.dataWrap.fID;
+    let fid = this.dfWrap.fID;
     let using = this.stepCtrl.stepsDictWrap.using;
     let fileName = `${this.projPrefix}-${using} [${fid}] @${worker} (${timeString()}).json`;
-    theSaver.saveJson(this.data.dataWrap, fileName);
+    theSaver.saveJson(this.dfWrap, fileName);
   }
 
   async onImport (doc) {
@@ -95,7 +108,7 @@ class IoControl {
     await this.readData();
 
 
-    this.log(`import from file at idx(${this.data?.dataWrap?._ctrl?.currentIdx})`);
+    this.log(`import from file at idx(${this.dfWrap?._ctrl?.currentIdx})`);
     this.saveStore();
   }
 
@@ -113,26 +126,26 @@ class IoControl {
     this.data.fileError = false;
 
     // ↓ 读取数据
-    // Object.assign(this.data.dataWrap, foolCopy(obj));
-    this.data.dataWrap = foolCopy(obj);
+    // Object.assign(this.dfWrap, foolCopy(obj));
+    this.dfWrap = foolCopy(obj);
 
     await this.fixData();
   }
 
   async fixData () {
     console.debug("开始 fixData");
-    console.debug(foolCopy(this.data.dataWrap));
+    console.debug(foolCopy(this.dfWrap));
 
     // 更新当前要标注的材料的序号
-    if (!('_ctrl' in this.data.dataWrap)) {
-      this.data.dataWrap._ctrl = {};
+    if (!('_ctrl' in this.dfWrap)) {
+      this.dfWrap._ctrl = {};
     };
-    if (!('currentIdx' in this.data.dataWrap._ctrl)) {
-      this.data.dataWrap._ctrl.currentIdx = 0;
+    if (!('currentIdx' in this.dfWrap._ctrl)) {
+      this.dfWrap._ctrl.currentIdx = 0;
     };
-    // console.debug(this.data.dataWrap._ctrl.currentIdx);
+    // console.debug(this.dfWrap._ctrl.currentIdx);
 
-    for (let item of this.data.dataWrap.dataItems) {
+    for (let item of this.dfWrap.dataItems) {
       if (!('annotations' in item)) {
         item.annotations = [];
       };
@@ -141,19 +154,19 @@ class IoControl {
       };
     };
 
-    if (!('handleLogs' in this.data.dataWrap)) {
-      this.data.dataWrap.handleLogs = [{
+    if (!('handleLogs' in this.dfWrap)) {
+      this.dfWrap.handleLogs = [{
         time: JSON.parse(JSON.stringify(new Date())),
         person: "App",
         action: "fix",
       }];
     };
 
-    console.debug(foolCopy(this.data.dataWrap));
+    console.debug(foolCopy(this.dfWrap));
     console.debug("结束 fixData");
 
     this.updateProgress();
-    await this.goIdx(this.data.dataWrap._ctrl.currentIdx);
+    await this.goIdx(this.dfWrap._ctrl.currentIdx);
   }
 
 
@@ -176,17 +189,17 @@ class IoControl {
   }
 
   saveExample() {
-    if (!this.data.dataWrap.dataItems.length) {return;};
+    if (!this.dfWrap.dataItems.length) {return;};
     this.ensureExampleStep();
     // 覆盖
-    this.data.dataWrap.dataItems[this.data.ctrl.currentIdx] = foolCopy(this.ewp.example);
+    this.dfWrap.dataItems[this.data.ctrl.currentIdx] = foolCopy(this.ewp.example);
   }
 
 
 
 
   fineIdx(idx) {
-    idx = Math.min(idx, this.data.dataWrap.dataItems.length-1);
+    idx = Math.min(idx, this.dfWrap.dataItems.length-1);
     idx = Math.max(idx, 0);
     return idx;
   }
@@ -198,16 +211,16 @@ class IoControl {
 
     idx = this.fineIdx(idx);
     this.data.ctrl.currentIdx = idx;
-    // Object.assign(this.ewp.example, foolCopy(this.data.dataWrap.dataItems[this.data.ctrl.currentIdx]));
-    if (!this.data.dataWrap.dataItems.length) {
+    // Object.assign(this.ewp.example, foolCopy(this.dfWrap.dataItems[this.data.ctrl.currentIdx]));
+    if (!this.dfWrap.dataItems.length) {
       this.log(`goIdx(${idx}) returned`);
       return;
     };
     this.log(`goIdx(${idx})`);
 
     // 覆盖
-    this.ewp.example = foolCopy(this.data.dataWrap.dataItems[this.data.ctrl.currentIdx]);
-    this.data.dataWrap._ctrl.currentIdx = idx;
+    this.ewp.example = foolCopy(this.dfWrap.dataItems[this.data.ctrl.currentIdx]);
+    this.dfWrap._ctrl.currentIdx = idx;
     this.data.ctrl.targetIdx = null;
 
     // 还原步骤
