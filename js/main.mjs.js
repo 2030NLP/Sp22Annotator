@@ -1157,14 +1157,8 @@ const RootComponent = {
 const the_app = Vue_createApp(RootComponent);
 const app = the_app.mount('#bodywrap');
 window.app = app;
-// the_app.config.globalProperties.$axios = axios;  // 用 app.theApi 就可以调试了。
+// the_app.config.globalProperties.$axios = axios;  // 用 app.theApi 或 app.theApiRequest 就可以调试了。
 
-
-// var _global = typeof window === 'object' && window.window === window
-//   ? window : typeof self === 'object' && self.self === self
-//   ? self : typeof global === 'object' && global.global === global
-//   ? global
-//   : this
-
+export default app;
 
 
