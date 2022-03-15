@@ -7,8 +7,6 @@ class StepControl {
     this.data = appPack.reactive_data;
     this.ewp = appPack.reactive_exam_wrap;
 
-    // this.updateSchema = appPack.updateSchemaFn;
-
     this.tokenSelector = appPack.tokenSelector;
 
     this.rootStep = appPack.reactive_rootStep;
