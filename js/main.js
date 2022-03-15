@@ -728,6 +728,9 @@ const RootComponent = {
           target: user.task.length,
           taskCount: user.task.length,
         };
+        appData.ctrl.currentWorker = user.name;
+        appData.ctrl.currentWorkerId = user.id;
+        appData.ctrl.currentWorkerSecret = user.password;
         appData.ctrl.currentWorkerTarget = user.task.length;
         appData.ctrl.currentWorkerTaskCount = user.task.length;
         appData.newThings.theUser = user;

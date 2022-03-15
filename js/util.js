@@ -15,3 +15,13 @@ const timeString = () => {
 };
 
 const foolCopy = (it) => JSON.parse(JSON.stringify(it ?? null));
+
+const uuid = () => {
+  // Author: Abhishek Dutta, 12 June 2020
+  // License: CC0 (https://creativecommons.org/choose/zero/)
+   let temp_url = URL.createObjectURL(new Blob());
+   let uuid_s = temp_url.toString();
+   let uuid = uuid_s.substr(uuid_s.lastIndexOf('/') + 1);  // remove prefix (e.g. blob:null/, blob:www.test.com/, ...)
+   URL.revokeObjectURL(temp_url);
+   return uuid;
+}
