@@ -1,6 +1,28 @@
 
-// import { reactive, readonly, ref, toRef, toRefs, computed, onMounted, onUpdated } from 'vue';
-const { reactive, readonly, ref, toRef, toRefs, computed, onMounted, onUpdated } = Vue;
+// 引入依赖的模块
+
+import {
+  reactive,
+  readonly,
+  ref,
+  toRef,
+  toRefs,
+  computed,
+  onMounted,
+  onUpdated,
+  createApp as Vue_createApp
+} from './modules_lib/vue_3.2.31_.esm-browser.prod.min.js';
+
+import { timeString, foolCopy } from './util.mjs.js';
+import BaseSaver from './modules/BaseSaver.mjs.js';
+import TheReader from './modules/TheReader.mjs.js';
+import AlertBox from './modules/AlertBox.mjs.js';
+
+import axios from './modules_lib/axios_0.26.1_.mjs.js';
+import ClipboardJS from './modules_lib/clipboard_2.0.10_.mjs.js';
+import __Wrap_of_store__ from './modules_lib/store_2.0.9_.legacy.min.mjs.js';
+
+
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno";
@@ -23,43 +45,28 @@ const fildId_to_info = { "A01": { "genre": "中小学语文课本", "file": "人
 const RootComponent = {
   setup() {
 
-    // 语料信息映射
-    const fileInfo = (originId) => {
-      const fileId = originId.split("-")[0];
-      return fildId_to_info[fileId];
-    };
-
     // 初始化 文件保存 模块
-    const theSaver = BaseSaver();
-    // ↑ 参看 js/components/BaseSaver.js
+    const theSaver = BaseSaver.new();
 
     // 初始化 提示框 模块
-    const alertBox = reactive(BaseAlert());
-    // ↑ 参看 js/components/BaseAlert.js
-    onMounted(()=>{
-      alertBox.lastIdx = 1;
-      alertBox.alerts = [];
-      // alertBox.pushAlert(`您好！`, 'success', 3000);
-    });
+    const alertBox = reactive(AlertBox.new());
 
     // 初始化 文件读取 模块
-    const theReader = TheReader(alertBox.pushAlert);
-    // ↑ 参看 js/components/TheReader.js
+    const theReader = TheReader.new(alertBox.pushAlert);
 
 
     // 初始化 剪贴板 插件
-    // TODO 考虑将这个插件转变成独立的“模块”放到 components 文件夹里
-    const theClipboard = ref(null);
+    const theClipboardRef = ref(null);
     onMounted(()=>{
-      theClipboard.value = new ClipboardJS(".btn-copy-selection");
-      theClipboard.value.on('success', function (e) {
+      theClipboardRef.value = new ClipboardJS(".btn-copy-selection");
+      theClipboardRef.value.on('success', function (e) {
         // console.info('Action:', e.action);
         // console.info('Text:', e.text);
         // console.info('Trigger:', e.trigger);
         alertBox.pushAlert(`成功拷贝文本【${e.text}】`, "success");
         e.clearSelection();
       });
-      theClipboard.value.on('error', function (e) {
+      theClipboardRef.value.on('error', function (e) {
         // console.info('Action:', e.action);
         // console.info('Trigger:', e.trigger);
         alertBox.pushAlert(`拷贝失败！`, "danger");
@@ -236,6 +243,18 @@ const RootComponent = {
         // console.log(selection.array);
       },
     };
+
+
+
+
+
+    // 语料信息映射函数
+    const fileInfo = (originId) => {
+      const fileId = originId.split("-")[0];
+      return fildId_to_info[fileId];
+    };
+
+
 
 
     const theApi = axios.create({
@@ -500,6 +519,10 @@ const RootComponent = {
         try {
           let resp = await apiMethods.apiGetThing(task_btn?.id);
           // alertBox.pushAlert(resp?.data);
+          if (resp?.data?.err?.length) {
+            alertBox.pushAlert(`【发生错误】${resp?.data?.err}`, 'danger');
+            return;
+          };
           return resp?.data?.thing;
         } catch (error) {
           alertBox.pushAlert(error, 'danger');
@@ -512,6 +535,7 @@ const RootComponent = {
           selectionMethods.clearSelection();
           //
           exampleWrap.example = {};
+          //
           let thing = await apiMethods.apiTouchTask(task_btn);
           if (thing?.entry) {
             let content = thing?.entry?.content;
@@ -526,6 +550,8 @@ const RootComponent = {
             // TODO
             console.debug(content);
             // alertBox.pushAlert(content);
+
+            exampleWrap.example = {};
             exampleWrap.example = foolCopy(content);
 
             // 还原步骤
@@ -1287,6 +1313,17 @@ const RootComponent = {
 };
 
 
-const the_app = Vue.createApp(RootComponent);
+const the_app = Vue_createApp(RootComponent);
 const app = the_app.mount('#bodywrap');
+window.app = app;
 // the_app.config.globalProperties.$axios = axios;  // 用 app.theApi 就可以调试了。
+
+
+// var _global = typeof window === 'object' && window.window === window
+//   ? window : typeof self === 'object' && self.self === self
+//   ? self : typeof global === 'object' && global.global === global
+//   ? global
+//   : this
+
+
+

@@ -1,6 +1,13 @@
+// modifiedAt: 2022-03-15
 
-const BaseReader = (handleError=console.log) => {
-  function reader_ReadFileAsText(fileWrap, options) {
+class BaseReader {
+  constructor(handleErrorFn=console.log) {
+  }
+  static new(handleErrorFn) {
+    return new BaseReader(handleErrorFn);
+  }
+
+  reader_ReadFileAsText(fileWrap, options) {
     let file = fileWrap.file;
     options = options || {};
     return new Promise(function(resolve, reject) {
@@ -18,14 +25,15 @@ const BaseReader = (handleError=console.log) => {
         });
       }
 
-      if (!file.type || /^text\//i.test(file.type) || /\/json/i.test(file.type)) {
+      if (!file.type || /^text\//i.test(file.type) || /\/json/i.test(file.type) || /\/markdown/i.test(file.type)) {
         reader.readAsText(file, fileWrap.encoding);
       } else {
         reader.readAsDataURL(file);
       }
     });
-  };
-  function reader_ReadFileAsArrayBuffer(file, options) {
+  }
+
+  reader_ReadFileAsArrayBuffer(file, options) {
     options = options || {};
     return new Promise(function(resolve, reject) {
       let reader = new FileReader();
@@ -44,8 +52,9 @@ const BaseReader = (handleError=console.log) => {
 
       reader.readAsArrayBuffer(file);
     });
-  };
-  function reader_ReadFileAsBinaryString(file, options) {
+  }
+
+  reader_ReadFileAsBinaryString(file, options) {
     options = options || {};
     return new Promise(function(resolve, reject) {
       let reader = new FileReader();
@@ -64,11 +73,8 @@ const BaseReader = (handleError=console.log) => {
 
       reader.readAsBinaryString(file);
     });
-  };
+  }
 
-  return {
-    reader_ReadFileAsText,
-    reader_ReadFileAsArrayBuffer,
-    reader_ReadFileAsBinaryString,
-  };
-};
+}
+
+export default BaseReader;
