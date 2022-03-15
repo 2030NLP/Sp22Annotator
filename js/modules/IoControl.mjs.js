@@ -67,7 +67,7 @@ class IoControl {
 
 
   async loadStore () {
-    this.dfWrap = this.storeTool.get(`${APP_NAME}:dataWrap`);
+    this.dfWrap = this.storeTool.get(`${this.appName}:dataWrap`);
     await this.fixData();
     this.log(`load from store at idx(${this.dfWrap?._ctrl?.currentIdx})`);
   }
