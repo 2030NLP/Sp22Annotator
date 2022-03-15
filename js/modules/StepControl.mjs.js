@@ -28,29 +28,30 @@ class StepControl {
 
 
 
-      ensureExampleStep() {
-        // 保存当前步骤
-        if (!('_ctrl' in this.ewp.example)) {
-          this.ewp.example._ctrl = {};
-        };
-        this.ewp.example._ctrl.currentStepRef = this.currentStep.ref;
-        // this.ewp.example._ctrl.currentSchema = {
-        //   name: stepsDictWrap.name ?? null,
-        //   version: stepsDictWrap.version ?? null,
-        //   using: stepsDictWrap.using ?? null,
-        // };
-        // 网络版节约空间
-        this.ewp.example._ctrl.schema = [
-          this.stepsDictWrap.version ?? null,
-          this.stepsDictWrap.using ?? null,
-        ];
-      }
-      saveExample() {
-        if (!this.data.dataWrap.dataItems.length) {return;};
-        this.ensureExampleStep();
-        // 覆盖
-        this.data.dataWrap.dataItems[this.data.ctrl.currentIdx] = foolCopy(this.ewp.example);
-      }
+  ensureExampleStep() {
+    // 保存当前步骤
+    if (!('_ctrl' in this.ewp.example)) {
+      this.ewp.example._ctrl = {};
+    };
+    this.ewp.example._ctrl.currentStepRef = this.currentStep.ref;
+    // this.ewp.example._ctrl.currentSchema = {
+    //   name: stepsDictWrap.name ?? null,
+    //   version: stepsDictWrap.version ?? null,
+    //   using: stepsDictWrap.using ?? null,
+    // };
+    // 网络版节约空间
+    this.ewp.example._ctrl.schema = [
+      this.stepsDictWrap.version ?? null,
+      this.stepsDictWrap.using ?? null,
+    ];
+  }
+
+  saveExample() {
+    if (!this.data.dataWrap.dataItems.length) {return;};
+    this.ensureExampleStep();
+    // 覆盖
+    this.data.dataWrap.dataItems[this.data.ctrl.currentIdx] = foolCopy(this.ewp.example);
+  }
 
 
 

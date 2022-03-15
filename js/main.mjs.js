@@ -373,11 +373,11 @@ const RootComponent = {
 
 
 
-      const updateProgress = () => {
-        appData.ctrl.doneNum = appData.tasks.filter(it=>it.valid||it.dropped).length ?? 0;
-        appData.ctrl.totalNum = appData.tasks.length ?? 1;
-        appData.ctrl.donePct = `${Math.min(100, appData.ctrl.doneNum / appData.ctrl.totalNum * 100)}%`;
-      };
+    const updateProgress = () => {
+      appData.ctrl.doneNum = appData.tasks.filter(it=>it.valid||it.dropped).length ?? 0;
+      appData.ctrl.totalNum = appData.tasks.length ?? 1;
+      appData.ctrl.donePct = `${Math.min(100, appData.ctrl.doneNum / appData.ctrl.totalNum * 100)}%`;
+    };
 
 
 
