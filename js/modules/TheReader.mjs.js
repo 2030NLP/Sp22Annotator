@@ -9,7 +9,7 @@ class TheReader {
     this.detect = jschardet_detect;
   }
   static new(handleErrorFn, jschardet_detect) {
-    return new BaseReader(handleErrorFn, jschardet_detect);
+    return new TheReader(handleErrorFn, jschardet_detect);
   }
 
   async readFileAsArrayBuffer (fileWrap) {
@@ -21,7 +21,7 @@ class TheReader {
         fileWrap.buffer = reader.result;
       })
       .catch((error) => {
-        handleError(error);
+        this.handleError(error);
       });
   }
 
@@ -49,7 +49,7 @@ class TheReader {
         return fileWrap;
       })
       .catch((error) => {
-        handleError(error);
+        this.handleError(error);
       });
   }
 
@@ -62,7 +62,7 @@ class TheReader {
         fileWrap.readed = true;
       })
       .catch((error) => {
-        handleError(error);
+        this.handleError(error);
       });
   }
 
