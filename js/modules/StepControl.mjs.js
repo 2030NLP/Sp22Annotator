@@ -16,8 +16,8 @@ class StepControl {
     this.stepsDict = appPack.reactive_stepsDict;
 
     this.ioControl = appPack.ioControl;
-    this.updateProgress = appPack.updateProgressFn;
 
+    this.updateProgress = appPack.updateProgressFn;
     this.saveStore = appPack.saveStoreFn;
   }
   static new(appPack) {

@@ -120,13 +120,13 @@
             <button
               type="button"
               class="btn btn-sm me-2 my-1 btn-outline-primary"
-              @click="apiConnect"
+              @click="()=>{bEU.apiConnect()}"
               title="每次刷新页面后需「同步信息」并获取任务列表"
             >同步信息</button>
             <button
               type="button"
               class="btn btn-sm me-2 my-1 btn-outline-primary"
-              @click="apiUpdateTarget"
+              @click="()=>{bEU.apiUpdateTarget()}"
               title="所有任务完成后，可为自己设置新的标注目标，增加总任务量"
             >更新目标</button>
           </div>
@@ -193,7 +193,7 @@
               v-show="(taskBtn.valid&&newThings.tasksShowValid)||(taskBtn.dropped&&newThings.tasksShowDropped)||(!taskBtn.valid&&!taskBtn.dropped&&newThings.tasksShowUndone)"
               class="btn btn-sm me-2 my-1"
               :class="`btn-${taskBtn.valid?'info':taskBtn.dropped?'dark':taskBtn.skipped?'outline-primary':'outline-primary'}`"
-              @click="apiTouchTaskBtn(taskBtn)"
+              @click="bEU.apiTouchTaskBtn(taskBtn)"
             >#{{taskBtn.eId}}</button>
           </div>
         </div>
@@ -279,7 +279,6 @@
                 <button v-if=" 'multiSpans' == (currentStep.mode) && currentStep?.props?.addBtn" type="button" @click="currentStep?.props?.data.tokenarrays.push(selection.array)" class="btn btn-sm my-1 me-1" :class="`btn-outline-primary`">{{ currentStep.props.addBtn.text }}</button>
                 <button
                   type="button"
-                  @click="copySelection"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-outline-info btn-copy-selection`"
                   :data-clipboard-text="tokenSelector.selectedReplacedText(example?.material?.tokenList)"
@@ -287,7 +286,6 @@
                 <button
                   type="button"
                   v-show="ctrl.showOrigin"
-                  @click="copySelection"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-outline-info btn-copy-selection`"
                   :data-clipboard-text="tokenSelector.selectedOriginText(example?.material?.tokenList)"
@@ -356,7 +354,7 @@
                 <button
                   type="button"
                   v-if="'finalResult'==(currentStep.mode)"
-                  @click="apiNext(example)"
+                  @click="bEU.apiNext(example)"
                   class="btn btn-sm my-1 me-4"
                   :class="`btn-danger`"
                 >不保存并前往下一条</button>
@@ -365,14 +363,14 @@
                 <button
                   type="button"
                   v-if="'finalResult'==(currentStep.mode)"
-                  @click="apiSave(example)"
+                  @click="bEU.apiSave(example)"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-success`"
                 >保存</button>
                 <button
                   type="button"
                   v-if="'finalResult'==(currentStep.mode)"
-                  @click="apiSaveAndNext(example)"
+                  @click="bEU.apiSaveAndNext(example)"
                   class="btn btn-sm my-1 me-1"
                   :class="`btn-primary`"
                 >保存并前往下一条</button>
@@ -473,7 +471,7 @@
               <div class="col col-12 my-1">
                 <!-- okBtn -->
                 <button v-if="currentStep?.props?.okBtn" type="button" @click="stepCtrl.handleChooseOrTextMultiSpans(currentStep.props.okBtn.go, currentStep.props.data);tokenSelector.clear(example?.material?.tokenList);" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`" :disabled="currentStep.props.data.tokenarrays.length<2">{{ currentStep.props.okBtn.text }}</button>
-                <!-- cleanBtn -->
+                <!-- cleanBtn 弃用 -->
                 <!-- <button v-if="currentStep?.props?.cleanBtn" type="button" @click="cleanSpans" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.clearBtn.style}`">{{ currentStep.props.cleanBtn.text }}</button> -->
                 <!-- cancelBtn -->
                 <button v-if="currentStep?.props?.cancelBtn" type="button" @click="stepCtrl.cancelStep(currentStep.props.cancelBtn.go);tokenSelector.clear(example?.material?.tokenList);" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.cancelBtn.style}`">{{ currentStep.props.cancelBtn.text }}</button>
@@ -704,10 +702,10 @@
         <div class="row page-ctrl">
           <div class="col col-12 my-1">
             <div class="input-group input-group-sm ">
-              <button class="btn btn-outline-secondary" type="button" @click="apiLast(example)">上一条</button>
+              <button class="btn btn-outline-secondary" type="button" @click="bEU.apiLast(example)">上一条</button>
               <!-- <span class="input-group-text">3</span> -->
               <input type="text" class="form-control text-center" disabled :value="`第 ${example?._info?.btn_idx??'_'} 条: 编号 #${example?._info?.entry_id??'_'}`">
-              <button class="btn btn-outline-secondary" type="button" @click="apiNext(example)">下一条</button>
+              <button class="btn btn-outline-secondary" type="button" @click="bEU.apiNext(example)">下一条</button>
             </div>
           </div>
         </div>
@@ -807,7 +805,7 @@
 
   <!-- Alert -->
   <div class="alert-wrap" style="display: block;" ref="alert_wrap">
-    <transition name = "fade" v-for="alert in alertBox.alerts">
+    <transition name = "fade" v-for="alert in alertBox.data.alerts">
       <div v-show="alert?.show" class="alert alert-dismissible" :class="'alert-'+(alert?.type ?? 'info')">
         <button type="button" class="btn-close" @click="alertBox.removeAlert(alert?.idx)"></button>
         <div>{{alert?.content}}</div>
