@@ -2,13 +2,21 @@
 
 
 
-### 一、作为标注者使用
+> [TOC]
 
-#### 1.1  离线版的使用
+---
+
+---
+
+---
+
+## 一、作为标注者使用
+
+### 1.1  离线版的使用
 
 【暂略】
 
-#### 1.2  网络版的使用
+### 1.2  网络版的使用
 
 【暂略】
 
@@ -18,11 +26,11 @@
 
 ---
 
-### 二、作为管理者管理和编辑 Schema
+## 二、作为管理者管理和编辑 Schema
 
 本项目通过一种 Json 格式的文件来控制标注的具体流程，我们将此文件称为 StepsSchema 。在当前项目中，该文件的路径为：`/schema/steps.schema.json`。
 
-#### 2.1  配置 StepsSchema 文件
+### 2.1  配置 StepsSchema 文件
 
 一个 StepsSchema 文件由以下字段来描述：
 
@@ -52,7 +60,7 @@
 }
 ```
 
-#### 2.2  配置 Workflow
+### 2.2  配置 Workflow
 
 每个 StepsSchema 文件可存放多个 Workflow，每个 Workflow 由以下字段描述：
 
@@ -76,7 +84,7 @@
 }
 ```
 
-#### 2.3  配置 Step
+### 2.3  配置 Step
 
 每个 Workflow 包含多个 Step，每个 Step 由以下字段描述：
 
@@ -115,11 +123,11 @@
 }
 ```
 
-#### 2.4  步骤的各种模式及其参数
+### 2.4  步骤的各种模式及其参数
 
 【暂略】【参考开发相关章节】
 
-#### 2.5  工具
+### 2.5  工具
 
 可使用代码编辑器直接编辑 StepsSchema 文件，如：
 
@@ -137,7 +145,7 @@
 
 ---
 
-### 三、回收数据之后如何处理（数据格式说明）
+## 三、回收数据之后如何处理（数据格式说明）
 
 【暂略】
 
@@ -147,7 +155,7 @@
 
 ---
 
-### 四、部署和运行
+## 四、部署和运行
 
 本章介绍如何部署和运行项目代码。
 
@@ -165,7 +173,7 @@
 
 
 
-#### 4.1  本地运行
+### 4.1  本地运行
 
 1. 使用 git 从仓库 pull 代码，或者在仓库页面打包下载代码。
 2. 在本地搭建简易服务器，挂载本项目，访问 index.html 即可。例如：
@@ -180,7 +188,7 @@
 
 
 
-#### 4.2  Github-pages
+### 4.2  Github-pages
 
 - 建立 Github 仓库，导入代码，或者直接从原始仓库 fork 代码。
 - Settings -> Pages ，设置 Source 为 main 或 你需要的分支，Save 。
@@ -191,7 +199,7 @@
 
 
 
-#### 4.3  部署到服务器
+### 4.3  部署到服务器
 
 - 只要放到服务器并提供链接，无需其他任何环境配置，即可访问。
 - 但需注意，网络版涉及到与后端交互，要做两个处理：
@@ -206,13 +214,13 @@
 
 ---
 
-### 五、开发
+## 五、开发
 
 
 
-#### 5.1  技术基础
+### 5.1  技术基础
 
-##### 5.1.1  项目技术栈
+#### 5.1.1  项目技术栈
 
 - 页面样式：[Bootstrap 5.1](https://getbootstrap.com/docs/5.1/getting-started/introduction/)
   - 要点提示： [响应式](https://getbootstrap.com/docs/5.1/layout/breakpoints/) , [栅格系统](https://getbootstrap.com/docs/5.1/layout/grid/) , [间距](https://getbootstrap.com/docs/5.1/utilities/spacing/) , [表单](https://getbootstrap.com/docs/5.1/forms/overview/) , [按钮](https://getbootstrap.com/docs/5.1/components/buttons/) , [进度条](https://getbootstrap.com/docs/5.1/components/progress/) , [提示框](https://getbootstrap.com/docs/5.1/components/alerts/)
@@ -231,7 +239,7 @@
   - FileSaver.js: 实现文件保存功能
   - store.js: 实现缓存功能
 
-##### 5.1.2  技术要求及学习资源
+#### 5.1.2  技术要求及学习资源
 
 进行本项目的开发或维护，需要掌握以下技术，若暂时未掌握，可参考以下线路进行学习。
 
@@ -297,7 +305,9 @@
 
 
 
-#### 5.2  项目结构
+### 5.2  项目概览
+
+#### 5.2.1  项目结构
 
 本项目主要文件的目录结构如下，其中加粗项为最核心的文件：
 
@@ -333,15 +343,27 @@
 
 说明2：第三方模块中以 `.mjs.js` 结尾的，都不是官方提供的版本，而是我们为了将其作为原生模块引入，而专门改造之后的版本。
 
+#### 5.2.2  项目核心业务逻辑
+
+离线版
+
+
+
+网络版
 
 
 
 
 
+---
 
+---
 
+---
 
-#### 5.4  页面主要板块
+## 六、产品规格
+
+### 页面主要板块
 
 页面主体布局通过若干的 `div.page` 块来组织，每个 `div.page` 可称为一个“板块”。
 
@@ -349,7 +371,7 @@
 
 主要的板块如下：
 
-##### 1）数据导入板块（限离线版）
+#### 1）数据导入板块（限离线版）
 
 cssPath: `div.page#page-import`
 
@@ -375,7 +397,7 @@ cssPath: `div.page#page-import`
 
 - 仅当当前存在加载的数据时可用
 
-##### 2）页面选择板块（限网络版）
+#### 2）页面选择板块（限网络版）
 
 cssPath: `div.page#page-nav`
 
@@ -383,7 +405,7 @@ cssPath: `div.page#page-nav`
 
 
 
-##### 3）用户信息配置板块（限网络版）
+#### 3）用户信息配置板块（限网络版）
 
 cssPath: `div.page#page-setup`
 
@@ -393,7 +415,7 @@ cssPath: `div.page#page-setup`
 
 
 
-##### 4）进度总览板块（限网络版）
+#### 4）进度总览板块（限网络版）
 
 cssPath: `div.page#page-overview`
 
@@ -402,7 +424,7 @@ cssPath: `div.page#page-overview`
 
 
 
-##### 5）待标注列表板块
+#### 5）待标注列表板块
 
 cssPath: `div.page#page-list`
 
@@ -412,7 +434,7 @@ cssPath: `div.page#page-list`
 
 
 
-##### 6）语料标注板块（最核心的功能板块）
+#### 6）语料标注板块（最核心的功能板块）
 
 cssPath: `div.page#page-main-editor`
 
@@ -421,31 +443,22 @@ cssPath: `div.page#page-main-editor`
 
 
 
-##### 7）语料切换控件板块
+#### 7）语料切换控件板块
 
 cssPath: `div.position-fixed`
 
 - 用于在所有要标注的语料之间切换，具体包括三个功能：「上一条」「下一条」和「前往第x条」
-
 - 仅当页面选择板块选中「标注」时显示。
 - 注：这不是 `div.page`
 - TODO：目前没有设置 id，不太好，建议设为 `div#page-ctrl-wrap` 之类（很不重要）
 
 
 
+---
 
+---
 
-#### 5.5  语料标注板块
-
-
-
-#### 5.6  Schema系统
-
-
-
-#### 5.7  代码主要运行逻辑（`main.js`）
-
-
+---
 
 
 
