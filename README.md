@@ -147,6 +147,8 @@
 
 ## 三、回收数据之后如何处理（数据格式说明）
 
+使用浏览器处理 json 数据的工具： [jsontool](https://tridict.github.io/jsontool/)
+
 【暂略】
 
 ---
@@ -333,7 +335,7 @@
     - `/js/modules/TokenSelector.mjs.js`  文本选取功能模块
     - `/js/modules/StepControl.mjs.js`  标注流程控制模块
     - `/js/modules/BackEnd.mjs.js`  后端接口功能模块
-    - **`/js/modules/BackEndUsage.mjs.js`**  后端调用控制，**网络版核心功能模块**
+    - **`/js/modules/BackEndUsage.mjs.js`**  后端具体用法，**网络版核心功能模块**
     - `/js/modules/BaseReader.mjs.js`  文件读取功能模块（相对通用）
     - `/js/modules/TheReader.mjs.js`  文件读取功能模块（项目专用）
     - `/js/modules/BaseSaver.mjs.js`  文件保存功能模块
@@ -347,11 +349,296 @@
 
 离线版
 
-
+【暂略】
 
 网络版
 
+【暂略】
 
+
+
+### 5.3  各功能模块接口介绍
+
+#### 5.3.1  `main.mjs.js`  页面核心逻辑
+
+该模块为前端页面提供了若干内容以供使用，主要包括：
+
+（1）数据、简单对象
+
+```javascript
+example            // 当前标注的语料对象
+dfWrap.dataItems   // 语料对象清单（离线版）
+tasks              // 标注任务清单（网络版）
+
+ctrl               // 应用控制相关变量
+
+alertData          // 消息提示盒的内容数据
+selection          // 选区相关数据
+
+rootStep           // 当前 StepsSchema 中的初始步骤
+currentStep        // 当前正在进行的标注步骤
+stepsDict          // 当前 StepsSchema 的详细描述
+stepsDictWrap      // 当前 StepsSchema 的元信息
+```
+
+（2）函数
+
+```javascript
+updateSchema()           // 更新 StepsSchema
+toogleShowOrigin()       // 切换是否显示原句
+fileInfo(originId)       // 获取 originId 对应语料的类型、原始文件名等信息
+getReplacedToken(idx)    // 获取语料（替换句）中第 idx 个词语
+getOriginToken(idx)      // 获取语料（原句）中第 idx 个词语
+getTokenList()           // 获取 example.material.tokenList
+```
+
+（3）复杂对象接口
+
+```javascript
+alertBox          // 消息盒子接口
+tokenSelector     // 文本片段选取工具接口
+theSaver          // 文件保存接口
+theApi            // 与后端连接的 Axios 实例的接口（ baseURL: `${API_BASE}/api/` ）
+theBackEnd        // 更加直接的后端功能接口
+
+win               // 浏览器 window 对象接口
+anotherAxios      // 另一个 Axios 实例的接口，未事先设置 baseURL
+
+stepCtrl          // 标注流程步骤控制接口
+ioC               // 离线版核心接口，是 ioControl 的简写
+bEU               // 网络版核心接口，是 backEndUsage 的简写
+```
+
+此外，该模块还在浏览器控制台创建了名为 `app` 的 Vue 实例变量，供调试使用。
+
+生产环境下应将最后几行之中的 `window.app = app;` 一行注释掉，以免用户自行调试，产生意外情况。
+
+各变量、函数、对象的具体细节，可查看源码，或在浏览器控制台中调试（`app.[变量名]`）。
+
+
+
+#### 5.3.2  `util.mjs.js`  一些工具函数
+
+该模块提供了几个工具性的函数，供其他模块使用，具体如下：
+
+```javascript
+forceBlur(event)    // 令按钮强制失去焦点，不太好用
+timeString()        // 返回 `yyMMdd-HHmmss` 格式的时间标记文本，如 `220316-195703`
+foolCopy(it)        // 返回对象 it 的拷贝，算法比较蠢，所以称为 `foolCopy`
+uuid()              // 返回一个新的 uuid
+```
+
+
+
+#### 5.3.3  `AlertBox.mjs.js`  消息提示功能模块
+
+该模块提供了 `AlertBox` 类，配合前端 html 文件中的 `div.alert-wrap` 块，以及 css 文件中相应的 css，可实现右下角消息提示框的功能。 `AlertBox` 类的用法如下：
+
+```javascript
+let data = reactive({
+  lastIdx: 1,
+  alerts: [],
+});
+let alertBox = new AlertBox(data);  // 实例化
+
+let idx = alertBox.pushAlert(ctt, typ, tot);  // 推送消息，ctt 为文本内容，typ 为 Bootstrap 配色类型，tot 为持续毫秒数；返回值为这条消息在 alertBox.data.alerts 数组中的序号。
+
+alertBox.removeAlert(idx);  // 从页面中隐去 alertBox.data.alerts 中序号为 idx 的消息。
+```
+
+
+
+#### 5.3.4  `TokenSelector.mjs.js`  文本选取功能模块
+
+该模块提供 `TokenSelector` 类，用于文本选取相关的控制。用法及接口如下：
+
+```javascript
+let selection = reactive({"...": "..."});  // 详情请看 main.mjs.js
+let tokenSelector = new TokenSelector(selection);  // 实例化
+
+tokenSelector.clear(tokenList);  // 清除选区
+
+// 以下函数与 语料 token 与鼠标的交互有关，用来实现选区的数据传递
+tokenSelector.onMouseDown(token, event, tokenList);  // 触发鼠标按下事件
+tokenSelector.onMouseEnter(token, tokenList);        // 触发鼠标移入事件
+tokenSelector.onMouseOut(token);                     // 触发鼠标移出事件
+tokenSelector.onMouseUp(token, tokenList);           // 触发鼠标松开事件
+
+// 以下函数与 选区中的文本 有关
+tokenSelector.getReplacedToken(idx, tokenList);    // 获取替换句中的第 idx 个 token
+tokenSelector.getOriginToken(idx, tokenList);      // 获取　原句中的第 idx 个 token
+tokenSelector.selectedReplacedText(tokenList);     // 获取替换句中 被选中的文本内容
+tokenSelector.selectedOriginText(tokenList);       // 获取　原句中 被选中的文本内容
+```
+
+
+
+#### 5.3.5  `StepControl.mjs.js`  标注流程控制模块
+
+该模块提供 `StepControl` 类，用于文本选取相关的控制。用法及接口如下：
+
+```javascript
+let appPack = {"...": "..."};  // 详情请看 main.mjs.js
+let stepCtrl = new StepControl(appPack);  // 实例化
+
+stepCtrl.touchSchema(wrap);      // 更换 StepSchema
+stepCtrl.ensureExampleStep();    // 为 example 附加 schema 信息
+
+await stepCtrl.goStep(stepObj_, data);    // 使用 stepObj_ 描述的步骤，并保存 data 标注数据
+await stepCtrl.goRefStep(ref, data);      // 前往 ref 对应的步骤，并保存 data 标注数据
+await stepCtrl.cancelStep(ref);           // 执行取消按钮的功能
+await stepCtrl.resetStep(ref);            // 执行重置按钮的功能
+
+// 以下函数用于各类 mode 下的步骤的数据处理
+stepCtrl.dealWithData(data, fn);          // 按预设流程加工 data 数据，并附加执行 fn 的操作，在下列各个函数中被调用
+await stepCtrl.handleTemplate(ref, data, fn);  // 各类 mode 下进行数据处理的一般化模板，在下列各个函数中被调用
+await stepCtrl.handleChooseOrText(ref, data);  // mode 为 choose 或 text 时调用
+await stepCtrl.handleWord(ref, data);          // mode 为 word 时调用
+await stepCtrl.handleAdd(ref, data);           // mode 为 add 时调用
+await stepCtrl.handleQita(ref, data);          // mode 为 qita 时调用 ??? 【待核实】
+await stepCtrl.handleMultiSpans(ref, data);    // mode 为 multiSpan 时调用
+```
+
+
+
+#### 5.3.6  `BackEnd.mjs.js`  后端接口功能模块
+
+该模块提供 `BackEnd` 类，用于后端接口的调用。用法及接口如下：
+
+```javascript
+let bridge = axios.create({"...": "..."});  // 一个 axios 实例，详情请看 main.mjs.js
+let handleErrorFn = (ctt, typ, tot) => alertBox.pushAlert(ctt, typ, tot);  // 错误处理函数
+let theBackEnd = new BackEnd(bridge, handleErrorFn);  // 实例化
+
+// 以下接口在源码中有比较详细的说明
+await theBackEnd.request(config);                      // 给后端发送定制请求
+await theBackEnd.db(table, operator, kwargs, _$$$);    // 后端数据库万能接口，非常危险，谨慎使用
+await theBackEnd.getTopic();                           // 获取当前标注任务的主题
+await theBackEnd.getUser(user_id, name, password);     // 获取用户信息
+await theBackEnd.getWorkList(user_id, password);       // 获取用户的任务清单
+await theBackEnd.getThing(user_id, task_id);           // 获取任务id对应的任务详情、语料、标注内容等
+await theBackEnd.getTask(user_id, task_id);            // 获取任务信息
+await theBackEnd.getEntry(entry_id);                   // 获取语料
+await theBackEnd.getAnno(user_id, task_id);            // 获取标注内容
+await theBackEnd.updateAnno(user_id, task_id, anno_wrap, topic);    // 更新标注内容
+await theBackEnd.newTask(user_id, count, topic);       // 给用户分配一定数量的新任务
+```
+
+
+
+#### 5.3.7  `BackEndUsage.mjs.js`  后端具体用法模块
+
+这是**网络版核心功能模块**。
+
+该模块提供 `BackEndUsage` 类，用于对后端接口进行具体使用。用法及接口如下：
+
+```javascript
+const appPack = {"...": "..."};  // 详情请看 main.mjs.js
+const bEU = new BackEndUsage(appPack);  // 实例化
+
+bEU.updateProgress();                // 更新页面上的标注进度
+bEU.saveStore();                     // 缓存一些用户信息，不太有用
+
+// 为 标注流程控制器 接上 相应函数
+stepCtrl.updateProgress = () => { bEU.updateProgress(); };
+stepCtrl.saveStore = () => { bEU.saveStore(); };
+
+await bEU.touchTask(task_btn);       // 获取具体任务按钮对应的 任务详情、语料、标注内容等
+await bEU.touchTaskBtn(task_btn);    // 点击具体任务按钮时触发，更新页面上的语料并跳转到标注页
+
+await bEU.connect();                 // 与后端进行连接，更新用户信息及任务清单
+await bEU.updateTarget();            // 更新标注目标
+await bEU.updateTaskList();          // 刷新任务清单，【TODO】名字改成 refreshTaskList 更好
+await bEU.updateUser(user);          // 刷新用户信息，【TODO】名字改成 refreshUser 更好
+
+await bEU.save(content);             // 保存（上传）针对当前语料的标注
+await bEU.goIdx(idx);                // 前往任务清单中的第 idx 条语料
+await bEU.prev(content);             // 前往上一条语料，【TODO】名字改成 goPrev 更好
+await bEU.next(content);             // 前往下一条语料，【TODO】名字改成 goNext 更好
+await bEU.saveAndPrev(content);      // 保存当前语料标注，并前往上一条语料
+await bEU.saveAndNext(content);      // 保存当前语料标注，并前往下一条语料
+```
+
+
+
+#### 5.3.8  `BaseReader.mjs.js`  文件读取功能模块（相对通用）
+
+该模块提供 `BaseReader` 类，用于本地文件读取。用法及接口如下：
+
+```javascript
+const baseReader = new BaseReader(handleErrorFn);  // 实例化
+
+// 【TODO】这个模块命名和具体使用方式都不太完善，通常不会直接使用
+await baseReader.reader_ReadFileAsText(fileWrap, options);
+await baseReader.reader_ReadFileAsArrayBuffer(file, options);
+await baseReader.reader_ReadFileAsBinaryString(file, options);
+```
+
+此模块在本项目中主要供 `TheReader.mjs.js` 调用。
+
+
+
+#### 5.3.9  `TheReader.mjs.js`  文件读取功能模块（项目专用）
+
+该模块提供 `TheReader` 类，用于本地文件读取。用法及接口如下：
+
+```javascript
+const theReader =  new TheReader(handleErrorFn, jschardet_detect);  // 实例化
+
+// 【TODO】这个模块命名和具体使用方式都不太完善
+await theReader.readFile (fileWrap);        // 在本项目中主要用这个方法来读取本地文件
+await theReader.readFileAsArrayBuffer (fileWrap);
+await theReader.readFileAsBinaryString (fileWrap, encoding);
+```
+
+
+
+#### 5.3.10  `BaseSaver.mjs.js`  文件保存功能模块
+
+该模块提供 `xx` 类，用于文本选取相关的控制。用法及接口如下：
+
+```javascript
+const theSaver = new BaseSaver();  // 实例化
+
+theSaver.saveText(text, fileName);  // 保存文本内容
+theSaver.saveJson(obj, fileName);   // 保存 json 对象
+theSaver.save(obj, fileName);       // 保存 json 对象，简写
+```
+
+
+
+#### 5.3.11  `IoControl.mjs.js`  本地文件读写控制模块
+
+这是**离线版核心功能模块**。
+
+该模块提供 `xx` 类，用于文本选取相关的控制。用法及接口如下：
+
+```javascript
+const appPack = {"...": "..."};  // 详情请看 main.mjs.js
+const ioC = new IoControl(appPack);  // 实例化
+
+ioC.updateProgress();        // 更新页面上的标注进度
+ioC.saveStore();             // 缓存一些数据
+ioC.saveExample();           // 将当前标注内容保存到本地数据中
+
+// 为 标注流程控制器 接上 相应函数
+stepCtrl.updateProgress = () => { ioC.updateProgress(); };
+stepCtrl.saveStore = () => { ioC.saveStore(); };
+stepCtrl.saveExample = () => { ioC.saveExample(); };
+
+ioC.ensureExampleStep();     // 为 example 附加 schema 信息，【TODO】应该与 stepCtrl 接起来
+
+ioC.log(action);             // 在本地数据中记录用户行为
+
+ioC.fineIdx(idx);            // 将用户输入的序号限制在有效范围内
+await ioC.goIdx(idx);        // 前往序号为 idx 的语料
+
+await ioC.loadStore();       // 从缓存中加载数据
+await ioC.onExport();        // 将本地数据输出为文件
+await ioC.onImport(doc);     // 导入本地文件时触发的加工过程
+await ioC.readData();        // 读取数据，供导入文件流程使用
+await ioC.fixData();         // 修复数据，供导入文件流程使用
+```
 
 
 
@@ -460,5 +747,7 @@ cssPath: `div.position-fixed`
 
 ---
 
+**编辑历史**
 
+- 孙春晖  2022-03-16
 
