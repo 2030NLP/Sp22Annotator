@@ -723,10 +723,18 @@
         <div class="row page-ctrl">
           <div class="col col-12 col-md-4 my-1">
             <div class="input-group input-group-sm ">
-              <button class="btn btn-outline-secondary" type="button" @click="saveExample();ioC.goIdx(ctrl.currentIdx-1)">上一条</button>
+              <button
+                class="btn btn-outline-secondary"
+                type="button"
+                @click="ioC.saveExample();ioC.goIdx(ctrl.currentIdx-1)"
+              >上一条</button>
               <!-- <span class="input-group-text">3</span> -->
               <input type="text" class="form-control text-center" disabled :value="ctrl.currentIdx+1">
-              <button class="btn btn-outline-secondary" type="button" @click="saveExample();ioC.goIdx(ctrl.currentIdx+1)">下一条</button>
+              <button
+                class="btn btn-outline-secondary"
+                type="button"
+                @click="ioC.saveExample();ioC.goIdx(ctrl.currentIdx+1)"
+              >下一条</button>
             </div>
           </div>
           <div class="col-md-4 my-0">
@@ -736,7 +744,11 @@
               <span class="input-group-text">前往第</span>
               <input type="number" class="form-control text-center" v-model="ctrl.targetIdx">
               <span class="input-group-text">条</span>
-              <button class="btn btn-outline-secondary" type="button" @click="saveExample();ioC.goIdx(ctrl.targetIdx-1)">GO</button>
+              <button
+                class="btn btn-outline-secondary"
+                type="button"
+                @click="ioC.saveExample();ioC.goIdx(ctrl.targetIdx-1)"
+              >GO</button>
             </div>
           </div>
           <!-- <div class="col-md-1 my-0">
