@@ -15,7 +15,7 @@
 
   <title>空间关系理解数据标注 2022</title>
 
-  <link href="lib/bootstrap_5.1.3_.min.css" rel="stylesheet">
+  <link href="css/bootstrap_5.1.3_.min.css" rel="stylesheet">
 
   <link href="css/style.css" rel="stylesheet">
 
@@ -578,7 +578,7 @@
                 <div>{{ currentStep?.props?.selectedTitle }}<span>“<span v-for="tokenIdx in selection.array">{{ getReplacedToken(tokenIdx) }}</span>”</span><!-- <sub>{{selection.array}}</sub> --></div>
               </div>
 
-              <template v-if="selection.array.length">
+              <template v-if="selection.array.length||currentStep?.props?.canSkipSelection"">
                 <!-- 指导语 -->
                 <div class="col col-12 my-1">
                   <div v-if="currentStep?.props?.instruction">{{ currentStep?.props?.instruction }}</div>
@@ -609,7 +609,7 @@
               <!-- 按钮区 -->
               <div class="col col-12 my-1">
                 <!-- okBtn -->
-                <button v-if="currentStep?.props?.okBtn" type="button" @click="stepCtrl.handleChooseOrText(currentStep.props.okBtn.go, currentStep.props.data)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`" :disabled="(!selection.array.length)||(!currentStep.props.data.withText.length)">{{ currentStep.props.okBtn.text }}</button>
+                <button v-if="currentStep?.props?.okBtn" type="button" @click="stepCtrl.handleChooseOrText(currentStep.props.okBtn.go, currentStep.props.data)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn.style}`" :disabled="(!currentStep?.props?.canSkipSelection&&!selection.array.length)||(!currentStep.props.data.withText.length)">{{ currentStep.props.okBtn.text }}</button>
                 <button v-if="currentStep?.props?.okBtn1" type="button" @click="stepCtrl.handleChooseOrTextQita(currentStep.props.okBtn1.go, currentStep.props.data)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.okBtn1.style}`" :disabled="(!currentStep.props.data.withText.length)">{{ currentStep.props.okBtn1.text }}</button>
                 <!-- cancelBtn -->
                 <button v-if="currentStep?.props?.cancelBtn" type="button" @click="stepCtrl.cancelStep(currentStep.props.cancelBtn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${currentStep.props.cancelBtn.style}`">{{ currentStep.props.cancelBtn.text }}</button>
