@@ -39,7 +39,7 @@ const PROJ_PREFIX = "Sp22";
 const DEVELOPING = 1;
 const DEVELOPING_LOCAL = 0;
 const API_BASE_DEV_LOCAL = "http://127.0.0.1:5000";
-const API_BASE_DEV = "http://192.168.124.28:8888";
+const API_BASE_DEV = "http://10.1.25.237:8888/";
 const API_BASE_PROD = "http://101.43.244.203";
 const API_BASE = DEVELOPING ? API_BASE_DEV : API_BASE_PROD;
 
