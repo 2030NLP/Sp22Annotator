@@ -112,6 +112,18 @@ class BackEndUsage {
     };
   }
 
+  async begin() {
+    await this.connect();
+    this.data.ctrl.currentPage = 'anno';
+    let lastEID = this?.data?.newThings?.lastEID ?? null;
+    let btn = this.data.tasks.find(btn => btn.eId == lastEID);
+    if (btn) {
+      await this.goIdx(btn.idx);
+      return;
+    }
+    await this.goIdx(0);
+  }
+
   async connect() {
     // this.pushAlert("connect 开始", 'secondary');
     console.log(this);
@@ -185,14 +197,14 @@ class BackEndUsage {
         let anno = work?.annotation;
         let task_btn = {
           id: task.id,
-          eId: task.eId,
+          eId: task.entry,
           valid: anno && !anno?.dropped && !anno?.skipped ? true : false,
           dropped: anno?.dropped ? true : false,
           skipped: anno?.skipped ? true : false,
         };
         task_btn_list.push(task_btn);
       };
-      task_btn_list = task_btn_list.sort((a,b)=> +a.eId-b.eId);
+      // task_btn_list = task_btn_list.sort((a,b)=> +a.eId-b.eId);
       for (let idx in task_btn_list) {
         task_btn_list[idx].idx = idx;
       };

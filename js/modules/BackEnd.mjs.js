@@ -202,6 +202,10 @@ class BackEnd {
     };
     if (anno_wrap.isDropping) {
       data.dropped = true;
+      data.valid = false;
+    } else {
+      data.dropped = false;
+      data.valid = true;
     };
     //
     // let dropped = false;
