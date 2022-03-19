@@ -213,18 +213,23 @@
       v-if="example!=null&&example?.material!=null"
       :class="ctrl?.currentWorker=='admin'?'admin':''"
     >
-      <div class="container">
+      <div class="container" id="page-main-editor--container">
 
+        <div class="row">
+          <div class="row mt-2 mb-0">
+            <p class="text-muted small">{{example?.originId}}　{{`${fileInfo(example?.originId).用户显示名称}`}}</p>
+          </div>
+        </div>
 
-        <div class="row mt-2 mb-3 align-items-center" id="page-main-editor--main">
-          <!-- 内容区 开始 -->
-          <div class="col col-12 col-lg-7 my-2">
 
             <div class="row my-2">
               <p class="text-muted small">#{{example?._info?.entry_id}}　{{`${fileInfo(example?.originId).用户显示名称}`}}</p>
             </div>
+        <div class="row mt-0 mb-2 __align-items-center" id="page-main-editor--main">
+          <!-- 内容区 开始 -->
+          <div class="col col-12 col-lg-7 my-1">
             <!-- 替换后文本区 开始 -->
-            <div class="row my-2 material-area" id="material-replaced">
+            <div class="row my-1 material-area" id="material-replaced">
               <p>
                 <span
                   v-for="token in getTokenList()"
@@ -250,7 +255,7 @@
             </div>
             <!-- 替换后文本区 结束 -->
             <!-- 替换前原文区 开始 -->
-            <div class="row my-2 material-area" id="material-origin" :data-show="ctrl.showOrigin" v-show="ctrl.showOrigin">
+            <div class="row my-1 material-area" id="material-origin" :data-show="ctrl.showOrigin" v-show="ctrl.showOrigin">
               <p>
                 <span
                   v-for="token in getTokenList()"
@@ -388,7 +393,9 @@
               </div>
               <!-- 选项按钮 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.optionBtns">
-                <button v-for="btn in currentStep.props.optionBtns" :key="btn.text" type="button" @click="stepCtrl.goRefStep(btn.go, btn.data)" class="btn btn-sm my-1 me-1" :class="`btn-${btn.style}`">{{ btn.text }}</button>
+                <template v-for="btn in currentStep.props.optionBtns">
+                  <button :key="btn.text" type="button" v-on:click="goRefStep(btn.go, btn.data)" class="btn btn-sm my-1 me-1" :class="`btn-${btn.style}`">{{ btn.text }}</button><br v-if="false"/>
+                </template>
               </div>
               <!-- 完成按钮 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.okBtn">
