@@ -3,17 +3,18 @@
 
 import {
   reactive,
-  readonly,
-  ref,
-  toRef,
+  // readonly,
+  // ref,
+  // toRef,
   toRefs,
-  computed,
+  // computed,
   onMounted,
-  onUpdated,
-  createApp as Vue_createApp
+  // onUpdated,
+  createApp as Vue_createApp,
+  watch
 } from './modules_lib/vue_3.2.31_.esm-browser.prod.min.js';
 
-import { timeString, foolCopy } from './util.mjs.js';
+// import { timeString, foolCopy } from './util.mjs.js';
 import BaseSaver from './modules/BaseSaver.mjs.js';
 import TheReader from './modules/TheReader.mjs.js';
 import AlertBox from './modules/AlertBox.mjs.js';
@@ -39,10 +40,9 @@ const PROJ_PREFIX = "Sp22";
 const DEVELOPING = 1;
 const DEVELOPING_LOCAL = 0;
 const API_BASE_DEV_LOCAL = "http://127.0.0.1:5000";
-const API_BASE_DEV = "http://192.168.124.28:8888/";
-// const API_BASE_DEV = "http://10.1.25.237:8888/";
+const API_BASE_DEV = "http://10.1.25.237:8888";
 const API_BASE_PROD = "http://101.43.244.203";
-const API_BASE = DEVELOPING ? API_BASE_DEV : API_BASE_PROD;
+const API_BASE = DEVELOPING ? API_BASE_DEV_LOCAL : API_BASE_PROD;
 
 // 语料信息映射
 const fildId_to_info = { "A01": { "genre": "中小学语文课本", "file": "人教版_课标教材初中语文原始语料.txt", "用户显示名称": "初中语文课本" }, "A02":{ "genre":"中小学语文课本", "file": "人教版_课标教材高中语文原始语料.txt", "用户显示名称": "高中语文课本" }, "A03":{ "genre":"中小学语文课本", "file": "人教版_课标教材小学语文原始语料.txt", "用户显示名称": "小学语文课本" }, "A04":{ "genre":"中小学语文课本", "file": "人教版_全日制普通高中语文原始语料.txt", "用户显示名称": "高中语文课本" }, "A05":{ "genre":"中小学语文课本", "file": "人教版_义务教育教材_3年_初中语文原始语料.txt", "用户显示名称": "初中语文课本" }, "A06":{ "genre":"中小学语文课本", "file": "人教版_义务教育教材_6年_小学语文原始语料.txt", "用户显示名称": "小学语文课本" }, "B01": { "genre": "体育训练人体动作", "file": "shentiyundongxunlian.txt", "用户显示名称": "身体运动训练" }, "B02":{ "genre":"体育训练人体动作", "file": "tushouxunlian.txt", "用户显示名称": "儿童徒手训练" }, "B03":{ "genre":"体育训练人体动作", "file": "yujia.txt", "用户显示名称": "瑜伽" }, "B04":{ "genre":"体育训练人体动作", "file": "qingshaoniantushou.txt", "用户显示名称": "青少年徒手训练" }, "B05":{ "genre":"体育训练人体动作", "file": "lashen131.txt", "用户显示名称": "儿童拉伸训练" }, "B06":{ "genre":"体育训练人体动作", "file": "lashen130.txt", "用户显示名称": "青少年拉伸训练" }, "C01": { "genre": "人民日报", "file": "rmrb_2020-2021.txt", "用户显示名称": "人民日报" }, "D01": { "genre": "文学", "file": "似水流年_王小波.txt", "用户显示名称": "人民日报" }, "D02": { "genre": "文学", "file": "洗澡_杨绛.txt", "用户显示名称": "文学" }, "D03":{ "genre":"文学", "file": "天狗.txt", "用户显示名称": "文学" }, "D04":{ "genre":"文学", "file": "北京北京.txt", "用户显示名称": "文学" }, "D05":{ "genre":"文学", "file": "草房子.txt", "用户显示名称": "文学" }, "D06":{ "genre":"文学", "file": "兄弟.txt", "用户显示名称": "文学" }, "E01":{ "genre":"地理百科全书", "file": "geography.txt", "用户显示名称": "地理百科全书" }, "F01":{ "genre":"交通事故判决书", "file": "上海_交通判决书.txt", "用户显示名称": "交通事故判决书" }, "F02":{ "genre":"交通事故判决书", "file": "北京_交通判决书.txt", "用户显示名称": "交通事故判决书" }, "G01":{ "genre":"语言学论文例句", "file": "wenxian.txt", "用户显示名称": "语言学论文例句" }};
@@ -103,14 +103,6 @@ const RootComponent = {
       hasDown: false,
     });
     const tokenSelector = new TokenSelector(selection);
-
-    // 初始化 后端 API
-    const theApi = axios.create({
-      baseURL: `${API_BASE}/api/`,
-      timeout: 30000,
-      headers: {'Catch-Cotrol': 'no-cache'},
-    });
-    const theBackEnd = new BackEnd(theApi, alertBox_pushAlert);
 
 
     // 初始化 标注工具当下正在标注的语料 数据
@@ -196,7 +188,11 @@ const RootComponent = {
       version: "00",
     });
 
+    const theBackEnd = new BackEnd(appData.ctrl.currentWorkerSecret, `${API_BASE}/api/`, alertBox_pushAlert);
 
+    watch(()=>appData.ctrl.currentWorkerSecret, () => {
+      theBackEnd.token = appData.ctrl.currentWorkerSecret
+    })
 
     const appPack = {
       reactive_data: appData,
@@ -309,7 +305,7 @@ const RootComponent = {
       //
       theSaver,
       //
-      theApi,
+      // theApi,
       theBackEnd,
       //
       toogleShowOrigin,
