@@ -99,10 +99,16 @@ class BackEndUsage {
         };
         this.tokenSelector.clear(this.ewp.example?.material?.tokenList);
 
+        if (!this.ewp.example._ctrl?.timeLog?.length) {
+          this.ewp.example._ctrl.timeLog = [];
+        }
+        this.ewp.example._ctrl.timeLog.push( ['in', JSON.parse(JSON.stringify(new Date()))] );
+
         //
         this.data.ctrl.currentPage = 'anno';
         this.data.newThings.lastEID = thing?.entry?.id;
         this.storeTool.set(`${this.appName}:lastEID`, this.data.newThings.lastEID);
+
         return content;
       } else {
         console.log("thing:", thing);
@@ -134,7 +140,7 @@ class BackEndUsage {
         this.pushAlert(`【发生错误】${resp?.data?.err}`, 'danger');
         return;
       };
-      this.data.newThings.topic = resp?.data?.topic;
+      this.data.newThings.topic = resp?.data?.topic;  // TODO, 此处不应该有 TOPIC 信息
       await this.updateUser(resp?.data?.user);
       this.pushAlert(`${resp?.data?.user?.name}的信息已同步`);
       await this.updateTaskList();
@@ -242,6 +248,12 @@ class BackEndUsage {
 
   async save(content) {
     try {
+
+      if (!this.ewp.example._ctrl?.timeLog?.length) {
+        this.ewp.example._ctrl.timeLog = [];
+      }
+      this.ewp.example._ctrl.timeLog.push( ['out', JSON.parse(JSON.stringify(new Date()))] );
+
       let task_id = content?._info?.task_id;
       let anno_wrap = {
         'annotations': this.ewp.example?.annotations,
