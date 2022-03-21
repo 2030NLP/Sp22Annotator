@@ -147,6 +147,7 @@
 
 
     .material-area {
+      -webkit-user-select: none;
       user-select: none;
     }
     .material-area span.token {
@@ -211,8 +212,8 @@
     }*/
     .material-area span.token[data-replaced=true].should-notice {
       /*border: 1px #ff0000 solid;*/
-      color: #f00;
-      font-weight: bold;
+      /*color: #f00;*/
+      /*font-weight: bold;*/
     }
     .material-area span.token[data-selecting=true] {
       background: #eef;
