@@ -115,11 +115,11 @@ class BackEnd {
     //   user_id
     //   task.id
     let response = await this.request({
-      method: "post",
-      url: `/thing/${task_id}`,
-      data: {
-        'user_id': user_id,
-      },
+      method: "get",
+      url: `/thing/${user_id}/${task_id}`,
+      // data: {
+      //   'user_id': user_id,
+      // },
     });
     return response;
     // 应有输出：
@@ -137,11 +137,11 @@ class BackEnd {
     //   user_id
     //   task.id
     let response = await this.request({
-      method: "post",
-      url: `/task/${task_id}`,
-      data: {
-        'user_id': user_id,
-      },
+      method: "get",
+      url: `/task/${user_id}/${task_id}`,
+      // data: {
+      //   'user_id': user_id,
+      // },
     });
     return response;
     // 应有输出：
