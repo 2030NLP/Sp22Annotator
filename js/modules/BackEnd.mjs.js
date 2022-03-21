@@ -160,12 +160,12 @@ class BackEnd {
     //   user_id
     //   task.id  // 该 annotation 所对应的 task
     let response = await this.request({
-      method: "post",
-      url: `/annotation/`,
-      data: {
-        'user_id': user_id,
-        'task_id': task_id,
-      },
+      method: "get",
+      url: `/anno/${user_id}/${task_id}`,
+      // data: {
+      //   'user_id': user_id,
+      //   'task_id': task_id,
+      // },
     });
     return response;
     // 应有输出：
