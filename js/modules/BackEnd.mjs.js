@@ -215,8 +215,8 @@ class BackEnd {
     // let valid = true;
     //
     let response = await this.request({
-      method: "post",
-      url: `/update/`,
+      method: "put",
+      url: `/anno/${user_id}/${task_id}`,
       data: data,
     });
     return response;
