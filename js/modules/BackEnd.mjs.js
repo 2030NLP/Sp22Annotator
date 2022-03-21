@@ -8,7 +8,7 @@ class BackEnd {
     const theApi = axios.create({
       baseURL,
       timeout: 30000,
-      headers: {'Catch-Cotrol': 'no-cache'},
+      headers: {'Cache-Cotrol': 'no-cache'},
     });
     this.bridge = theApi;  // axios
     this.token = token;
@@ -45,7 +45,7 @@ class BackEnd {
 
 
   // 万能 api 开始
-  async db(table, operator, kwargs, _$$$) {
+  async db(table, operator, kwargs, _$$$, timeout=30000) {
     let data = {
       table: `${table??''}`,
       opt: `${operator??''}`,
@@ -56,6 +56,7 @@ class BackEnd {
       method: "post",
       url: `/db`,
       data: data,
+      timeout: timeout,
     });
     return response;
   }
