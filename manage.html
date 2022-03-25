@@ -223,7 +223,8 @@
               >开始执行</button>
               <button
                 type="button"
-                class="btn btn-sm me-2 my-1 btn-outline-secondary"
+                class="btn btn-sm me-2 my-1"
+                :class="assignData.undone ? 'btn-outline-secondary' : 'btn-outline-success'"
                 @click="()=>{if(assignData.undone){cancelAssigment();}else{cleanAssigment();}}"
                 :title="assignData.undone ? '撤除规划好的任务安排' : '清除以上信息'"
               >{{ assignData.undone ? '撤除规划' : '知道了，清除'}}</button>
