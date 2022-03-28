@@ -7,7 +7,7 @@ import {
   // ref,
   // toRef,
   toRefs,
-  // computed,
+  computed,
   onMounted,
   // onUpdated,
   createApp as Vue_createApp,
@@ -38,7 +38,7 @@ const DEVELOPING = 1;
 const API_BASE_DEV_LOCAL = "http://127.0.0.1:5000";
 const API_BASE_DEV = "http://192.168.124.28:8888";  //"http://10.1.25.237:8888";
 const API_BASE_PROD = "https://sp22.nlpsun.cn";
-const API_BASE = DEVELOPING ? API_BASE_DEV_LOCAL : API_BASE_PROD;
+const API_BASE = DEVELOPING ? API_BASE_DEV : API_BASE_PROD;
 
 
 const RootComponent = {
@@ -151,7 +151,25 @@ const RootComponent = {
       entryDict: {},
       taskDict: {},
       annoDict: {},
+      topics: [],
+      topicTaskDict: {},
     });
+
+    const tasks_sta = (tasks) => ({
+      total_num: tasks?.length ?? 0,
+      assigned_num: tasks.filter(task => task.to?.length).length,
+      working_num: tasks.filter(task => task.to?.length&&task.submitters?.length&&task.submitters?.length<task.to?.length).length,
+      done_num: tasks.filter(task => task.to?.length&&task.submitters?.length==task.to?.length).length,
+    });
+
+    const tasks_computed = computed(() => ({
+      total: tasks_sta(theDB.tasks),
+      by_topic: Object.entries(theDB.topicTaskDict).map(pr => [pr[0], tasks_sta(pr[1])]),
+    }));
+
+
+
+
 
     const saveBasic = () => {
       store.set(`${APP_NAME}:version`, APP_VERSION);
@@ -219,7 +237,7 @@ const RootComponent = {
       let cDueLen = userCurrTasks(user).length;
       let bg = Math.max(cDoneLen, cDueLen);
       let mn = Math.min(cDoneLen, cDueLen);
-      let pct = `${mn/bg*100}%`;
+      let pct = bg==0 ? `0` : `${mn/bg*100}%`;
       let done = cDoneLen >= cDueLen;
       return {
         done,
@@ -230,10 +248,21 @@ const RootComponent = {
     };
 
     const extendDB = () => {
+        theDB.topics = [];
+        theDB.topicTaskDict = {};
         for (let task of theDB.tasks) {
           task.submitters = theDB.annos.filter(anno => anno.task==task.id).map(anno => anno.user);
           task.enough = task.to?.length??0 <= task.submitters?.length??0;
           theDB.taskDict[task.id] = task;
+          if (task.topic?.length && !theDB.topics.includes(task.topic)) {
+            theDB.topics.push(task.topic);
+          };
+          if (task.topic?.length && !(task.topic in theDB.topicTaskDict)) {
+            theDB.topicTaskDict[task.topic] = [];
+          };
+          if (task.topic?.length) {
+            theDB.topicTaskDict[task.topic].push(task);
+          };
         };
 
         for (let user of theDB.users) {
@@ -294,6 +323,20 @@ const RootComponent = {
       alertBox_removeAlert(aidx);
     };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const setAsQuitted = async (user) => {
       if (user.quitted) {
         alertBox_pushAlert(`${user.name} 本来就被记为“已退出”了`, 'warning', 5000);
@@ -343,6 +386,21 @@ const RootComponent = {
         alertBox_pushAlert(`${user.name} 更新时出错【${error}】`, 'danger', 5000, error);
       }
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -542,6 +600,7 @@ const RootComponent = {
       alertBox,
       ctrl,
       theDB,
+      tasks_computed,
       //
       assignTopics,
       assignData,

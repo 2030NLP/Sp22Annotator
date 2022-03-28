@@ -1,6 +1,13 @@
 
 
 
+
+    dl, ol, ul {
+      margin-top: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+
     .vh-80 {
       height: 80vh;
     }
