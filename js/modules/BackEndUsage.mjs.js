@@ -126,6 +126,7 @@ class BackEndUsage {
           btn_idx: task_btn.idx,
           task_id: thing?.task?.id,
           entry_id: thing?.entry?.id,
+          entry_ver: thing?.entry?.version,
           anno_id: thing?.anno?.id,
         };
 
@@ -325,6 +326,8 @@ class BackEndUsage {
       this.ewp.example._ctrl.timeLog.push( ['out', JSON.parse(JSON.stringify(new Date()))] );
 
       let task_id = content?._info?.task_id;
+      let entry_id = content?._info?.entry_id;
+      let entryVer = content?._info?.entry_ver;
       let anno_wrap = {
         'annotations': this.ewp.example?.annotations,
         '_ctrl': this.ewp.example?._ctrl,
@@ -336,7 +339,7 @@ class BackEndUsage {
       if (anno_wrap.annotations.filter(anno => anno.isDropping).length) {
         anno_wrap.isDropping = true;
       };
-      let resp = await this.backEnd.updateAnno(this.data.ctrl.currentWorkerId, task_id, anno_wrap, this.data?.newThings?.topic);
+      let resp = await this.backEnd.updateAnno(this.data.ctrl.currentWorkerId, task_id, entry_id, anno_wrap, this.data?.newThings?.topic, entryVer);
       if (resp?.data?.code!=200) {
         this.pushAlert(`【发生错误】${resp?.data?.msg}`, 'danger', null, resp);
         return false;

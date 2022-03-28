@@ -245,7 +245,7 @@ class BackEnd {
     return response;
   }
 
-  async updateAnno(user_id, task_id, anno_wrap, topic) {
+  async updateAnno(user_id, task_id, entry_id, anno_wrap, topic, entryVer) {
     // 获取 anno 信息
     // 输入：
     //   user_id
@@ -264,6 +264,8 @@ class BackEnd {
     let data = {
       'user': user_id,
       'task': task_id,
+      'entry': entry_id,
+      'entryVer': entryVer,
       'topic': topic,
       'content': anno_wrap,
     };
