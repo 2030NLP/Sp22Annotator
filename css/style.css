@@ -201,6 +201,9 @@
     .material-area span.token:hover {
       background: #fee;
     }
+    .material-area span.token[data-auto-dverb=true] {
+      color: #e39128;
+    }
     .material-area span.token[data-auto-entity=true] {
       /*border: 1px #0d6efd solid;*/
       /*color: #0d6efd;*/
@@ -218,8 +221,8 @@
       color: #0d6efd;
       /*border-bottom: 1px #0d6efd dotted;*/
     }
-    .material-area span.token[data-auto-entity=true][data-pos=s] {
-      color: #198754;
+    .material-area span.token[data-pos=s] {
+      color: #11ab21;
       /*border: 1px #198754 solid;*/
     }
     .material-area span.token[data-auto-spatial=true] {
