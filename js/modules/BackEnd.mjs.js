@@ -212,6 +212,15 @@ class BackEnd {
     return response;
   }
 
+  async getEntryInfoAll(timeout=600000) {
+    let response = await this.request({
+      method: "get",
+      url: `/entry-infos`,
+      timeout: timeout,
+    });
+    return response;
+  }
+
   async getAnno(user_id, task_id) {
     // 获取 anno 信息
     // 输入：

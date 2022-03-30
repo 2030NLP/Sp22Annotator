@@ -7,7 +7,7 @@ import {
   // ref,
   // toRef,
   toRefs,
-  // computed,
+  computed,
   onMounted,
   // onUpdated,
   createApp as Vue_createApp,
@@ -32,7 +32,7 @@ import __Wrap_of_store__ from './modules_lib/store_2.0.9_.legacy.min.mjs.js';
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno";
-const APP_VERSION = "22-0323-00";
+const APP_VERSION = "22-0330-00";
 const PROJ_DESC = "SpaCE2022";
 const PROJ_PREFIX = "Sp22";
 
@@ -40,7 +40,7 @@ const PROJ_PREFIX = "Sp22";
 const DEVELOPING = 1;
 const DEVELOPING_LOCAL = 0;
 const API_BASE_DEV_LOCAL = "http://127.0.0.1:5000";
-const API_BASE_DEV = "http://192.168.124.28:8888";  //"http://10.1.25.237:8888";
+const API_BASE_DEV = "http://192.168.124.3:8888";  //"http://10.1.25.237:8888";
 const API_BASE_PROD = "https://sp22.nlpsun.cn";
 const API_BASE = DEVELOPING ? API_BASE_DEV : API_BASE_PROD;
 
@@ -330,6 +330,18 @@ const RootComponent = {
     const getTokenList = () => exampleWrap?.example?.material?.tokenList;
 
 
+    const modifiedText = computed(() => {
+      let tokenList = getTokenList();
+      let txt = tokenList.map(token => selection.array.includes(token.idx)?"⚛":(token?.to?.word??token.word)).join("");
+      let textFragsPre = txt.split(/⚛+/g);
+      let textFrags = {
+        sideL: textFragsPre[0],
+        sideM: currentStep?.props?.data?.withText,  //||"【???】",
+        sideR: textFragsPre[1]??"",
+      };
+      return textFrags;
+    });
+
 
     const shouldShowNotice = () => (topic2using(appData?.ctrl?.currentWorkerTaskType)=='清洗' || appData?.ctrl?.currentWorker=='admin');
     const shouldBeAdmin = () => (appData?.ctrl?.currentWorker=='admin');
@@ -375,6 +387,7 @@ const RootComponent = {
       getReplacedToken,
       getOriginToken,
       getTokenList,
+      modifiedText,
       //
       shouldShowNotice,
       shouldBeAdmin,

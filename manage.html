@@ -83,8 +83,36 @@
               class="btn btn-sm me-2 my-1"
               :class="{'btn-outline-success': theDB.users?.length, 'btn-outline-primary': !theDB.users?.length}"
               @click="()=>{sync()}"
-              title="从服务器更新最新数据，仅更新 User, Task, Anno 表"
-            >刷新数据库</button>
+              title="从服务器更新最新数据，包括 User, Task, Anno 表，以及 Entry 表中的基本信息"
+            >刷新全部</button>
+            <button
+              type="button"
+              class="btn btn-sm me-2 my-1"
+              :class="{'btn-outline-success': theDB.users?.length, 'btn-outline-primary': !theDB.users?.length}"
+              @click="()=>{sync()}"
+              title="从服务器更新 User 表"
+            >刷新 User 表</button>
+            <button
+              type="button"
+              class="btn btn-sm me-2 my-1"
+              :class="{'btn-outline-success': theDB.tasks?.length, 'btn-outline-primary': !theDB.tasks?.length}"
+              @click="()=>{sync()}"
+              title="从服务器更新 Task 表"
+            >刷新 Task 表</button>
+            <button
+              type="button"
+              class="btn btn-sm me-2 my-1"
+              :class="{'btn-outline-success': theDB.annos?.length, 'btn-outline-primary': !theDB.annos?.length}"
+              @click="()=>{sync()}"
+              title="从服务器更新 Anno 表"
+            >刷新 Anno 表</button>
+            <button
+              type="button"
+              class="btn btn-sm me-2 my-1"
+              :class="{'btn-outline-success': theDB.entries?.length, 'btn-outline-primary': !theDB.entries?.length}"
+              @click="()=>{sync()}"
+              title="从服务器更新 Entry 表（仅基本信息）"
+            >刷新 Entry 表（仅基本信息）</button>
             <button
               type="button"
               class="btn btn-sm me-2 my-1"

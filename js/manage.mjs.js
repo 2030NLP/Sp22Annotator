@@ -28,15 +28,17 @@ import ClipboardJS from './modules_lib/clipboard_2.0.10_.mjs.js';
 import __Wrap_of_store__ from './modules_lib/store_2.0.9_.legacy.min.mjs.js';  //
 import __Wrap_of_lodash__ from './modules_lib/lodash_4.17.21_.min.mjs.js';     // 这两个包引入之后，直接全局能用，不用做任何处理。
 
+import assign_tasks from './assign_tasks.mjs.js';
+
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno-Manager";
-const APP_VERSION = "22-0325-00";
+const APP_VERSION = "22-0330-00";
 
 // 开发环境 和 生产环境 的 控制变量
 const DEVELOPING = 1;
 const API_BASE_DEV_LOCAL = "http://127.0.0.1:5000";
-const API_BASE_DEV = "http://192.168.124.28:8888";  //"http://10.1.25.237:8888";
+const API_BASE_DEV = "http://192.168.124.3:8888";  //"http://10.1.25.237:8888";
 const API_BASE_PROD = "https://sp22.nlpsun.cn";
 const API_BASE = DEVELOPING ? API_BASE_DEV : API_BASE_PROD;
 
@@ -83,6 +85,9 @@ const RootComponent = {
     // 初始化 文件读取 模块
     const theReader = new TheReader(alertBox_pushAlert);
 
+    // 初始化 文件保存 模块
+    const theSaver = new BaseSaver();
+
 
     // 初始化 剪贴板 插件
     onMounted(() => {
@@ -97,6 +102,76 @@ const RootComponent = {
         alertBox_pushAlert(`拷贝失败！`, "danger");
       });
     });
+
+
+
+
+
+    const ll0 = ['t0', '第0期', '清洗', '0', 'clean', 'check'];
+    const ll1 = ['t1', '第1期', '正确性', '1'];
+    const ll2 = ['t2', '第2期', '同义性', '2'];
+    const ll3 = ['t3', '第3期', '归因', '3', 'reason'];
+    const ll4 = ['t4', '第4期', '精标', '4', 'detail'];
+
+    // 处理 topic 历史遗留混乱 用于 Task task.topic
+    const topic_regulation = (topic) => {
+      if (ll0.includes(topic)) {
+        return '清洗';
+      };
+      if (ll1.includes(topic)) {
+        return '第1期';
+      };
+      if (ll2.includes(topic)) {
+        return '第2期';
+      };
+      if (ll3.includes(topic)) {
+        return '归因';
+      };
+      if (ll4.includes(topic)) {
+        return '精标';
+      };
+      return null;
+    }
+
+    // 处理 topic 历史遗留混乱 用于 User user.currTask
+    const topic_to_tag = (topic) => {
+      if (ll0.includes(topic)) {
+        return 't0';
+      };
+      if (ll1.includes(topic)) {
+        return 't1';
+      };
+      if (ll2.includes(topic)) {
+        return 't2';
+      };
+      if (ll3.includes(topic)) {
+        return 't3';
+      };
+      if (ll4.includes(topic)) {
+        return 't4';
+      };
+      return null;
+    }
+
+    // 处理 topic 历史遗留混乱 用于 find()
+    const topic_tags = (topic) => {
+      if (ll0.includes(topic)) {
+        return ll0;
+      };
+      if (ll1.includes(topic)) {
+        return ll1;
+      };
+      if (ll2.includes(topic)) {
+        return ll2;
+      };
+      if (ll3.includes(topic)) {
+        return ll3;
+      };
+      if (ll4.includes(topic)) {
+        return ll4;
+      };
+      return [];
+    }
 
     const topic2using = (topic) => {
       const map = {
@@ -117,6 +192,9 @@ const RootComponent = {
       }
       return map[topic];
     };
+
+
+
 
     const TABS = {
       "userInfo": "userInfo",
@@ -281,16 +359,29 @@ const RootComponent = {
       let aidx = alertBox_pushAlert('正在同步，请稍等……', 'info', 9999999);
       let time = new Date();
       try {
+        alertBox_removeAlert(aidx);
+        aidx = alertBox_pushAlert('正在同步用户表，请稍等……', 'info', 9999999);
         let usersResp = await app.theBackEnd.getUsersAll();
         if (errorHappened(usersResp?.data?.err)) {
           throw new Error(usersResp?.data?.err, {cause: usersResp?.data?.err});
           return;
         };
+        alertBox_removeAlert(aidx);
+        aidx = alertBox_pushAlert('正在同步任务表，请稍等……', 'info', 9999999);
         let tasksResp = await app.theBackEnd.getTasksAll();
         if (errorHappened(tasksResp?.data?.err)) {
           throw new Error(tasksResp?.data?.err, {cause: tasksResp?.data?.err});
           return;
         };
+        alertBox_removeAlert(aidx);
+        aidx = alertBox_pushAlert('正在同步语料表（仅基本信息），请稍等……', 'info', 9999999);
+        let entriesResp = await app.theBackEnd.getEntryInfoAll();
+        if (errorHappened(entriesResp?.data?.err)) {
+          throw new Error(entriesResp?.data?.err, {cause: entriesResp?.data?.err});
+          return;
+        };
+        alertBox_removeAlert(aidx);
+        aidx = alertBox_pushAlert('正在同步标注表，请稍等……', 'info', 9999999);
         let annosResp = await app.theBackEnd.getAnnosAll();
         if (errorHappened(annosResp?.data?.err)) {
           throw new Error(annosResp?.data?.err, {cause: annosResp?.data?.err});
@@ -298,6 +389,7 @@ const RootComponent = {
         };
 
         theDB.users = usersResp?.data?.data;
+        theDB.entries = entriesResp?.data?.data;
         theDB.tasks = tasksResp?.data?.data;
         theDB.annos = annosResp?.data?.data;
 
@@ -315,7 +407,7 @@ const RootComponent = {
         return theDB;
 
       } catch (error) {
-        if (aidx!=undefined)
+        // if (aidx!=undefined)
         alertBox_removeAlert(aidx);
         alertBox_pushAlert(`【发生错误】${error}`, 'danger', null, error);
         return;
@@ -468,7 +560,8 @@ const RootComponent = {
     const planAssigment = async () => {
       assignData.undone = true;
       let aidx = alertBox_pushAlert(`正在规划任务，请稍等……`, 'info', 99999999);
-      const plansResp = await app.theBackEnd.makeAssigmentPlan(assignData.settings);
+      const plansResp = await makeAssigmentPlan(assignData.settings);
+      // const plansResp = await app.theBackEnd.makeAssigmentPlan(assignData.settings);
       if (plansResp?.data?.code!=200) {
         alertBox_removeAlert(aidx);
         alertBox_pushAlert(`规划任务时出现问题：${plansResp?.data?.msg}`, 'danger', 5000, plansResp);
@@ -548,9 +641,77 @@ const RootComponent = {
 
 
 
+    const assignment = async function (
+      topic=null,
+      user_tag=null,
+      task_tag=null,
+      users_per_task=2,
+      tasks_per_user=20,
+      exclusion=[],
+      polygraphs_per_user=[],
+      lo,
+    ) {
+      console.log(arguments);
 
+      console.log([2, dateString()]);
+      if (topic == null) {
+        return [];
+      };
 
+      let users = theDB.users.filter(it => (
+        topic_tags(topic).includes(it['currTask'])
+        && (user_tag==null||(it['tags']?.length&&it['tags'].includes(user_tag)))
+        && !it['quitted']
+      ));
 
+      let tasks = theDB.tasks.filter(it => (
+        topic_tags(topic).includes(it['topic'])
+        && (task_tag==null||(it['tags']?.length&&it['tags'].includes(task_tag)))
+        && !it['deleted']
+      ));
+
+      let e_ids = tasks.map(task => task['entry']);
+      let entries = [];
+      for (let e_id of e_ids) {
+        let entry_found = _.find(theDB.entries, it => (it['id']==e_id && !it['deleted']));
+        if (entry_found) {
+          entries.push(entry_found);
+        };
+      };
+
+      let pack = {
+        entries: entries,
+        users: users,
+        tasks: tasks,
+        topic: topic_regulation(topic),
+        exclusion: exclusion,
+        users_per_task: users_per_task,
+        tasks_per_user: tasks_per_user,
+        polygraphs_per_user: polygraphs_per_user,
+      };
+      // theSaver.save(pack);
+
+      console.log(['start', dateString()]);
+      let tasks_to_update = await assign_tasks(pack, _);
+      console.log(['end', dateString()]);
+      return tasks_to_update;
+    };
+
+    const makeAssigmentPlan = async (wrap) => {
+      console.log([1, dateString()]);
+      let tables_to_update = await assignment(
+        wrap?.['topic'],
+        wrap?.['user_tag'],
+        wrap?.['task_tag'],
+        wrap?.['users_per_task'],
+        wrap?.['tasks_per_user'],
+        wrap?.['exclusion'],
+        wrap?.['polygraphs_per_user'],
+      );
+      console.log([5, dateString()]);
+      console.log(tables_to_update);
+      return {'data': {'code': 200, 'data': tables_to_update}};
+    };
 
 
 
@@ -579,6 +740,7 @@ const RootComponent = {
       win,
       lo,
       store,
+      theSaver,
       //
       timeString,
       dateString,
