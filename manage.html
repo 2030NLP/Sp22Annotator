@@ -541,6 +541,22 @@
           </div>
 
 
+          <div class="modal-content" v-if="MODAL_THEMES[modalBox.data.theme] == MODAL_THEMES['entry-detail']">
+            <div class="modal-body" v-for="entry in [modalBox.data.kwargs]">
+              <div class="row align-items-center my-2">
+                <div class="col-12">{{entry}}
+
+
+
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-sm btn-secondary" @click="()=>{modalBox.hide();}">关闭</button>
+            </div>
+          </div>
+
+
           <div class="modal-content" v-if="modalBox.data.theme == MODAL_THEMES['user-progress']">
             <div class="modal-body" v-for="user in [modalBox.data.kwargs]">
               <div class="row align-items-center my-2">
@@ -548,7 +564,7 @@
                   <h5>{{user.name}}</h5>
                 </div>
               </div>
-              <div class="row align-items-center my-2 card" v-for="anno in user.allAnnos">
+              <div class="row align-items-center my-2 card" v-for="anno in user.allAnnos.map(it=>theDB.annoDict[it])">
                 <div class="col-12 my-2">
                   <button type="button" class="btn btn-sm btn-outline-dark my-1 me-2">task#{{theDB.taskDict[anno.task]?.id}}</button>
                   <div>
@@ -556,10 +572,40 @@
                   </div>
                 </div>
 
-                <div class="col-12 my-2">
-                  <button type="button" class="btn btn-sm btn-outline-dark my-1 me-2">entry#{{theDB.entryDict[anno.entry]?.id}}</button>
-                  <div>
-                    <span class="badge bg-light text-dark text-wrap my-1 me-2">{{theDB.entryDict[anno.entry]}}</span>
+                <div class="col-12 my-2" v-for="entry in [theDB.entryDict[anno.entry]]">
+                  <button type="button" class="btn btn-sm btn-outline-dark my-1 me-2">entry#{{entry?.id}}</button>
+                  <div v-show="entry.version">
+                    <span class="badge bg-light text-dark text-wrap my-1 me-2">版本: {{entry.version}}</span>
+                  </div>
+                  <div v-show="entry.polygraph">
+                    <span class="badge bg-warning text-dark text-wrap my-1 me-2">测谎类型: {{entry.polygraph}}</span>
+                  </div>
+                  <div v-show="entry.info">
+                    <span class="badge bg-light text-dark text-wrap my-1 me-2">信息: {{entry.info}}</span>
+                  </div>
+                  <div v-if="entry?.content?.material?.tokenList">
+                    <div
+                      class="my-1 material-area admin show-notice"
+                    >
+                      <p>
+                        <span
+                          v-for="token in entry?.content?.material?.tokenList"
+                          :key="token.idx"
+                          class="token"
+                          :title="`idx: ${token.idx}\npos: ${token.pos}${token.replaced?'\norigin: '+token.word:''}`"
+                          :data-idx="token.idx"
+                          :data-pos="token.pos"
+                          :data-auto-dverb="token?.autoDVerb"
+                          :data-auto-entity="token.autoEntity"
+                          :data-auto-spatial="token.autoSpatial"
+                          :data-selecting="token?._ctrl?.selecting"
+                          :data-selected="token?._ctrl?.selected"
+                          :data-replaced="token?.replaced ?? false"
+                          :data-word="token.word"
+                          :data-to-word="token?.to?.word"
+                        >{{ token?.to?.word ?? token.word }}</span>
+                      </p>
+                    </div>
                   </div>
                 </div>
 
