@@ -1,10 +1,10 @@
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno-Manager";
-const APP_VERSION = "22-0401-00";
+const APP_VERSION = "22-0401-02";
 
 // 开发环境 和 生产环境 的 控制变量
-const DEVELOPING = 1;
+const DEVELOPING = 0;
 const API_BASE_DEV_LOCAL = "http://127.0.0.1:5000";
 const DEV_HOSTS = ["http://192.168.124.3:8888", "http://10.1.22.96:8888"];
 const API_BASE_DEV = DEV_HOSTS[0];
@@ -37,7 +37,8 @@ import BackEnd from './modules/BackEnd.mjs.js';
 
 import axios from './modules_lib/axios_0.26.1_.mjs.js';
 import ClipboardJS from './modules_lib/clipboard_2.0.10_.mjs.js';
-import __Wrap_of_store__ from './modules_lib/store_2.0.9_.legacy.min.mjs.js';  //
+// import __Wrap_of_store__ from './modules_lib/store_2.0.9_.legacy.min.mjs.js';  //
+import __Wrap_of_froage__ from './modules_lib/localforage_1.10.0_.min.mjs.js';  //
 import __Wrap_of_lodash__ from './modules_lib/lodash_4.17.21_.min.mjs.js';     // 这两个包引入之后，直接全局能用，不用做任何处理。
 
 import assign_tasks from './assign_tasks_new.mjs.js';
@@ -55,6 +56,8 @@ const RootComponent = {
       'upload-entries': 'upload-entries',
       'user-set-quitted': 'user-set-quitted',
       'user-unset-quitted': 'user-unset-quitted',
+      'user-progress': 'user-progress',
+      'user-edit': 'user-edit',
     };
 
     // 初始化 提示框 模块
@@ -250,61 +253,63 @@ const RootComponent = {
 
 
 
-    const saveBasic = () => {
-      store.set(`${APP_NAME}:version`, APP_VERSION);
-      store.set(`${APP_NAME}:currentUser`, ctrl.currentUser);
-      store.set(`${APP_NAME}:tab`, ctrl.tab);
-      store.set(`${APP_NAME}:lastTime`, ctrl.lastTime);
-      store.set(`${APP_NAME}:lastTimeDict`, ctrl.lastTimeDict);
-      store.set(`${APP_NAME}:assignData_settings`, assignData.settings);
+    const saveBasic = async () => {
+      await localforage.setItem(`${APP_NAME}:version`, APP_VERSION);
+      await localforage.setItem(`${APP_NAME}:currentUser`, foolCopy(ctrl.currentUser));
+      await localforage.setItem(`${APP_NAME}:tab`, foolCopy(ctrl.tab));
+      await localforage.setItem(`${APP_NAME}:lastTime`, foolCopy(ctrl.lastTime));
+      await localforage.setItem(`${APP_NAME}:lastTimeDict`, foolCopy(ctrl.lastTimeDict));
+      await localforage.setItem(`${APP_NAME}:assignData_settings`, foolCopy(assignData.settings));
     };
-    const loadBasic = () => {
-      let storedVersion = store.get(`${APP_NAME}:version`);
+    const loadBasic = async () => {
+      let storedVersion = await localforage.getItem(`${APP_NAME}:version`);
       if (storedVersion == APP_VERSION) {
         ctrl.haveStore = true;  // 没什么用
       };
-      let storedUser = store.get(`${APP_NAME}:currentUser`);
+      let storedUser = await localforage.getItem(`${APP_NAME}:currentUser`);
       if (storedUser != null) {
         ctrl.currentUser = storedUser;
       };
-      let storedTime = store.get(`${APP_NAME}:lastTime`);
+      let storedTime = await localforage.getItem(`${APP_NAME}:lastTime`);
       if (storedTime != null) {
         ctrl.lastTime = storedTime;
       };
-      let storedTimeDict = store.get(`${APP_NAME}:lastTimeDict`);
+      let storedTimeDict = await localforage.getItem(`${APP_NAME}:lastTimeDict`);
       if (storedTimeDict != null) {
         ctrl.lastTimeDict = storedTimeDict;
       };
-      let stored_assignData_settings = store.get(`${APP_NAME}:assignData_settings`);
+      let stored_assignData_settings = await localforage.getItem(`${APP_NAME}:assignData_settings`);
       if (stored_assignData_settings != null) {
         assignData.settings = stored_assignData_settings;
       };
-      goTab(store.get(`${APP_NAME}:tab`));
+      await goTab(await localforage.getItem(`${APP_NAME}:tab`));
     };
-    const saveDB = () => {
-      store.set(`${APP_NAME}:DB`, {
-        users: theDB.users,
-        tasks: theDB.tasks,
-        annos: theDB.annos,
-        entries: theDB.entries,
+    const saveDB = async () => {
+      await localforage.setItem(`${APP_NAME}:DB`, {
+        users: foolCopy(theDB.users),
+        tasks: foolCopy(theDB.tasks),
+        annos: foolCopy(theDB.annos),
+        entries: foolCopy(theDB.entries),
       });
     };
-    onMounted(() => {
-      let storedDB = store.get(`${APP_NAME}:DB`);
+    onMounted(async () => {
+      let aidx = alertBox_pushAlert('正在加载缓存，请稍等……', 'info', 9999999);
+      let storedDB = await localforage.getItem(`${APP_NAME}:DB`);
       if (storedDB != null) {
         Object.assign(theDB, storedDB);
-        extendDB();
+        await extendDB();
       };
-      loadBasic();
+      await loadBasic();
+      alertBox_removeAlert(aidx);
     });
 
-    const goTab = (tb) => {
+    const goTab = async (tb) => {
       ctrl.tab = TABS[tb]??TABS['overview'];
-      saveBasic();
+      await saveBasic();
     };
 
-    const begin = () => {
-      saveBasic();
+    const begin = async () => {
+      await saveBasic();
     };
 
     // const User = class User {
@@ -337,12 +342,12 @@ const RootComponent = {
       };
     };
 
-    const extendDB = () => {
+    const extendDB = async () => {
         theDB.topics = [];
         theDB.topicTaskDict = {};
         for (let task of theDB.tasks) {
           task.submitters = theDB.annos.filter(anno => anno.task==task.id).map(anno => anno.user);
-          task.enough = task.to?.length??0 <= task.submitters?.length??0;
+          task.enough = ((task.to?.length??0) <= (task.submitters?.length??0));
           theDB.taskDict[task.id] = task;
           if (task.topic?.length && !theDB.topics.includes(task.topic)) {
             theDB.topics.push(task.topic);
@@ -372,41 +377,43 @@ const RootComponent = {
     };
 
     const syncTable = async (extend=true, tableName, tableListName, fnName) => {
-      let aidx = alertBox_pushAlert('正在同步，请稍等……', 'info', 9999999);
+      let aidx = await alertBox_pushAlert('正在同步，请稍等……', 'info', 9999999);
       let time = new Date();
       try {
-        alertBox_removeAlert(aidx);
-        aidx = alertBox_pushAlert(`正在同步${tableName}，请稍等……`, 'info', 9999999);
+        await alertBox_removeAlert(aidx);
+        aidx = await alertBox_pushAlert(`正在同步${tableName}，请稍等……`, 'info', 9999999);
         let resp = await app.theBackEnd[fnName]();
         if (errorHappened(resp?.data?.err)) {
           throw new Error(resp?.data?.err, {cause: resp?.data?.err});
           return;
         };
 
-        theDB[tableListName] = resp?.data?.data;
+        await alertBox_removeAlert(aidx);
+        aidx = await alertBox_pushAlert(`已取回${tableName}数据，正在处理，请稍等……`, 'info', 9999999);
 
+        theDB[tableListName] = await resp?.data?.data;
         if (extend) {
-          extendDB();
+          await extendDB();
         }
 
-        saveDB();
+        await saveDB();
 
-        alertBox_removeAlert(aidx);
-        ctrl.lastTimeDict[tableListName] = time.toLocaleString();
+        await alertBox_removeAlert(aidx);
+        ctrl.lastTimeDict[tableListName] = await time.toLocaleString();
 
-        saveBasic();
+        await saveBasic();
 
-        alertBox_pushAlert(`${tableName}已更新至最新状态(${ctrl.lastTimeDict[tableListName]})`, 'success', 5000);
+        await alertBox_pushAlert(`${tableName}已更新至最新状态(${ctrl.lastTimeDict[tableListName]})`, 'success', 5000);
 
-        return theDB[tableListName];
+        return true;  //theDB[tableListName];
 
       } catch (error) {
         // if (aidx!=undefined)
         alertBox_removeAlert(aidx);
         alertBox_pushAlert(`【发生错误】${error}`, 'danger', null, error);
-        return;
+        return false;
       };
-      alertBox_removeAlert(aidx);
+      await alertBox_removeAlert(aidx);
     };
 
 
@@ -477,14 +484,14 @@ const RootComponent = {
         // theDB.tasks = tasksResp?.data?.data;
         // theDB.annos = annosResp?.data?.data;
 
-        extendDB();
+        await extendDB();
 
-        saveDB();
+        await saveDB();
 
         alertBox_removeAlert(aidx);
         ctrl.lastTime = time.toLocaleString();
 
-        saveBasic();
+        await saveBasic();
 
         alertBox_pushAlert(`数据库已更新至最新状态(${ctrl.lastTime})`, 'success', 5000);
 
@@ -501,51 +508,59 @@ const RootComponent = {
 
 
 
+    const editUser = async (user, jsonText) => {};
+
+    const editingUser = async (user, jsonText) => {
+      let newObj = {};
+      try {
+        newObj = JSON.parse(jsonText);
+      } catch(error) {
+        alertBox_pushAlert(`JSON解析失败，请检查`, 'warning', 60000, jsonText);
+        return;
+      };
+      for (let kk of ['id', 'name', 'token']) {
+        if (!(kk in newObj)) {
+          alertBox_pushAlert(`缺少必要字段「${kk}」`, 'warning', 60000, jsonText);
+          return;
+        };
+      };
+      if (newObj.id!=user.id) {
+        alertBox_pushAlert(`id发生改变，操作中止（${user.id} → ${newObj.id}）`, 'warning', 60000, jsonText);
+        return;
+      };
+      for (let [kk, vv] of [['currTask', ''], ['currTaskGroup', ''], ['manager', ''], ['managerName', '']]) {
+        if (!(kk in newObj)) {
+          newObj[kk] = user[kk] ?? vv;
+        };
+      };
 
 
-    const editUser = async (user, jsonText) => {
-      // let newObj = {};
-      // try {
-      //   newObj = JSON.parse(jsonText);
-      // } catch(error) {
-      //   alertBox_pushAlert(`JSON解析失败，请检查`, 'warning', 5000, jsonText);
-      //   return;
-      // };
-      // for (let kk of ['id', 'name', 'token']) {
-      //   if (!(kk in newObj)) {
-      //     alertBox_pushAlert(`缺少必要字段「${kk}」`, 'warning', 5000, jsonText);
-      //   };
-      // };
-      // for (let kk of [['currTask', ''], ['currTaskGroup', ''], []]) {
-      //   if (!(kk in newObj)) {
-      //     alertBox_pushAlert(`缺少必要字段「${kk}」`, 'warning', 5000, jsonText);
-      //   };
-      // };
+
+      if (user.quitted) {
+        alertBox_pushAlert(`${user.name} 本来就被记为“已退出”了`, 'warning', 5000);
+        return;
+      };
+      let newUser = foolCopy({
+        id: user.id,
+        token: user.token,
+      });
+      newUser.quitted = true;
+      try {
+        let resp = await theBackEnd.updateUser(newUser);
+        if (resp.data?.code!=200) {
+          alertBox_pushAlert(`${user.name} 更新失败【${resp.data.msg}】`, 'danger', 5000, resp);
+          return;
+        };
+        Object.assign(user, resp.data.data);
+        await saveDB();
+        alertBox_pushAlert(`${user.name} 更新成功`, 'success');
+        modalBox_hide();
+      } catch(error) {
+        alertBox_pushAlert(`${user.name} 更新时出错【${error}】`, 'danger', 5000, error);
+      }
 
 
 
-      // if (user.quitted) {
-      //   alertBox_pushAlert(`${user.name} 本来就被记为“已退出”了`, 'warning', 5000);
-      //   return;
-      // };
-      // let newUser = foolCopy({
-      //   id: user.id,
-      //   token: user.token,
-      // });
-      // newUser.quitted = true;
-      // try {
-      //   let resp = await theBackEnd.updateUser(newUser);
-      //   if (resp.data?.code!=200) {
-      //     alertBox_pushAlert(`${user.name} 更新失败【${resp.data.msg}】`, 'danger', 5000, resp);
-      //     return;
-      //   };
-      //   Object.assign(user, resp.data.data);
-      //   saveDB();
-      //   alertBox_pushAlert(`${user.name} 更新成功`, 'success');
-      //   modalBox_hide();
-      // } catch(error) {
-      //   alertBox_pushAlert(`${user.name} 更新时出错【${error}】`, 'danger', 5000, error);
-      // }
     };
 
 
@@ -573,7 +588,7 @@ const RootComponent = {
           return;
         };
         Object.assign(user, resp.data.data);
-        saveDB();
+        await saveDB();
         alertBox_pushAlert(`${user.name} 更新成功`, 'success');
         modalBox_hide();
       } catch(error) {
@@ -598,7 +613,7 @@ const RootComponent = {
           return;
         };
         Object.assign(user, resp.data.data);
-        saveDB();
+        await saveDB();
         alertBox_pushAlert(`${user.name} 更新成功`, 'success');
         modalBox_hide();
       } catch(error) {
@@ -655,8 +670,8 @@ const RootComponent = {
       undone: true,
       result: {},
     });
-    watch(() => assignData.settings, () => {
-      saveBasic();
+    watch(() => assignData.settings, async () => {
+      await saveBasic();
     }, { deep: true });
 
     const selectUsersAuto = () => {
@@ -902,25 +917,6 @@ const RootComponent = {
     };
 
 
-
-    const FileControl = class FileControl {
-      constructor(pack) {
-        this.appName = pack.appName;
-        this.appVersion = pack.appVersion;
-        this.projDesc = pack.projDesc;
-        this.projPrefix = pack.projPrefix;
-
-        this.data = pack.reactive_data;
-
-        this.reader = pack.reader;
-        this.storeTool = pack.storeTool;
-      }
-    };
-
-
-
-
-
     const classAssignAnalisisByUser = (user_id, task_id) => {
       let classConfig = {};
       if (theDB.entryDict[theDB.taskDict[task_id]?.entry]?.polygraph) {
@@ -936,10 +932,49 @@ const RootComponent = {
       return `${classConfig.prefix}${classConfig.color}`;
     };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const onImportEntryTable = async () => {
+      const fc = new FileControl({
+        document: win.document,
+        fileGetterChain: ['forms', 'file-form', 'file-input', 'files', '0'],
+        reader: theReader,
+      });
+      let content = (await fc.onImport()).content;
+      if (content.length);
+      theDB.entries = JSON.parse(content);
+      // await extendDB();
+    };
+
+
+
+
+
+
+
+
+
+
     return {
       win,
       lo,
-      store,
+      // store,
       theSaver,
       //
       timeString,
@@ -992,6 +1027,8 @@ const RootComponent = {
       selectUsersAuto,
       selectUsersAll,
       selectUsersNone,
+      //
+      onImportEntryTable,
       //
     };
   },
