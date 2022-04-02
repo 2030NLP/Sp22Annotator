@@ -1,10 +1,10 @@
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno-Manager";
-const APP_VERSION = "22-0401-02";
+const APP_VERSION = "22-0402-00";
 
 // 开发环境 和 生产环境 的 控制变量
-const DEVELOPING = 1;
+const DEVELOPING = 0;
 const API_BASE_DEV_LOCAL = "http://127.0.0.1:5000";
 const DEV_HOSTS = ["http://192.168.124.3:8888", "http://10.1.22.96:8888"];
 const API_BASE_DEV = DEV_HOSTS[0];
@@ -59,7 +59,10 @@ const RootComponent = {
       'user-unset-quitted': 'user-unset-quitted',
       'user-progress': 'user-progress',
       'user-edit': 'user-edit',
-      'entry-detil': 'entry-detil',
+      'user-detail': 'user-detail',
+      'entry-detail': 'entry-detail',
+      'task-detail': 'task-detail',
+      'anno-detail': 'anno-detail',
     };
 
     // 初始化 提示框 模块
@@ -231,14 +234,25 @@ const RootComponent = {
       entries: [],
       tasks: [],
       annos: [],
+      //
       userDict: {},
       entryDict: {},
       taskDict: {},
       annoDict: {},
+      //
       topics: [],
       topicTaskDict: {},
+      //
       labels: [],
       labelAnnoDict: {},
+      //
+      inf_user_all_tasks: {},
+      inf_user_all_annos: {},
+      inf_entry_all_tasks: {},
+      inf_entry_all_tasks: {},
+      //
+      inf_user_task_anno: {},
+      //
     });
 
     const tasks_sta = (tasks) => ({
@@ -355,12 +369,12 @@ const RootComponent = {
         theDB.topics = [];
       };
       theDB.topicTaskDict = {};
+      theDB.inf_user_all_tasks = {};
+      theDB.inf_entry_all_tasks = {};
       for (let task of theDB.tasks) {
 
         task.submitters = theDB.annos.filter(anno => anno.task==task.id).map(anno => anno.user);
         task.enough = ((task.to?.length??0) <= (task.submitters?.length??0));
-
-        theDB.taskDict[task.id] = task;
 
         if (task.topic?.length && !theDB.topics.includes(task.topic)) {
           theDB.topics.push(task.topic);
@@ -371,6 +385,20 @@ const RootComponent = {
         if (task.topic?.length) {
           theDB.topicTaskDict[task.topic].push(task);
         };
+
+        for (let user of task.to??[]) {
+          if (!(user in theDB.inf_user_all_tasks)) {
+            theDB.inf_user_all_tasks[user] = [];
+          };
+          theDB.inf_user_all_tasks[user].push(task.id);
+        };
+
+        if (!(task.entry in theDB.inf_entry_all_tasks)) {
+          theDB.inf_entry_all_tasks[task.entry] = [];
+        };
+        theDB.inf_entry_all_tasks[task.entry].push(task.id);
+
+        theDB.taskDict[task.id] = task;
 
       };
     };
@@ -410,9 +438,13 @@ const RootComponent = {
       theDB.topicAnnoDict = {};
       theDB.labels = [];
       theDB.labelAnnoDict = {};
+      theDB.inf_user_all_annos = {};
+      theDB.inf_entry_all_annos = {};
+      theDB.inf_user_task_anno = {};
       for (let anno of theDB.annos) {
         anno._timeInfo = _annoTimeCompute(anno);
-        theDB.annoDict[anno.id] = anno;
+
+        anno.polygraph = theDB.taskDict[anno.task]?.polygraph;
 
         if (!anno.topic) {
           anno.topic = theDB.taskDict[anno.task]?.topic;
@@ -428,17 +460,32 @@ const RootComponent = {
           theDB.topicAnnoDict[anno.topic].push(anno);
         };
 
+        theDB.inf_user_task_anno[`${anno.user}/${anno.task}`] = anno.id;
+
+        if (!(anno.user in theDB.inf_user_all_annos)) {
+          theDB.inf_user_all_annos[anno.user] = [];
+        };
+        theDB.inf_user_all_annos[anno.user].push(anno.id);
+
+        if (!(anno.entry in theDB.inf_entry_all_annos)) {
+          theDB.inf_entry_all_annos[anno.entry] = [];
+        };
+        theDB.inf_entry_all_annos[anno.entry].push(anno.id);
+
         for (let annot of anno?.content?.annotations??[]) {
-          if (annot.label?.length && !theDB.labels.includes(annot.label)) {
-            theDB.labels.push(annot.label);
+          let annot_topic_label = `${anno.topic}-${annot.label}`
+          if (annot.label?.length && !theDB.labels.includes(annot_topic_label)) {
+            theDB.labels.push(annot_topic_label);
           };
-          if (annot.label?.length && !(annot.label in theDB.labelAnnoDict)) {
-            theDB.labelAnnoDict[annot.label] = [];
+          if (annot.label?.length && !(annot_topic_label in theDB.labelAnnoDict)) {
+            theDB.labelAnnoDict[annot_topic_label] = [];
           };
           if (annot.label?.length) {
-            theDB.labelAnnoDict[annot.label].push(annot);
+            theDB.labelAnnoDict[annot_topic_label].push(anno.id);
           };
         };
+
+        theDB.annoDict[anno.id] = anno;
       };
     };
 
@@ -447,9 +494,11 @@ const RootComponent = {
       // require extendTasks
 
       for (let user of theDB.users) {
-        user.allTasks = theDB.tasks.filter(task => task.to.includes(user.id)).map(it=>it.id);
-        user.allAnnos = theDB.annos.filter(anno => anno.user==user.id).map(it=>it.id);
-        user.doneTasks = theDB.tasks.filter(task => (task.submitters??[]).includes(user.id)).map(it=>it.id);
+        // user.allTasks = theDB.tasks.filter(task => task.to.includes(user.id)).map(it=>it.id);
+        // user.allAnnos = theDB.annos.filter(anno => anno.user==user.id).map(it=>it.id);
+        user.allTasks = theDB.inf_user_all_tasks[user.id]??[];
+        user.allAnnos = theDB.inf_user_all_annos[user.id]??[];
+        user.doneTasks = user.allTasks.map(tid=>theDB.taskDict[tid]).filter(task => (task.submitters??[]).includes(user.id)).map(it=>it.id);
         theDB.userDict[user.id] = user;
       };
     };
@@ -458,9 +507,13 @@ const RootComponent = {
       // require entries, tasks, annos
 
       for (let entry of theDB.entries) {
-        entry.allTasks = theDB.tasks.filter(task=>task.entry==entry.id).map(it=>it.id);
-        entry.allAnnos = theDB.annos.filter(anno=>anno.entry==entry.id).map(it=>it.id);
+        // if (theDB.tasks.find(it=>it.entry==entry.id)) {
+        // entry.allTasks = theDB.tasks.filter(task=>task.entry==entry.id).map(it=>it.id);
+        // entry.allAnnos = theDB.annos.filter(anno=>anno.entry==entry.id).map(it=>it.id);
+        entry.allTasks = theDB.inf_entry_all_tasks[entry.id];
+        entry.allAnnos = theDB.inf_entry_all_annos[entry.id];
         theDB.entryDict[entry.id] = entry;
+        // };
       };
     };
 
@@ -490,13 +543,14 @@ const RootComponent = {
 
         theDB[tableListName] = await resp?.data?.data;
         if (extend) {
-          const fnMap = {
-            'users': (()=>{extendTasks();extendUsers();}),
-            'entries': extendEntries,
-            'tasks': extendDB,
-            'annos': extendDB,
-          };
-          await (fnMap[tableListName]??extendDB)();
+          // const fnMap = {
+          //   'users': (()=>{extendTasks();extendUsers();}),
+          //   'entries': extendEntries,
+          //   'tasks': extendDB,
+          //   'annos': extendDB,
+          // };
+          // await (fnMap[tableListName]??extendDB)();
+          await extendDB();
         }
 
         await saveDB();
@@ -548,10 +602,10 @@ const RootComponent = {
       let time = new Date();
       try {
 
-        await syncUser(false);
         await syncEntryInfo(false);  // 非常重要，必须放在 Task 表 更新之前！因为它（的后端逻辑）会改变 Task 表！（测谎题相关字段）
-        await syncTask(false);
         await syncAnno(false);
+        await syncTask(false);
+        await syncUser(false);
 
         await extendDB();
 
@@ -1029,11 +1083,16 @@ const RootComponent = {
         });
         let content = (await fc.onImport()).content;
         if (content.length);
-        theDB.entries = JSON.parse(content);
+        let allEntries = JSON.parse(content);
+        theDB.entries = [];
 
-        for (let entry of theDB.entries) {
-          theDB.entryDict[entry.id] = entry;
+        for (let entry of allEntries) {
+          // if (theDB.tasks.find(it=>it.entry==entry.id)) {
+          theDB.entries.push(entry);
+          // };
         };
+
+        await extendEntries();
 
         // await saveDB();
       } catch(error) {
@@ -1055,6 +1114,7 @@ const RootComponent = {
     };
 
     const makeAnnoOnTexts = () => {
+      let aidx = alertBox_pushAlert(`开始`, 'info', 99999999);
       for (let anno of theDB.annos) {
         let entry = theDB.entryDict[anno.entry];
         if (entry) {        
@@ -1065,6 +1125,8 @@ const RootComponent = {
           };
         };
       };
+      alertBox_removeAlert(aidx);
+      alertBox_pushAlert(`完成`, 'info', 3000);
     };
 
 
