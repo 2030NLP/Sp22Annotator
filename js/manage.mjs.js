@@ -222,6 +222,7 @@ const RootComponent = {
         name: "",
         token: "",
       },
+      showOnlyMyMembers: false,
       haveStore: false,
       tab: TABS['overview'],
       lastTime: "never",
@@ -292,6 +293,13 @@ const RootComponent = {
       let storedUser = await localforage.getItem(`${APP_NAME}:currentUser`);
       if (storedUser != null) {
         ctrl.currentUser = storedUser;
+        if (theDB.users.length) {
+          let me = theDB.users.find(it=>it.token==ctrl.currentUser.token);
+          if (me) {
+            ctrl.currentUser = me;
+            await localforage.setItem(`${APP_NAME}:currentUser`, foolCopy(ctrl.currentUser));
+          };
+        };
       };
       let storedTime = await localforage.getItem(`${APP_NAME}:lastTime`);
       if (storedTime != null) {
@@ -379,12 +387,17 @@ const RootComponent = {
       let bg = Math.max(cDoneLen, cDueLen);
       let mn = Math.min(cDoneLen, cDueLen);
       let pct = bg==0 ? `0` : `${mn/bg*100}%`;
+      let ratio = cDoneLen/cDueLen;
+      ratio = isNaN(ratio) ? 0 : ratio;
       let done = cDoneLen >= cDueLen;
       return {
+        cDoneLen,
+        cDueLen,
         done,
         pct,
         bg,
-        mn
+        mn,
+        ratio
       };
     };
 
