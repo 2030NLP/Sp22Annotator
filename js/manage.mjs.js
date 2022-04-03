@@ -1,7 +1,7 @@
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno-Manager";
-const APP_VERSION = "22-0402-05";
+const APP_VERSION = "22-0403-00";
 
 // 开发环境 和 生产环境 的 控制变量
 const DEVELOPING = location?.hostname=="2030nlp.github.io" ? 0 : 1;
@@ -227,12 +227,14 @@ const RootComponent = {
       tab: TABS['overview'],
       lastTime: "never",
       lastTimeDict: {},
-    });
-
-    const theBackEnd = new BackEnd(ctrl.currentUser.token, `${API_BASE}/api/`, alertBox_pushAlert);
-
-    watch(() => ctrl?.currentUser?.token, () => {
-      theBackEnd.token = ctrl?.currentUser?.token;
+      entryIdBoxText: "",
+      taskIdBoxText: "",
+      annoIdBoxText: "",
+      userIdBoxText: "",
+      entryIdBoxList: [],
+      taskIdBoxList: [],
+      annoIdBoxList: [],
+      userIdBoxList: [],
     });
 
     const theDB = reactive({
@@ -261,6 +263,12 @@ const RootComponent = {
       //
     });
 
+    const theBackEnd = new BackEnd(ctrl.currentUser.token, `${API_BASE}/api/`, alertBox_pushAlert);
+
+    watch(() => ctrl?.currentUser?.token, () => {
+      theBackEnd.token = ctrl?.currentUser?.token;
+    });
+
     const tasks_sta = (tasks) => ({
       total_num: tasks?.length ?? 0,
       assigned_num: tasks.filter(task => task.to?.length).length,
@@ -272,6 +280,26 @@ const RootComponent = {
       total: tasks_sta(theDB.tasks),
       by_topic: Object.entries(theDB.topicTaskDict).map(pr => [pr[0], tasks_sta(pr[1])]),
     }));
+
+
+
+
+
+    const search = () => {
+      let entryIdBoxList = ctrl.entryIdBoxText.match(/\d+/g) ?? [];
+      ctrl.entryIdBoxList = entryIdBoxList.filter(it=>it in theDB.entryDict);
+      let taskIdBoxList = ctrl.taskIdBoxText.match(/\d+/g) ?? [];
+      ctrl.taskIdBoxList = taskIdBoxList.filter(it=>it in theDB.taskDict);
+      let annoIdBoxList = ctrl.annoIdBoxText.match(/\d+/g) ?? [];
+      ctrl.annoIdBoxList = annoIdBoxList.filter(it=>it in theDB.annoDict);
+      let userIdBoxList = ctrl.userIdBoxText.match(/\d+/g) ?? [];
+      ctrl.userIdBoxList = userIdBoxList.filter(it=>it in theDB.userDict);
+    };
+
+
+
+
+
 
 
 
@@ -1271,6 +1299,8 @@ const RootComponent = {
       wordAt,
       makeAnnoOnTexts,
       updateOneEntry,
+      //
+      search,
       //
     };
   },

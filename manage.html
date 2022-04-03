@@ -221,9 +221,138 @@
 
         <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.entryAndTask">
           <div class="col col-12">
+            <h4>检索</h4>
+          </div>
+          <div class="col col-12">
+            <p>说明：id 都是整数， id 与 id 之间用任意非数字字符（如逗号或空格）隔开</p>
+          </div>
+          <div class="col col-12 col-sm-6 col-md-3">
+            <label class="form-label">要检索哪些 entry.id</label>
+            <input
+             class="form-control form-control-sm"
+             type="text"
+             v-model="ctrl.entryIdBoxText"
+            >
+          </div>
+          <div class="col col-12 col-sm-6 col-md-3">
+            <label class="form-label">要检索哪些 task.id</label>
+            <input
+             class="form-control form-control-sm"
+             type="text"
+             v-model="ctrl.taskIdBoxText"
+            >
+          </div>
+          <div class="col col-12 col-sm-6 col-md-3">
+            <label class="form-label">要检索哪些 anno.id</label>
+            <input
+             class="form-control form-control-sm"
+             type="text"
+             v-model="ctrl.annoIdBoxText"
+            >
+          </div>
+          <div class="col col-12 col-sm-6 col-md-3">
+            <label class="form-label">要检索哪些 user.id</label>
+            <input
+             class="form-control form-control-sm"
+             type="text"
+             v-model="ctrl.userIdBoxText"
+            >
+          </div>
+          <div class="col col-12 col-sm-6 col-md-3">
+            <button
+              type="button"
+              class="btn btn-sm btn-primary my-1 me-2"
+              @click="search"
+            >检索</button>
+          </div>
+        </div>
+        <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.entryAndTask">
+          <div class="col col-12">
+            <h4>检索结果</h4>
+          </div>
+
+          <div class="col col-12" v-if="ctrl.entryIdBoxList?.length">
+            <div
+              class="form-control form-control-sm overflow-auto my-2"
+            >
+              <h5>entries</h5>
+              <div class="form-control form-control-sm overflow-auto max-vh-40">
+                <template v-for="entry_id in ctrl.entryIdBoxList">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-light my-1 me-2"
+                    @click="modalBox_open('entry-detail', theDB.entryDict[entry_id])"
+                  >entry#{{entry_id}}</button>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <div class="col col-12" v-if="ctrl.taskIdBoxList?.length">
+            <div
+              class="form-control form-control-sm overflow-auto my-2"
+            >
+              <h5>tasks</h5>
+              <div class="form-control form-control-sm overflow-auto max-vh-40">
+                <template v-for="task_id in ctrl.taskIdBoxList">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-light my-1 me-2"
+                    @click="modalBox_open('task-detail', theDB.taskDict[task_id])"
+                  >task#{{task_id}}</button>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <div class="col col-12" v-if="ctrl.annoIdBoxList?.length">
+            <div
+              class="form-control form-control-sm overflow-auto my-2"
+            >
+              <h5>annos</h5>
+              <div class="form-control form-control-sm overflow-auto max-vh-40">
+                <template v-for="anno_id in ctrl.annoIdBoxList">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-light my-1 me-2"
+                    @click="modalBox_open('anno-detail', theDB.annoDict[anno_id])"
+                  >anno#{{anno_id}}</button>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <div class="col col-12" v-if="ctrl.userIdBoxList?.length">
+            <div
+              class="form-control form-control-sm overflow-auto my-2"
+            >
+              <h5>users</h5>
+              <div class="form-control form-control-sm overflow-auto max-vh-40">
+                <template v-for="user_id in ctrl.userIdBoxList">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-light my-1 me-2"
+                    @click="modalBox_open('user-progress', theDB.userDict[user_id])"
+                  >user#{{user_id}}</button>
+                </template>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+
+
+
+
+        <div class="row align-items-center my-4" v-show="ctrl.tab == TABS.entryAndTask">
+          <div class="col col-12">
             <h4>质检题情况</h4>
-            <ul>
-              <li v-for="kkvv in Object.entries( lo.groupBy( theDB.tasks.filter(task=>task.polygraph&&task.submitters?.length), 'polygraph' ) )">
+
+              <div
+                class="form-control form-control-sm overflow-auto my-2"
+                v-for="kkvv in Object.entries( lo.groupBy( theDB.tasks.filter(task=>task.polygraph&&task.submitters?.length), 'polygraph' ) )"
+              >
                 <h5>{{kkvv[0]}}</h5>
                 <div class="form-control form-control-sm overflow-auto max-vh-40">
                   <template v-for="task in kkvv[1]">
@@ -234,16 +363,19 @@
                     >task#{{task?.id}}</button>
                   </template>
                 </div>
-              </li>
-            </ul>
+              </div>
+
           </div>
         </div>
 
         <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.entryAndTask">
           <div class="col col-12">
             <h4>按标签分组</h4>
-            <ul>
-              <li v-for="kkvv in Object.entries(theDB.labelAnnoDict)">
+
+              <div
+                class="form-control form-control-sm overflow-auto my-2"
+                v-for="kkvv in Object.entries(theDB.labelAnnoDict)"
+              >
                 <h5>{{kkvv[0]}}</h5>
                 <div class="form-control form-control-sm overflow-auto max-vh-40">
                   <template v-for="anno_id in kkvv[1]">
@@ -255,8 +387,8 @@
                     >anno#{{anno?.id}}-{{theDB.userDict[anno?.user]?.name}}</button>
                   </template>
                 </div>
-              </li>
-            </ul>
+              </div>
+
           </div>
         </div>
 
@@ -464,7 +596,7 @@
                 class="btn btn-sm my-1 me-2"
                 :class="ctrl.showOnlyMyMembers ? 'btn-primary' : 'btn-outline-dark'"
                 @click="ctrl.showOnlyMyMembers = !ctrl.showOnlyMyMembers"
-              >只显示我管理的用户</button>
+              >只显示我管理的人员</button>
               <button
                 type="button"
                 class="btn btn-sm btn-light my-1 me-2"
