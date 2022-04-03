@@ -4,7 +4,12 @@ const APP_NAME = "Sp22-Anno-Manager";
 const APP_VERSION = "22-0402-05";
 
 // 开发环境 和 生产环境 的 控制变量
-const DEVELOPING = 1;
+const DEVELOPING = location?.hostname=="2030nlp.github.io" ? 0 : 1;
+if (DEVELOPING) {
+  console.log("DEVELOPING");
+} else {
+  console.log("PRODUCTION");
+};
 const API_BASE_DEV_LOCAL = "http://127.0.0.1:5000";
 const DEV_HOSTS = ["http://192.168.124.3:8888", "http://10.1.22.96:8888"];
 const API_BASE_DEV = DEV_HOSTS[0];
@@ -309,6 +314,29 @@ const RootComponent = {
         annos: foolCopy(theDB.annos),
         entries: foolCopy(theDB.entries),
       });
+    };
+    const exportDB = async () => {
+      if (!theDB.tasks.length) {
+        alertBox_pushAlert('请注意： Task 表为空！导出数据可能不完整！', 'warning', 30000);
+      };
+      if (!theDB.annos.length) {
+        alertBox_pushAlert('请注意： Anno 表为空！导出数据可能不完整！', 'warning', 30000);
+      };
+      if (!theDB.users.length) {
+        alertBox_pushAlert('请注意： User 表为空！导出数据可能不完整！', 'warning', 30000);
+      };
+      if (!theDB.entries.length) {
+        alertBox_pushAlert('请注意： Entry 表为空！导出数据可能不完整！', 'warning', 30000);
+      };
+      if (!theDB.entries?.[0]?.content?.material?.tokenList?.length) {
+        alertBox_pushAlert('请注意： Entry 表中缺少语料文本！导出数据可能不完整！', 'warning', 30000);
+      };
+      await theSaver.save({
+        users: foolCopy(theDB.users),
+        tasks: foolCopy(theDB.tasks),
+        annos: foolCopy(theDB.annos),
+        entries: foolCopy(theDB.entries),
+      }, 'db.json');
     };
     onMounted(async () => {
       let aidx = alertBox_pushAlert('正在加载缓存，请稍等……', 'warning', 9999999);
@@ -1213,6 +1241,7 @@ const RootComponent = {
       //
       saveBasic,
       saveDB,
+      exportDB,
       //
       editUser,
       setAsQuitted,
