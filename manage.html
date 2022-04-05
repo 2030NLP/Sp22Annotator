@@ -191,7 +191,7 @@
             <div>纯原句多少，替换句多少，替换句对多少。任务是否已设置。</div>
             <div>总体情况：</div>
             <ul>
-              <li :title="`${tasks_computed?.total_num} - ${tasks_computed?.deleted_num}`">总任务量：{{ tasks_computed.total.total_num - tasks_computed.total.deleted_num }}</li>
+              <li :title="`${tasks_computed.total.total_num} - ${tasks_computed.total.deleted_num}`">总任务量：{{ tasks_computed.total.total_num - tasks_computed.total.deleted_num }}</li>
               <li>已分配量：{{ tasks_computed.total.assigned_num }}</li>
               <li>非足量提交：{{ tasks_computed.total.working_num }}</li>
               <li>已足量提交：{{ tasks_computed.total.done_num }}</li>
