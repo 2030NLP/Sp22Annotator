@@ -903,8 +903,8 @@
                   <button
                     v-for="task in [theDB.taskDict[task_id]]"
                     type="button"
-                    class="btn btn-sm btn-outline-dark my-1 me-2"
-                    :class="task.deleted ? 'btn-outline-danger' : 'btn-outline-dark'"
+                    class="btn btn-sm my-1 me-2"
+                    :class="task.deleted ? 'btn-danger' : 'btn-outline-dark'"
                     @click="modalBox_open('task-detail', task)"
                   >task-{{task?.topic}}-#{{task?.id}}</button>
                 </div>
@@ -987,8 +987,8 @@
                   <button
                     v-for="task in [theDB.taskDict[anno.task]]"
                     type="button"
-                    class="btn btn-sm btn-outline-dark my-1 me-2"
-                    :class="task.deleted ? 'btn-outline-danger' : 'btn-outline-dark'"
+                    class="btn btn-sm my-1 me-2"
+                    :class="task.deleted ? 'btn-danger' : 'btn-outline-dark'"
                     @click="modalBox_open('task-detail', task)"
                   >task#{{task?.id}}</button>
                   <button
@@ -1138,8 +1138,8 @@
                   <button
                     v-for="task in [theDB.taskDict[anno.task]]"
                     type="button"
-                    class="btn btn-sm btn-outline-dark my-1 me-2"
-                    :class="task.deleted ? 'btn-outline-danger' : 'btn-outline-dark'"
+                    class="btn btn-sm my-1 me-2"
+                    :class="task.deleted ? 'btn-danger' : 'btn-outline-dark'"
                     @click="modalBox_open('task-detail', task)"
                   >task#{{task?.id}}</button>
                 </div>
