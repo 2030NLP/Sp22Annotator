@@ -829,6 +829,7 @@ const RootComponent = {
     const assignData = reactive({
       settings: {
         'topic': null,
+        'batchName': null,
         'user_tag': null,
         'task_tag': null,
         'users_per_task': 2,
@@ -1015,6 +1016,7 @@ const RootComponent = {
       // };
       let tables_to_update = await assignment(
         wrap?.['topic'],
+        wrap?.['batchName'],
         wrap?.['user_tag'],
         wrap?.['task_tag'],
         wrap?.['users_per_task'],
@@ -1030,6 +1032,7 @@ const RootComponent = {
 
     const assignment = async function (
       topic=null,
+      batchName=null,
       user_tag=null,
       task_tag=null,
       users_per_task=2,
@@ -1057,6 +1060,7 @@ const RootComponent = {
 
       let tasks = theDB.tasks.filter(it => (
         topic_tags(topic).includes(it['topic'])
+        && it['batchName'] == batchName
         && (task_tag==null||(it['tags']?.length&&it['tags'].includes(task_tag)))
         && !it['deleted']
       ));
@@ -1075,6 +1079,7 @@ const RootComponent = {
         users: users,
         tasks: tasks,
         topic: topic_regulation(topic),
+        batchName: batchName,
         exclusion: exclusion,
         users_per_task: users_per_task,
         tasks_per_user: tasks_per_user,
