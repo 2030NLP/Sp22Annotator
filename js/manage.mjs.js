@@ -1,7 +1,7 @@
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno-Manager";
-const APP_VERSION = "22-0405-01";
+const APP_VERSION = "22-0405-05";
 
 // 开发环境 和 生产环境 的 控制变量
 const DEVELOPING = location?.hostname=="2030nlp.github.io" ? 0 : 1;
@@ -249,12 +249,20 @@ const RootComponent = {
       theBackEnd.token = ctrl?.currentUser?.token;
     });
 
-    const tasks_sta = (tasks) => ({
-      total_num: tasks?.length ?? 0,
-      assigned_num: tasks.filter(task => task.to?.length).length,
-      working_num: tasks.filter(task => task.to?.length&&task.submitters?.length&&task.submitters?.length<task.to?.length).length,
-      done_num: tasks.filter(task => task.to?.length&&task.submitters?.length==task.to?.length).length,
-    });
+    const tasks_sta = (tasks=[]) => {
+      let not_deleted = tasks.filter(task => !task.deleted);
+      let assigned = not_deleted.filter(task => task.to?.length);
+      let submitted = assigned.filter(task => task.submitters?.length>0);
+      let working = submitted.filter(task => task.submitters?.length<task.to?.length);
+      let done = submitted.filter(task => task.submitters?.length>=task.to?.length);
+      return {
+        total_num: tasks.length,
+        deleted_num: tasks.length - not_deleted.length,
+        assigned_num: assigned.length,
+        working_num: working.length,
+        done_num: done.length,
+      }
+    };
 
     const tasks_computed = computed(() => ({
       total: tasks_sta(theDB.tasks),
