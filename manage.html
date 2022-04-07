@@ -91,7 +91,7 @@
             >刷新全部</button>
             <button
               type="button"
-              v-show="ctrl.haveCache"
+              __v-show="ctrl.haveCache"
               class="btn btn-sm me-2 my-1"
               :class="`btn-outline-dark`"
               @click="()=>{loadCacheDB()}"
@@ -102,28 +102,28 @@
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': theDB.entries?.length, 'btn-outline-primary': !theDB.entries?.length}"
+              :class="{'btn-outline-success': theDB.entries?.length, 'btn-outline-secondary': !theDB.entries?.length}"
               @click="()=>{syncEntryInfo()}"
               title="从服务器更新 Entry 表（仅基本信息，不含文本内容）"
             >刷新 Entry 表（仅基本信息）</button>
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': theDB.tasks?.length, 'btn-outline-primary': !theDB.tasks?.length}"
+              :class="{'btn-outline-success': theDB.tasks?.length, 'btn-outline-secondary': !theDB.tasks?.length}"
               @click="()=>{syncTask()}"
               title="从服务器更新 Task 表"
             >刷新 Task 表</button>
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': theDB.annos?.length, 'btn-outline-primary': !theDB.annos?.length}"
+              :class="{'btn-outline-success': theDB.annos?.length, 'btn-outline-secondary': !theDB.annos?.length}"
               @click="()=>{syncAnno()}"
               title="从服务器更新 Anno 表"
             >刷新 Anno 表</button>
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': theDB.users?.length, 'btn-outline-primary': !theDB.users?.length}"
+              :class="{'btn-outline-success': theDB.users?.length, 'btn-outline-secondary': !theDB.users?.length}"
               @click="()=>{syncUser()}"
               title="从服务器更新 User 表"
             >刷新 User 表</button>
@@ -132,7 +132,7 @@
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': theDB.entries?.[0]?.content?.material?.tokenList?.length, 'btn-outline-primary': !theDB.entries?.[0]?.content?.material?.tokenList?.length}"
+              :class="{'btn-outline-success': theDB.entries?.[0]?.content?.material?.tokenList?.length, 'btn-outline-secondary': !theDB.entries?.[0]?.content?.material?.tokenList?.length}"
               @click="modalBox_open('upload-entries')"
               title="因网络传输不太稳定，而语料库较大，故请从本地选择语料库文件进行加载"
             >导入 Entry 表（完整)</button>

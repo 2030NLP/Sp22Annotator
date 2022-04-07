@@ -1,7 +1,7 @@
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno-Manager";
-const APP_VERSION = "22-0407-00";
+const APP_VERSION = "22-0407-02";
 
 // 开发环境 和 生产环境 的 控制变量
 const DEVELOPING = location?.hostname=="2030nlp.github.io" ? 0 : 1;
@@ -11,8 +11,8 @@ if (DEVELOPING) {
   console.log("PRODUCTION");
 };
 const API_BASE_DEV_LOCAL = "http://127.0.0.1:5000";
-const DEV_HOSTS = ["http://192.168.124.3:8888", "http://10.1.22.96:8888"];
-const API_BASE_DEV = DEV_HOSTS[0];
+const DEV_HOSTS = ["http://192.168.124.3:8888", "http://192.168.1.100:8888"];
+const API_BASE_DEV = DEV_HOSTS[1];
 const API_BASE_PROD = "https://sp22.nlpsun.cn";
 const API_BASE = DEVELOPING ? API_BASE_DEV : API_BASE_PROD;
 
@@ -248,6 +248,44 @@ const RootComponent = {
 
     const theBackEnd = new BackEnd(ctrl.currentUser.token, `${API_BASE}/api/`, alertBox_pushAlert);
 
+
+    const workerState = reactive({
+      working: false,
+    });
+    const theWorker = new Worker("js/workers/manageWorker.worker.js");
+    theWorker.onmessage = async (message) => {
+      // console.log(message);
+      const pack = message.data;
+      const actions = {
+        'working': ()=>{workerState.working=true},
+        'done': ()=>{workerState.working=false},
+        'updateDB': ()=>{Object.assign(theDB, pack.data)},
+        'alert': ()=>{alertBox_pushAlert(...pack.data)},
+      };
+      if (pack.command in actions) {
+        await actions[pack.command]();
+      } else {
+        alertBox_pushAlert(`辅助线程 传来未知消息【${pack}】`, "warning", null, pack);
+      };
+    };
+    theWorker.onerror = async (error) => {
+      alertBox_pushAlert(`辅助线程 发生错误【${error}】`, "danger", null, error);
+    };
+    theWorker.onmessageerror = async (messageerror) => {
+      alertBox_pushAlert(`辅助线程 发生消息错误【${messageerror}】`, "danger", null, messageerror);
+    };
+
+    onMounted(async()=>{
+      // console.time('theWorker.postMessage');
+      theWorker.postMessage({
+        'command': "alert",
+        'data': ["辅助线程 连接成功", "success", 1000],
+      });
+      // console.timeEnd('theWorker.postMessage');
+    });
+
+
+
     watch(() => ctrl?.currentUser?.token, () => {
       theBackEnd.token = ctrl?.currentUser?.token;
     });
@@ -368,12 +406,18 @@ const RootComponent = {
 
     const loadCacheDB = async () => {
       let aidx = alertBox_pushAlert('正在读取，请稍等……', 'warning', 9999999);
+      console.time('getItem');
       let storedDB = await localforage.getItem(`${APP_NAME}:DB`);
+      console.timeEnd('getItem');
       alertBox_removeAlert(aidx);
       if (storedDB != null) {
+        console.time('assign');
         await Object.assign(theDB, storedDB);
+        console.timeEnd('assign');
         aidx = alertBox_pushAlert('正在组织数据，请稍等……', 'warning', 9999999);
+        console.time('extendDB');
         await extendDB();
+        console.timeEnd('extendDB');
         alertBox_removeAlert(aidx);
         return;
       };
@@ -389,16 +433,12 @@ const RootComponent = {
         alertBox_pushAlert(`版本已更新到 ${APP_VERSION}`, "success", 2000);
         await localforage.setItem(`${APP_NAME}:version`, APP_VERSION);
       };
-      //
-      // let aidx = alertBox_pushAlert('正在读取缓存，请稍等……', 'warning', 9999999);
       await loadBasic();
-      let storedDB = await localforage.getItem(`${APP_NAME}:DB`);
-      // alertBox_removeAlert(aidx);
-      if (storedDB != null) {
-        ctrl.haveCache = true;
-      };
-      // await loadCacheDB();
-      // alertBox_removeAlert(aidx);
+      //
+      // let storedDB = await localforage.getItem(`${APP_NAME}:DB`);
+      // if (storedDB != null) {
+      //   ctrl.haveCache = true;
+      // };
     });
 
     const goTab = async (tb) => {
@@ -450,128 +490,31 @@ const RootComponent = {
     const extendTasks = async () => {
       // require tasks, annos
 
-      if (!theDB.topics?.length) {
-        theDB.topics = [];
+      if (workerState.working) {
+        alertBox_pushAlert("辅助线程正在工作，请稍后再试", "warning");
+        return;
       };
-      theDB.topicTaskDict = {};
-      theDB.inf_user_all_tasks = {};
-      theDB.inf_entry_all_tasks = {};
-      for (let task of theDB.tasks) {
 
-        task.submitters = theDB.annos.filter(anno => anno.task==task.id).map(anno => anno.user);
-        task.enough = ((task.to?.length??0) <= (task.submitters?.length??0));
+      theWorker.postMessage({
+        'command': "extendTasks",
+        'data': foolCopy(theDB),
+      });
 
-        if (task.topic?.length && !theDB.topics.includes(task.topic)) {
-          theDB.topics.push(task.topic);
-        };
-        if (task.topic?.length && !(task.topic in theDB.topicTaskDict)) {
-          theDB.topicTaskDict[task.topic] = [];
-        };
-        if (task.topic?.length) {
-          theDB.topicTaskDict[task.topic].push(task);
-        };
-
-        for (let user of task.to??[]) {
-          if (!(user in theDB.inf_user_all_tasks)) {
-            theDB.inf_user_all_tasks[user] = [];
-          };
-          theDB.inf_user_all_tasks[user].push(task.id);
-        };
-
-        if (!(task.entry in theDB.inf_entry_all_tasks)) {
-          theDB.inf_entry_all_tasks[task.entry] = [];
-        };
-        theDB.inf_entry_all_tasks[task.entry].push(task.id);
-
-        theDB.taskDict[task.id] = task;
-
-      };
-    };
-
-    const _annoTimeCompute = (anno) => {
-      const logs = anno?.content?._ctrl?.timeLog ?? [];
-      let box = [];
-      for (let log of logs) {
-        if (log[0]=="in") {
-          box.push([log[1], null]);
-        };
-        if (log[0]=="out" && box.length) {
-          if (box.at(-1)[1]==null) {
-            box.at(-1)[1] = log[1];
-          };
-        };
-      };
-      let totalDur = 0;
-      for (let pair of box) {
-        if (pair[0].length&&pair[1].length) {
-          let delta = (new Date(pair[1])) - (new Date(pair[0]));
-          totalDur += delta;
-        };
-      };
-      let firstDur = (new Date(box[0][1])) - (new Date(box[0][0]));
-      let stride = (new Date(box.at(-1)[1])) - (new Date(box[0][0]));
-      let lastAt = box.at(-1)[1];
-      return {firstDur, totalDur, stride, lastAt, detail: box};
     };
 
     const extendAnnos = async () => {
       // require annos, tasks
 
-      if (!theDB.topics?.length) {
-        theDB.topics = [];
+      if (workerState.working) {
+        alertBox_pushAlert("辅助线程正在工作，请稍后再试", "warning");
+        return;
       };
-      theDB.topicAnnoDict = {};
-      theDB.labels = [];
-      theDB.labelAnnoDict = {};
-      theDB.inf_user_all_annos = {};
-      theDB.inf_entry_all_annos = {};
-      theDB.inf_user_task_anno = {};
-      for (let anno of theDB.annos) {
-        anno._timeInfo = _annoTimeCompute(anno);
 
-        anno.polygraph = theDB.taskDict[anno.task]?.polygraph;
+      theWorker.postMessage({
+        'command': "extendAnnos",
+        'data': foolCopy(theDB),
+      });
 
-        if (!anno.topic) {
-          anno.topic = theDB.taskDict[anno.task]?.topic;
-        };
-
-        if (anno.topic?.length && !theDB.topics.includes(anno.topic)) {
-          theDB.topics.push(anno.topic);
-        };
-        if (anno.topic?.length && !(anno.topic in theDB.topicAnnoDict)) {
-          theDB.topicAnnoDict[anno.topic] = [];
-        };
-        if (anno.topic?.length) {
-          theDB.topicAnnoDict[anno.topic].push(anno);
-        };
-
-        theDB.inf_user_task_anno[`${anno.user}/${anno.task}`] = anno.id;
-
-        if (!(anno.user in theDB.inf_user_all_annos)) {
-          theDB.inf_user_all_annos[anno.user] = [];
-        };
-        theDB.inf_user_all_annos[anno.user].push(anno.id);
-
-        if (!(anno.entry in theDB.inf_entry_all_annos)) {
-          theDB.inf_entry_all_annos[anno.entry] = [];
-        };
-        theDB.inf_entry_all_annos[anno.entry].push(anno.id);
-
-        for (let annot of anno?.content?.annotations??[]) {
-          let annot_topic_label = `${anno.topic}-${annot.label}`
-          if (annot.label?.length && !theDB.labels.includes(annot_topic_label)) {
-            theDB.labels.push(annot_topic_label);
-          };
-          if (annot.label?.length && !(annot_topic_label in theDB.labelAnnoDict)) {
-            theDB.labelAnnoDict[annot_topic_label] = [];
-          };
-          if (annot.label?.length) {
-            theDB.labelAnnoDict[annot_topic_label].push(anno.id);
-          };
-        };
-
-        theDB.annoDict[anno.id] = anno;
-      };
     };
 
     const extendUsers = async () => {
@@ -1262,6 +1205,7 @@ const RootComponent = {
       lo,
       // store,
       theSaver,
+      theWorker,
       //
       timeString,
       dateString,
