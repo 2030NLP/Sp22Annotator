@@ -1,7 +1,7 @@
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno-Manager";
-const APP_VERSION = "22-0405-05";
+const APP_VERSION = "22-0407-00";
 
 // 开发环境 和 生产环境 的 控制变量
 const DEVELOPING = location?.hostname=="2030nlp.github.io" ? 0 : 1;
@@ -204,6 +204,9 @@ const RootComponent = {
       },
       showOnlyMyMembers: false,
       haveStore: false,
+      haveCache: false,
+      started: false,
+
       tab: TABS['overview'],
       lastTime: "never",
       lastTimeDict: {},
@@ -362,23 +365,40 @@ const RootComponent = {
         entries: foolCopy(theDB.entries),
       }, 'db.json');
     };
+
+    const loadCacheDB = async () => {
+      let aidx = alertBox_pushAlert('正在读取，请稍等……', 'warning', 9999999);
+      let storedDB = await localforage.getItem(`${APP_NAME}:DB`);
+      alertBox_removeAlert(aidx);
+      if (storedDB != null) {
+        await Object.assign(theDB, storedDB);
+        aidx = alertBox_pushAlert('正在组织数据，请稍等……', 'warning', 9999999);
+        await extendDB();
+        alertBox_removeAlert(aidx);
+        return;
+      };
+      alertBox_pushAlert('没有找到缓存', 'danger');
+      alertBox_removeAlert(aidx);
+    };
+
     onMounted(async () => {
       let storedVersion = await localforage.getItem(`${APP_NAME}:version`);
       if (storedVersion == APP_VERSION) {
-        alertBox_pushAlert(`ver. ${APP_VERSION}`, "info", 300);
+        alertBox_pushAlert(`ver. ${APP_VERSION}`, "info", 2000);
       } else {
-        alertBox_pushAlert(`版本已更新到 ${APP_VERSION}`, "success", 1000);
+        alertBox_pushAlert(`版本已更新到 ${APP_VERSION}`, "success", 2000);
         await localforage.setItem(`${APP_NAME}:version`, APP_VERSION);
       };
       //
-      let aidx = alertBox_pushAlert('正在加载缓存，请稍等……', 'warning', 9999999);
-      let storedDB = await localforage.getItem(`${APP_NAME}:DB`);
-      if (storedDB != null) {
-        Object.assign(theDB, storedDB);
-        await extendDB();
-      };
+      // let aidx = alertBox_pushAlert('正在读取缓存，请稍等……', 'warning', 9999999);
       await loadBasic();
-      alertBox_removeAlert(aidx);
+      let storedDB = await localforage.getItem(`${APP_NAME}:DB`);
+      // alertBox_removeAlert(aidx);
+      if (storedDB != null) {
+        ctrl.haveCache = true;
+      };
+      // await loadCacheDB();
+      // alertBox_removeAlert(aidx);
     });
 
     const goTab = async (tb) => {
@@ -1280,6 +1300,8 @@ const RootComponent = {
       syncTask,
       syncAnno,
       syncEntryInfo,
+      //
+      loadCacheDB,
       //
       saveBasic,
       saveDB,

@@ -85,10 +85,18 @@
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': theDB.users?.length, 'btn-outline-primary': !theDB.users?.length}"
+              :class="`btn-outline-dark`"
               @click="()=>{sync()}"
               title="从服务器更新最新数据，包括 User, Task, Anno 表，以及 Entry 表中的基本信息"
             >刷新全部</button>
+            <button
+              type="button"
+              v-show="ctrl.haveCache"
+              class="btn btn-sm me-2 my-1"
+              :class="`btn-outline-dark`"
+              @click="()=>{loadCacheDB()}"
+              title="加载缓存数据"
+            >加载缓存</button>
           </div>
           <div class="col col-12">
             <button
@@ -141,22 +149,31 @@
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
-              :class="'btn-outline-primary'"
+              :class="'btn-outline-dark'"
               @click="exportDB"
               title="将整个数据库导出为json文件（需要先刷新数据库到本地，否则数据可能不完整；其中Entry表可使用离线版）"
             >导出数据库（需要先刷新数据库到本地）</button>
             <a
               class="btn btn-sm me-2 my-1"
-              :class="'btn-outline-primary'"
+              :class="'btn-outline-dark'"
               href="https://github.com/2030NLP/sp22scripts/blob/main/SpaCE2022_DB.spec.md"
               target="_blank"
             >查看数据格式说明</a>
+          </div>
+          <div class="col col-12">
+            <button
+              type="button"
+              class="btn btn-sm me-2 my-1"
+              :class="`btn-info`"
+              @click="()=>{ctrl.started=true;}"
+              title="开始工作"
+            >开始工作</button>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="container page my-4">
+    <div class="container page my-4" v-if="ctrl.started">
       <div class="container py-2">
         <div class="row mt-2 mb-4">
           <div class="col">
