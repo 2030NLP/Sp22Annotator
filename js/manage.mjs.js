@@ -1519,7 +1519,7 @@ the_app.component('anno-card', {
 
             h('input', {
                 'type': "text",
-                'class': "border rounded p-1 my-1 me-2",
+                'class': "border rounded p-1 my-1 me-2 align-middle",
                 'placeholder': "填写批示/评论/备注",
                 'value': this.ctrl.comment,
                 'onInput': event => {
