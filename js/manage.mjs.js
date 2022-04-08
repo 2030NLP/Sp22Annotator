@@ -1,7 +1,7 @@
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno-Manager";
-const APP_VERSION = "22-0408-03";
+const APP_VERSION = "22-0408-05";
 
 // 开发环境 和 生产环境 的 控制变量
 const DEVELOPING = location?.hostname=="2030nlp.github.io" ? 0 : 1;
@@ -1276,10 +1276,16 @@ const RootComponent = {
 
     const saveAnnoReview = async (anno, review) => {
       let {user, task, entry, content, topic, entryVer} = anno;
+      review.reviewing = undefined;
       review.reviewer = {
         id: ctrl.currentUser?.id,
         name: ctrl.currentUser?.name,
       };
+      if (!anno._timeInfo.lastAt) {
+        anno._timeInfo = _annoTimeCompute(anno);
+      };
+      review.annoAt = anno._timeInfo.lastAt;
+      review.reviewedAt = dateString();
       content.review = review;
       let resp = await theBackEnd.updateAnno(user, task, entry, content, topic, entryVer);
       if (resp?.data?.code!=200) {
@@ -1436,7 +1442,7 @@ const the_app = Vue_createApp(RootComponent);
 
 the_app.component('anno-card', {
   props: ["db", "anno", "reviewer"],
-  emits: ['open-modal', 'submit-review', /*'update:modelValue'*/],
+  emits: ['open-modal', 'submit-review', 'update-anno', /*'update:modelValue'*/],
   setup(props, ctx) {
     const ctrl = reactive({
       reviewing: false,
@@ -1517,14 +1523,8 @@ the_app.component('anno-card', {
                 'placeholder': "填写批示/评论/备注",
                 'value': this.ctrl.comment,
                 'onInput': event => {
-                  // console.log(event?.target);
                   this.ctrl.comment = event?.target?.value;
                 },
-                // 'modelValue': this.ctrl.comment,
-                // 'onUpdate:modelValue': (value) => {
-                //   this.ctrl.comment = value;
-                //   return emit('update:modelValue', value);
-                // },  // 这句是不是多余的？
               },
             ),
 
@@ -1544,11 +1544,22 @@ the_app.component('anno-card', {
               },
               [`取消`],
             ),
-          ] : this.anno?.content?.review ? [
+          ] : this.anno?.content?.review.accept!=null ? [
             h('span', {
-                'class': ["badge text-wrap my-1 me-2", this.anno?.content?.review?.accept?'bg-success text-light':'bg-danger text-light'],
+                'title': JSON.stringify(this.anno?.content?.review),
+                'class': ["badge text-wrap my-1 me-2",
+                  this.anno?.content?.review?.accept?
+                  ('bg-light border border-success text-dark'):
+                  (this.anno?.content?.review?.checked?
+                    'bg-warning border border-danger text-dark':
+                    'bg-light border border-danger text-dark')
+                ],
               },
-              [JSON.stringify(this.anno?.content?.review)],
+              [
+                this.anno?.content?.review?.accept?'已通过':'已否决',' ',
+                this.anno?.content?.review?.comment?`「${this.anno?.content?.review?.comment}」`:null,' ',
+                this.anno?.content?.review?.accept?null:this.anno?.content?.review?.checked?`标注者已处理`:'标注者尚未处理',
+              ],
             ),
           ] : [
             h('span', {
@@ -1570,6 +1581,33 @@ the_app.component('anno-card', {
     );
   },
 });
+
+the_app.component('entry-card', {
+  props: ["db", "entry"],
+  emits: ["open-modal", 'update-entry'],
+  setup(props, ctx) {
+    const onOpenModal = () => {
+      ctx.emit('open-modal', ['entry-detail', props.entry]);
+    };
+    const updateEntry = () => {
+      ctx.emit('update-entry', props.entry);
+    };
+    return { onOpenModal, updateEntry };
+  },
+  render() {
+    // console.log(this);
+    if (!this.entry) {
+      return h('div', {}, ["没有找到这条语料"]);
+    };
+    return h(
+      'div', {
+        'class': "form-control form-control-sm mx-1 my-1",
+      }, [],
+    );
+  },
+};
+
+
 
 the_app.component('task-card', {
   props: ["db", "task"],
