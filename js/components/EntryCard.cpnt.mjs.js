@@ -1,4 +1,5 @@
 import {  h  } from '../modules_lib/vue_3.2.31_.esm-browser.prod.min.js';
+import TokenListP from './TokenListP.cpnt.mjs.js';
 
 const EntryCard = {
   props: ["db", "entry"],
@@ -70,21 +71,11 @@ const EntryCard = {
         this.entry?.content?.material?.tokenList ? h('div', {
           'class':"my-1 material-area admin show-notice"
         }, [
-          h('p', {}, this.entry?.content?.material?.tokenList.map(token=>h('span', {
-            'key': token.idx,
-            'class': "token",
-            'title': `idx: ${token.idx}\npos: ${token.pos}${token.replaced?'\norigin: '+token.word:''}`,
-            'data-idx': token.idx,
-            'data-pos': token.pos,
-            'data-auto-dverb': token?.autoDVerb,
-            'data-auto-entity': token.autoEntity,
-            'data-auto-spatial': token.autoSpatial,
-            'data-selecting': token?._ctrl?.selecting,
-            'data-selected': token?._ctrl?.selected,
-            'data-replaced': token?.replaced ?? false,
-            'data-word': token.word,
-            'data-to-word': token?.to?.word,
-          }, [`${token?.to?.word ?? token.word ?? ""}`]))),
+          h(TokenListP, {
+            'tokens': this.entry?.content?.material?.tokenList??[],
+            'showtitle': true,
+            'showreplaced': true,
+          }),
         ]) : null,
       ],
     );
