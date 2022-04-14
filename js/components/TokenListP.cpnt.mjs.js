@@ -42,7 +42,7 @@ const TokenListP = {
           'data-auto-spatial' : token.autoSpatial,
           'data-selecting' : token?._ctrl?.selecting,
           'data-selected' : token?._ctrl?.selected,
-          'data-replaced' : token?.to?.word?.length ?? false,
+          'data-replaced' : token?.to?.word?.length ? true : false,
           'data-word' : token.word,
           'data-to-word' : token?.to?.word,
           'onMousedown' : (evt)=>{this.onTknDown(token, evt)},
