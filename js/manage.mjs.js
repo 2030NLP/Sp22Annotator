@@ -44,9 +44,11 @@ import FileControl from './modules/FileControl.mjs.js';
 
 import axios from './modules_lib/axios_0.26.1_.mjs.js';
 import ClipboardJS from './modules_lib/clipboard_2.0.10_.mjs.js';
-// import __Wrap_of_store__ from './modules_lib/store_2.0.9_.legacy.min.mjs.js';  //
-import __Wrap_of_froage__ from './modules_lib/localforage_1.10.0_.min.mjs.js';  //
-import __Wrap_of_lodash__ from './modules_lib/lodash_4.17.21_.min.mjs.js';     // 这两个包引入之后，直接全局能用，不用做任何处理。
+// 下面这几个包引入之后，直接全局能用，不用做任何处理。
+// import __Wrap_of_store__ from './modules_lib/store_2.0.9_.legacy.min.mjs.js';
+import __Wrap_of_froage__ from './modules_lib/localforage_1.10.0_.min.mjs.js';
+import __Wrap_of_lodash__ from './modules_lib/lodash_4.17.21_.min.mjs.js';
+import __Wrap_of_marked__ from './modules_lib/marked_4.0.2_.min.mjs.js';
 
 import assign_tasks from './assign_tasks_new.mjs.js';
 
@@ -1382,6 +1384,31 @@ const RootComponent = {
       return (ins2.true??0) - (ins1.true??0);
     };
 
+
+
+
+
+
+    // 一个 axios 实例，方便在控制台调试
+    const anAxios = axios.create({
+      headers: {'Cache-Cotrol': 'no-cache'},
+    });
+    // 更新 notes
+    const updateNotes = async () => {
+      let wrap;
+      try {
+        let response = await anAxios.request({
+          url: "notes.md",
+          method: 'get',
+        });
+        wrap = (response.data);
+      } catch (error) {
+        alertBox_pushAlert(`获取 notes 时出错！（${error}）`, "danger", 5000, error);
+        throw error;
+        return;
+        // return;
+      };
+    };
 
 
 

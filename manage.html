@@ -1102,7 +1102,8 @@
             <div class="modal-body" v-for="user in [modalBox.data.kwargs]">
               <div
                 class="row align-items-center my-3 border border-secondary border-2 rounded"
-                v-for="anno in lo.sortBy(user.allAnnos.map(it=>theDB.annoDict[it]), [annoSortFn, it=>(-it.batch)])"
+                v-for="anno in user.allAnnos.map(it=>theDB.annoDict[it])"
+                __v-for="anno in lo.sortBy(user.allAnnos.map(it=>theDB.annoDict[it]), [annoSortFn, it=>(-it.batch)])"
                 :key="anno.id"
                 v-show="[anno.topic, '【all】'].includes(ctrl.userAnnoFilter.topic)&&[anno.batchName??'【empty】', '【all】'].includes(ctrl.userAnnoFilter.batchName??'【empty】')">
 
