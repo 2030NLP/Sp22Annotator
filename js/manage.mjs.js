@@ -1,7 +1,7 @@
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno-Manager";
-const APP_VERSION = "22-0414-00";
+const APP_VERSION = "22-0415-00";
 
 // 开发环境 和 生产环境 的 控制变量
 const DEVELOPING = location?.hostname=="2030nlp.github.io" ? 0 : 1;
@@ -38,6 +38,7 @@ import TheReader from './modules/TheReader.mjs.js';
 import AlertBox from './modules/AlertBox.mjs.js';
 import ModalBox from './modules/ModalBox.mjs.js';
 import BackEnd from './modules/BackEnd.mjs.js';
+// import BackEndUsage from './modules/BackEndUsage.mjs.js';
 import FileControl from './modules/FileControl.mjs.js';
 // import BackEndUsage from './modules/BackEndUsage.mjs.js';
 // import IoControl from './modules/IoControl.mjs.js';
@@ -192,6 +193,9 @@ const RootComponent = {
 
 
     const TABS = {
+      "functions": "functions",
+      "memos": "memos",
+      "todos": "todos",
       "userInfo": "userInfo",
       "userProgress": "userProgress",
       "overview": "overview",
@@ -516,6 +520,7 @@ const RootComponent = {
     };
 
     const loadCacheDB = async () => {
+      // await getMemoList();
       let aidx = alertBox_pushAlert('正在读取，请稍等……', 'warning', 9999999);
       console.time('getItem');
       let storedDB = await localforage.getItem(`${APP_NAME}:DB`);
@@ -678,6 +683,7 @@ const RootComponent = {
 
 
     const sync = async () => {
+      // await getMemoList();
       let aidx = alertBox_pushAlert('正在获取数据，请稍等……', 'info', 9999999);
       let time = new Date();
       try {
@@ -1414,6 +1420,140 @@ const RootComponent = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const theBoard = reactive({
+      memos: [],
+      text: "",
+    });
+
+    const getMemoList = async () => {
+      try {
+        let resp = await theBackEnd.getMemosAll();
+        // alertBox_pushAlert(resp?.data);
+        if (resp?.data?.code!=200) {
+          alertBox_pushAlert(`【发生错误】${resp?.data?.msg}`, 'danger', resp);
+          return;
+        };
+        theBoard.memos = lo.sortBy(resp?.data?.data, it=> -(new Date(it?.postedAt)).valueOf());
+        return theBoard.memos;
+      } catch (error) {
+        alertBox_pushAlert(error, 'danger');
+      };
+    };
+
+    const postNormalMemo = async () => {
+      try {
+        let memo = {
+          text: theBoard.text,
+          user: {
+            id: ctrl.currentUser?.id,
+            name: ctrl.currentUser?.name,
+          },
+          postedAt: dateString(),
+        };
+        let resp = await theBackEnd.postMemo(memo);
+        // alertBox_pushAlert(resp?.data);
+        if (resp?.data?.code!=200) {
+          alertBox_pushAlert(`【发生错误】${resp?.data?.msg}`, 'danger', resp);
+          return;
+        };
+        let new_memo = resp?.data?.data;
+        theBoard.memos.push(new_memo);
+        theBoard.memos = lo.sortBy(theBoard.memos);
+        theBoard.text="";
+        return new_memo;
+      } catch (error) {
+        alertBox_pushAlert(error, 'danger');
+      };
+    };
+
+    const deleteMemo = async (memo) => {
+      try {
+        memo.deleted = true;
+        let resp = await theBackEnd.updateMemo(memo);
+        // alertBox_pushAlert(resp?.data);
+        if (resp?.data?.code!=200) {
+          alertBox_pushAlert(`【发生错误】${resp?.data?.msg}`, 'danger', resp);
+          return;
+        };
+        await getMemoList();
+        return;
+      } catch (error) {
+        alertBox_pushAlert(error, 'danger');
+      };
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     return {
       win,
       lo,
@@ -1490,6 +1630,11 @@ const RootComponent = {
       inspectionSum,
       sortFnByPassRatio,
       sortFnByPassRatioR,
+      //
+      theBoard,
+      getMemoList,
+      postNormalMemo,
+      deleteMemo,
       //
     };
   },
