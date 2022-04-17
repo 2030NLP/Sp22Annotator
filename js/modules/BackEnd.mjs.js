@@ -368,6 +368,15 @@ class BackEnd {
     // response.data.err === ''
   }
 
+  async postBuildTasks(settings) {
+    let response = await this.request({
+      method: "post",
+      url: `/build-tasks`,
+      settings: settings,
+    });
+    return response;
+  }
+
 }
 
 export default BackEnd;
