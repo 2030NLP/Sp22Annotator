@@ -372,7 +372,9 @@ class BackEnd {
     let response = await this.request({
       method: "post",
       url: `/build-tasks`,
-      settings: settings,
+      data: {
+        settings: settings,
+      },
     });
     return response;
   }
