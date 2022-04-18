@@ -125,6 +125,15 @@ class BackEnd {
     return response;
   }
 
+  async postUser(user) {
+    let response = await this.request({
+      method: "post",
+      url: `/users`,
+      data: user,
+    });
+    return response;
+  }
+
   async updateUser(user) {
     let response = await this.request({
       method: "put",
