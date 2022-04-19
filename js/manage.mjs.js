@@ -1,7 +1,7 @@
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno-Manager";
-const APP_VERSION = "22-0419-00";
+const APP_VERSION = "22-0419-02";
 
 // 开发环境 和 生产环境 的 控制变量
 const DEVELOPING = location?.hostname=="2030nlp.github.io" ? 0 : 1;
@@ -220,6 +220,11 @@ const RootComponent = {
         topic: "【all】",
         batchName: "【all】",
       },
+
+      managerFilter: {
+        manager: "【all】",
+      },
+      showQuittedUsers: false,
 
       tab: TABS['overview'],
       lastTime: "never",
