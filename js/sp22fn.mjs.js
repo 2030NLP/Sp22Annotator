@@ -1,171 +1,171 @@
 
-const fn = it => it;
+// const fn = it => it;
 
 
-const fff = () => {
+// const fff = () => {
 
-  labelsAgree = (labels, lo) => {
-    let countDict = lo.countBy(labels, it=>it);
-    // console.log(countDict);
-    let vmax = lo.max(lo.values(countDict));
-    let vsum = lo.sum(lo.values(countDict));
-    let rr = vmax/vsum;
-    console.log(rr);
-    return rr;
-  };
+//   labelsAgree = (labels, lo) => {
+//     let countDict = lo.countBy(labels, it=>it);
+//     // console.log(countDict);
+//     let vmax = lo.max(lo.values(countDict));
+//     let vsum = lo.sum(lo.values(countDict));
+//     let rr = vmax/vsum;
+//     console.log(rr);
+//     return rr;
+//   };
 
-  labelSide = (label) => {
-    label = label.toLowerCase();
-    const map = {
-      'somebad': 'bad',
-      'somefine': 'fine',
-    };
-    if (label in map) {
-      return map[label];
-    };
-    return label;
-  };
+//   labelSide = (label) => {
+//     label = label.toLowerCase();
+//     const map = {
+//       'somebad': 'bad',
+//       'somefine': 'fine',
+//     };
+//     if (label in map) {
+//       return map[label];
+//     };
+//     return label;
+//   };
 
-  annoLabels = (anno, lo) => lo.uniq(anno?.content?.annotations.map(it=>it.label).sort());
+//   annoLabels = (anno, lo) => lo.uniq(anno?.content?.annotations.map(it=>it.label).sort());
 
-  annoLabelText = (anno, lo) => annoLabels(anno, lo).join("&");
+//   annoLabelText = (anno, lo) => annoLabels(anno, lo).join("&");
 
-  annoLabelSide = (anno, lo) => annoLabels(anno, lo).map(it=>labelSide(it)).join("&");
+//   annoLabelSide = (anno, lo) => annoLabels(anno, lo).map(it=>labelSide(it)).join("&");
 
-  // task1最宽松一致性 = (entry, db, lo) => {
-  //   let aids = entry?.allAnnos??[];
-  //   let annos = aids.map(aid=>db?.annoDict?.[aid]);
-  //   let labelses = annos.map(anno=>annoLabels(anno, lo));
-  //   return labelsAgree(labelTexts, lo);
-  // };
+//   // task1最宽松一致性 = (entry, db, lo) => {
+//   //   let aids = entry?.allAnnos??[];
+//   //   let annos = aids.map(aid=>db?.annoDict?.[aid]);
+//   //   let labelses = annos.map(anno=>annoLabels(anno, lo));
+//   //   return labelsAgree(labelTexts, lo);
+//   // };
 
-  单条较宽松一致性 = (entry, db, lo) => {
-    let aids = entry?.allAnnos??[];
-    let annos = aids.map(aid=>db?.annoDict?.[aid]);
-    let labelTexts = annos.map(anno=>annoLabelSide(anno, lo));
-    return labelsAgree(labelTexts, lo);
-  };
+//   单条较宽松一致性 = (entry, db, lo) => {
+//     let aids = entry?.allAnnos??[];
+//     let annos = aids.map(aid=>db?.annoDict?.[aid]);
+//     let labelTexts = annos.map(anno=>annoLabelSide(anno, lo));
+//     return labelsAgree(labelTexts, lo);
+//   };
 
-  单条严格一致性 = (entry, db, lo) => {
-    let aids = entry?.allAnnos??[];
-    let annos = aids.map(aid=>db?.annoDict?.[aid]);
-    let labelTexts = annos.map(anno=>annoLabelText(anno, lo));
-    return labelsAgree(labelTexts, lo);
-  };
+//   单条严格一致性 = (entry, db, lo) => {
+//     let aids = entry?.allAnnos??[];
+//     let annos = aids.map(aid=>db?.annoDict?.[aid]);
+//     let labelTexts = annos.map(anno=>annoLabelText(anno, lo));
+//     return labelsAgree(labelTexts, lo);
+//   };
 
-  双人一致率 = (甲, 乙, db, lo) => {
-    let aa = (甲?.allAnnos??[]).map(aid=>db?.annoDict?.[aid]?.entry);
-    let bb = (乙?.allAnnos??[]).map(aid=>db?.annoDict?.[aid]?.entry);
-    let eids = lo.intersectionBy(aa, bb);
-    let entries = eids.map(eid=>db?.entryDict?.[eid]).filter(it=>it);
-    console.log(entries);
-    let result = {};
-    for (let entry of entries) {
-      单条严格一致性(entry, db, lo);
-      单条较宽松一致性(entry, db, lo);
-    };
-  };
-  aa = app.theDB.userDict["9"];
-  bb = app.theDB.userDict["10"];
-  双人一致率(aa, bb, app.theDB, _);
+//   双人一致率 = (甲, 乙, db, lo) => {
+//     let aa = (甲?.allAnnos??[]).map(aid=>db?.annoDict?.[aid]?.entry);
+//     let bb = (乙?.allAnnos??[]).map(aid=>db?.annoDict?.[aid]?.entry);
+//     let eids = lo.intersectionBy(aa, bb);
+//     let entries = eids.map(eid=>db?.entryDict?.[eid]).filter(it=>it);
+//     console.log(entries);
+//     let result = {};
+//     for (let entry of entries) {
+//       单条严格一致性(entry, db, lo);
+//       单条较宽松一致性(entry, db, lo);
+//     };
+//   };
+//   aa = app.theDB.userDict["9"];
+//   bb = app.theDB.userDict["10"];
+//   双人一致率(aa, bb, app.theDB, _);
 
-};
-
-
-const fn2 = () => {
-
-  batchName="task1-01";
-
-  log = console.log;
-  annos = app.theDB.annos.filter(it=>it.batchName==batchName&&app.theDB.userDict[it.user]?.currTaskGroup!="zwdGroup");
-
-  ll = annos.map(anno=>_.min([anno._timeInfo.totalDur,1000*60*3]));
-
-  avg = _.sum(ll)/ll.length;
-  log(`${batchName} 每条标注平均耗费时长（单位 秒，超过3分钟以3分钟计）：`, avg/1000);
-  sorted_ll = _.sortBy(ll, it=>+it);
-  log(`${batchName} 最短的耗时（单位 秒）：`, sorted_ll[0]/1000);
-  log(`${batchName} 中位数耗时（单位 秒）：`, sorted_ll[Math.round(sorted_ll.length/2)]/1000);
-
-  firstTimes = _.sortBy(annos.map(anno=>new Date(anno._timeInfo.detail[0][0])), it=>it.valueOf());
-  log(`${batchName} 的第一条标注的时间是：`, firstTimes[0]);
-  log(`${batchName} 的第50条标注的时间是：`, firstTimes[49]);
-  log(`${batchName} 的最中间标注的时间是：`, firstTimes[Math.round(firstTimes.length/2)]);
-  log(`${batchName} 的倒数第50条标注的时间是：`, firstTimes.at(-50));
-  log(`${batchName} 的最后一条标注的时间是：`, firstTimes.at(-1));
-  log(`${batchName} 总耗时（单位 小时）：`, (firstTimes.at(-1)-firstTimes[0])/1000/60/60);
+// };
 
 
-  一些annos的总历时 = (annos, lo) => {
-    let firstEnterTimes = lo.sortBy(annos.map(anno=>new Date(anno._timeInfo.detail[0][0])), it=>it.valueOf());
-    let firstSaveTimes = lo.sortBy(annos.map(anno=>new Date(anno._timeInfo.detail[0][1])), it=>it.valueOf());
-    return firstSaveTimes.at(-1)-firstEnterTimes[0];
-  };
+// const fn2 = () => {
 
-  一个用户某个批次的总历时 = (user, batchName, db, lo) => {
-    let annos = db.annos.filter(it=>it.batchName==batchName&&it.user==user.id);
-    return 一些annos的总历时(annos, lo);
-  };
+//   batchName="task1-01";
 
-  每个用户的总历时pair列表 = app.theDB.users
-    .filter(it=>it.currTaskGroup!="zwdGroup")
-    .map(it=>[it, 一个用户某个批次的总历时(it, batchName, app.theDB, _)])
-    .filter(it=>it[1]!=null&&!isNaN(it[1]));
-  每个用户的总历时pair列表 = _.sortBy(每个用户的总历时pair列表, it=>+it[1]);
-  pairs = 每个用户的总历时pair列表.map(it=>[it[0].id, it[0].currTaskGroup, it[0].name, +it[1]]);
+//   log = console.log;
+//   annos = app.theDB.annos.filter(it=>it.batchName==batchName&&app.theDB.userDict[it.user]?.currTaskGroup!="zwdGroup");
 
-  每个用户的总历时列表 = 每个用户的总历时pair列表.map(it=>it[1]);
+//   ll = annos.map(anno=>_.min([anno._timeInfo.totalDur,1000*60*3]));
 
+//   avg = _.sum(ll)/ll.length;
+//   log(`${batchName} 每条标注平均耗费时长（单位 秒，超过3分钟以3分钟计）：`, avg/1000);
+//   sorted_ll = _.sortBy(ll, it=>+it);
+//   log(`${batchName} 最短的耗时（单位 秒）：`, sorted_ll[0]/1000);
+//   log(`${batchName} 中位数耗时（单位 秒）：`, sorted_ll[Math.round(sorted_ll.length/2)]/1000);
 
-  平均总历时 = _.sum(每个用户的总历时列表)/每个用户的总历时列表.length;
-  log(`${batchName} 每个用户平均历时（单位 分钟）：`, 平均总历时/1000/60);
-
-  sorted_每个用户的总历时列表 = _.sortBy(每个用户的总历时列表, it=>+it);
-  log(`${batchName} 最快用户历时（单位 分钟）：`, sorted_每个用户的总历时列表[0]/1000/60);
-  log(`${batchName} 中位用户历时（单位 分钟）：`, sorted_每个用户的总历时列表[Math.round(sorted_每个用户的总历时列表.length/2)]/1000/60);
-  log(`${batchName} 最慢用户历时（单位 分钟）：`, sorted_每个用户的总历时列表.at(-1)/1000/60);
+//   firstTimes = _.sortBy(annos.map(anno=>new Date(anno._timeInfo.detail[0][0])), it=>it.valueOf());
+//   log(`${batchName} 的第一条标注的时间是：`, firstTimes[0]);
+//   log(`${batchName} 的第50条标注的时间是：`, firstTimes[49]);
+//   log(`${batchName} 的最中间标注的时间是：`, firstTimes[Math.round(firstTimes.length/2)]);
+//   log(`${batchName} 的倒数第50条标注的时间是：`, firstTimes.at(-50));
+//   log(`${batchName} 的最后一条标注的时间是：`, firstTimes.at(-1));
+//   log(`${batchName} 总耗时（单位 小时）：`, (firstTimes.at(-1)-firstTimes[0])/1000/60/60);
 
 
+//   一些annos的总历时 = (annos, lo) => {
+//     let firstEnterTimes = lo.sortBy(annos.map(anno=>new Date(anno._timeInfo.detail[0][0])), it=>it.valueOf());
+//     let firstSaveTimes = lo.sortBy(annos.map(anno=>new Date(anno._timeInfo.detail[0][1])), it=>it.valueOf());
+//     return firstSaveTimes.at(-1)-firstEnterTimes[0];
+//   };
+
+//   一个用户某个批次的总历时 = (user, batchName, db, lo) => {
+//     let annos = db.annos.filter(it=>it.batchName==batchName&&it.user==user.id);
+//     return 一些annos的总历时(annos, lo);
+//   };
+
+//   每个用户的总历时pair列表 = app.theDB.users
+//     .filter(it=>it.currTaskGroup!="zwdGroup")
+//     .map(it=>[it, 一个用户某个批次的总历时(it, batchName, app.theDB, _)])
+//     .filter(it=>it[1]!=null&&!isNaN(it[1]));
+//   每个用户的总历时pair列表 = _.sortBy(每个用户的总历时pair列表, it=>+it[1]);
+//   pairs = 每个用户的总历时pair列表.map(it=>[it[0].id, it[0].currTaskGroup, it[0].name, +it[1]]);
+
+//   每个用户的总历时列表 = 每个用户的总历时pair列表.map(it=>it[1]);
 
 
+//   平均总历时 = _.sum(每个用户的总历时列表)/每个用户的总历时列表.length;
+//   log(`${batchName} 每个用户平均历时（单位 分钟）：`, 平均总历时/1000/60);
 
-  一些annos的总耗时 = (annos, lo) => {
-    let totalDurs = annos.map(anno=>anno._timeInfo.totalDur);
-    return lo.sum(totalDurs);
-  };
-
-  一个用户某个批次的总耗时 = (user, batchName, db, lo) => {
-    let annos = db.annos.filter(it=>it.batchName==batchName&&it.user==user.id);
-    return 一些annos的总耗时(annos, lo);
-  };
-
-  每个用户的总耗时pair列表 = app.theDB.users
-    .filter(it=>it.currTaskGroup!="zwdGroup")
-    .map(it=>[it, 一个用户某个批次的总耗时(it, batchName, app.theDB, _)])
-    .filter(it=>it[1]!=null&&!isNaN(it[1])&&it[1]!=0);
-  每个用户的总耗时pair列表 = _.sortBy(每个用户的总耗时pair列表, it=>+it[1]);
-  pairs = 每个用户的总耗时pair列表.map(it=>[it[0].id, it[0].currTaskGroup, it[0].name, +it[1]]);
-
-  每个用户的总耗时列表 = 每个用户的总耗时pair列表.map(it=>it[1]);
-
-
-  平均总耗时 = _.sum(每个用户的总耗时列表)/每个用户的总耗时列表.length;
-  log(`${batchName} 每个用户平均耗时（单位 分钟）：`, 平均总耗时/1000/60);
-
-  sorted_每个用户的总耗时列表 = _.sortBy(每个用户的总耗时列表, it=>+it);
-  log(`${batchName} 最快用户耗时（单位 分钟）：`, sorted_每个用户的总耗时列表[0]/1000/60);
-  log(`${batchName} 中位用户耗时（单位 分钟）：`, sorted_每个用户的总耗时列表[Math.round(sorted_每个用户的总耗时列表.length/2)]/1000/60);
-  log(`${batchName} 最慢用户耗时（单位 分钟）：`, sorted_每个用户的总耗时列表.at(-1)/1000/60);
+//   sorted_每个用户的总历时列表 = _.sortBy(每个用户的总历时列表, it=>+it);
+//   log(`${batchName} 最快用户历时（单位 分钟）：`, sorted_每个用户的总历时列表[0]/1000/60);
+//   log(`${batchName} 中位用户历时（单位 分钟）：`, sorted_每个用户的总历时列表[Math.round(sorted_每个用户的总历时列表.length/2)]/1000/60);
+//   log(`${batchName} 最慢用户历时（单位 分钟）：`, sorted_每个用户的总历时列表.at(-1)/1000/60);
 
 
 
-  log("pairs");
-  csv = pairs.map(it=>it.map(xx=>JSON.stringify(xx)).join(",")).join("\n");
-  log(csv);
 
-  app.theSaver.saveText(csv, 'task1-01-实际耗时表.csv')
 
-};
+//   一些annos的总耗时 = (annos, lo) => {
+//     let totalDurs = annos.map(anno=>anno._timeInfo.totalDur);
+//     return lo.sum(totalDurs);
+//   };
+
+//   一个用户某个批次的总耗时 = (user, batchName, db, lo) => {
+//     let annos = db.annos.filter(it=>it.batchName==batchName&&it.user==user.id);
+//     return 一些annos的总耗时(annos, lo);
+//   };
+
+//   每个用户的总耗时pair列表 = app.theDB.users
+//     .filter(it=>it.currTaskGroup!="zwdGroup")
+//     .map(it=>[it, 一个用户某个批次的总耗时(it, batchName, app.theDB, _)])
+//     .filter(it=>it[1]!=null&&!isNaN(it[1])&&it[1]!=0);
+//   每个用户的总耗时pair列表 = _.sortBy(每个用户的总耗时pair列表, it=>+it[1]);
+//   pairs = 每个用户的总耗时pair列表.map(it=>[it[0].id, it[0].currTaskGroup, it[0].name, +it[1]]);
+
+//   每个用户的总耗时列表 = 每个用户的总耗时pair列表.map(it=>it[1]);
+
+
+//   平均总耗时 = _.sum(每个用户的总耗时列表)/每个用户的总耗时列表.length;
+//   log(`${batchName} 每个用户平均耗时（单位 分钟）：`, 平均总耗时/1000/60);
+
+//   sorted_每个用户的总耗时列表 = _.sortBy(每个用户的总耗时列表, it=>+it);
+//   log(`${batchName} 最快用户耗时（单位 分钟）：`, sorted_每个用户的总耗时列表[0]/1000/60);
+//   log(`${batchName} 中位用户耗时（单位 分钟）：`, sorted_每个用户的总耗时列表[Math.round(sorted_每个用户的总耗时列表.length/2)]/1000/60);
+//   log(`${batchName} 最慢用户耗时（单位 分钟）：`, sorted_每个用户的总耗时列表.at(-1)/1000/60);
+
+
+
+//   log("pairs");
+//   csv = pairs.map(it=>it.map(xx=>JSON.stringify(xx)).join(",")).join("\n");
+//   log(csv);
+
+//   app.theSaver.saveText(csv, 'task1-01-实际耗时表.csv')
+
+// };
 
 
 
@@ -193,12 +193,12 @@ const reviewerWorkStatistics = async () => {
 
 
 class Sp22FN {
-  constructor(lodash) {
-    this.lodash = lodash;
+  constructor(_lo) {
+    this.lodash = _lo;
     this.lo = this.lodash;
   }
-  useLodash(lodash) {
-    this.lodash = lodash;
+  useLodash(_lo) {
+    this.lodash = _lo;
     this.lo = this.lodash;
   }
 
@@ -348,12 +348,6 @@ class Sp22FN {
 
 
 
-
-
-                                                                                                                               
-                                                                                                                               
-                                                                                                                               
-                                                                                                     
   //                                                  .>l:.              I>>;          `ii!'           
   //                                 }O00QCCCQ00Q0O]  >kkC.              zaan    ;+>,  >kkb!           
   //                                 <ft/xkaac\\//f>  faaJ????--?-`      zaan    noa|  >kkb!           
@@ -368,7 +362,13 @@ class Sp22FN {
   //                                 :})\fvkaaqpbkql:[Yho0{,)m*bv-,      zhan .?}}}}}}}tkhk/}}}}}{>    
   //                                 ;ZpZQJcx/)]+!:>Zopc?'   "{Chp?      Xoou 'Qdpppppppwwwppppppbf    
   //                                  ^`'           !?"        .!:       >--!  ^""""""""""""""""""`    
-                                                                                                   
+
+
+
+  static inTask1(task) {
+    return Sp22FN.topic_regulation(task.topic)==Sp22FN.topic_regulation('第1期');
+  }
+
   static task1LabelSide(label) {
     label = label.toLowerCase();
     const map = {
@@ -381,122 +381,248 @@ class Sp22FN {
     return label;
   }
 
-  static annoLabels(anno, lodash) {
-    return lodash.sortedUniq(anno?.content?.annotations.map(it=>it.label));
+  static annoLabels(anno, _lo) {
+    return _lo.sortedUniq(anno?.content?.annotations.map(it=>it.label));
   }
 
-  static annoLabelText(anno, lodash) {
-    return annoLabels(anno, lodash).join("&");
+  static annoLabelText(anno, _lo) {
+    return Sp22FN.annoLabels(anno, _lo).join("&");
   }
 
-  static annoTask1LabelSideText(anno, lodash) {
-    return annoLabels(anno, lodash).map(it=>Sp22FN.task1LabelSide(it)).join("&");
+  static annoTask1LabelSideText(anno, _lo) {
+    return Sp22FN.annoLabels(anno, _lo).map(it=>Sp22FN.task1LabelSide(it)).join("&");
   }
 
-  static 多数标签占比(labels, lodash) {
-    let countDict = lodash.countBy(labels, it=>it);
-    // console.lodashg(countDict);
-    let vmax = lodash.max(lodash.values(countDict));
-    let vsum = lodash.sum(lodash.values(countDict));
+  static 多数标签占比(labels, _lo) {
+    let countDict = _lo.countBy(labels, it=>it);
+    // console._log(countDict);
+    let vmax = _lo.max(_lo.values(countDict));
+    let vsum = _lo.sum(_lo.values(countDict));
     let rr = vmax/vsum;
     console.log(rr);
     return rr;
   }
 
-  static 一条task的所有答题者的一致率(task, sp22db, 一致率计算函数, 标签函数, lodash) {
+  static 一条task的所有答题者的一致率(task, sp22db, 一致率计算函数, 标签函数, _lo) {
     if (一致率计算函数 == null) { 一致率计算函数 = Sp22FN.多数标签占比; };
     if (标签函数 == null) { 标签函数 = Sp22FN.annoLabelText; };
-    if (lodash == null) { lodash = sp22db.lo; };
+    if (_lo == null) { _lo = sp22db.lo; };
     let entry = sp22db.entryDict[task.entry];
     let aids = entry?.allAnnos??[];
-    let annos = lodash.chain(aids).map(aid=>sp22db?.annoDict?.[aid]).filter(anno=>anno.task==task.id);
-    let labels = 标签函数(annos, lodash);
-    return 一致率计算函数(labels, lodash);
+    let annos = _lo.chain(aids)
+      .map(aid=>sp22db?.annoDict?.[aid])
+      .filter(anno=>anno.task==task.id)
+      .value();
+    let labels = 标签函数(annos, _lo);
+    return 一致率计算函数(labels, _lo);
   }
 
-  static 一条task1语料的多数标签占比(task, sp22db, lodash) {
-    return Sp22FN.一条task的所有答题者的一致率(task, sp22db, Sp22FN.多数标签占比, Sp22FN.annoTask1LabelSideText, lodash);
+  static 一条task1语料的多数标签占比(task, sp22db, _lo) {
+    return Sp22FN.一条task的所有答题者的一致率(task, sp22db, Sp22FN.多数标签占比, Sp22FN.annoTask1LabelSideText, _lo);
   }
 
-  static 两人在一条任务语料上是否一致(task, u1, u2, sp22db, 标签函数, 一致性计算函数, lodash) {
+  static 两条标注是否一致(a1, a2, 标签函数, 一致性计算函数, _lo) {
     if (标签函数 == null) { 标签函数 = Sp22FN.annoLabelText; };
     if (一致性计算函数 == null) { 一致性计算函数 = (a,b)=>a==b; };
-    if (lodash == null) { lodash = sp22db.lo; };
-    let [labelText1, labelText2] = lodash.chain([u1, u2])
-      .map(user => lodash.chain(user.allAnnos)
-        .map(aid=>sp22db.annoDict[aid])
-        .filter(anno=>anno.task==task.id)
-        .map(anno => 标签函数(anno))
-        [0]
-      );
+    if (_lo == null) { _lo = sp22db.lo; };
+
+    let [labelText1, labelText2] = _lo.map([a1, a2], anno => 标签函数(anno, _lo));
+
     if(labelText1==null||labelText2==null){return;};
     return 一致性计算函数(labelText1, labelText2);
   }
 
-  static inTask1(task) {
-    return Sp22FN.topic_regulation(task.topic)==Sp22FN.topic_regulation('第1期');
+  static 两条task1的标注是否一致(a1, a2, _lo) {
+    return Sp22FN.两条标注是否一致(a1, a2, Sp22FN.annoTask1LabelSideText, null, _lo);
   }
 
-  static 两人在一条task1语料上是否一致(task, u1, u2, sp22db, lodash) {
-    if (!inTask1(task)) {return;};
-    return 两人在一条任务语料上是否一致(task, u1, u2, sp22db, Sp22FN.annoTask1LabelSideText, null, lodash);
+  static 两人对一条任务语料的标注标签是否一致(task, u1, u2, sp22db, 标签函数, 一致性计算函数, _lo) {
+    if (_lo == null) { _lo = sp22db.lo; };
+
+    let anno1 = sp22db.getAnnoByUserAndTask(u1.id, task.id);
+    let anno2 = sp22db.getAnnoByUserAndTask(u2.id, task.id);
+    if (!anno1 || !anno2) {return;};
+
+    return 两条标注是否一致(a1, a2, 标签函数, 一致性计算函数, _lo);
   }
 
-  static 两人在共有的task1语料上的一致率报告(u1, u2, sp22db, lodash) {
-    if (lodash == null) { lodash = sp22db.lo; };
-    let report = {};
-    let aa = lodash.map(u1?.allAnnos??[], aid=>sp22db?.annoDict?.[aid]?.task);
-    let bb = lodash.map(u2?.allAnnos??[], aid=>sp22db?.annoDict?.[aid]?.task);
-    let tids = lodash.intersectionBy(aa, bb);
-    if (!tids.length) {return;};
-    let tasks = lodash.chain(tids).map(tid=>sp22db?.taskDict?.[tid]).filter(it=>inTask1(it));
-    if (!tasks.length) {return;};
-    let pairs = [];
-    for (let task of tasks) {
-      let item = 两人在一条task1语料上是否一致(task, u1, u2, sp22db, lodash);
-      pairs.push([task.id, item]);
+  static 两人对一条task1语料的标注是否一致(task, u1, u2, sp22db, _lo) {
+    if (!Sp22FN.inTask1(task)) {return;};
+    return Sp22FN.两人对一条任务语料的标注标签是否一致(task, u1, u2, sp22db, Sp22FN.annoTask1LabelSideText, null, _lo);
+  }
+
+  static 一个人与其他所有人在task1语料上的一致率报告(user, sp22db, _lo) {
+    if (_lo == null) { _lo = sp22db.lo; };
+    // 思路：
+    // 对 user.allTasks 找 entry.allAnnos 制作 annoPairs
+
+    let results = [];
+
+    for (let task_id of user.allTasks) {
+      let task = sp22db?.taskDict?.[task_id]; if (!task) {continue;};
+      if (!Sp22FN.inTask1(task)) {continue;};
+      let anno = sp22db?.getAnnoByUserAndTask?.(user.id, task_id); if (!anno) {continue;};
+      let entry = sp22db?.entryDict?.[task.entry]; if (!entry) {continue;};
+      let other_anno_ids = _lo.difference(entry.allAnnos??[], [anno.id]); if (!other_anno_ids.length) {continue;};
+      let otherAnnos = _lo.chain(other_anno_ids)
+        .map(aid=>sp22db?.annoDict?.[aid])
+        .filter(it=>it!=null)
+        .value();
+      if (!otherAnnos.length) {continue;};
+      for (let a2 of otherAnnos) {
+        let oneResult = Sp22FN.两条task1的标注是否一致(anno, a2, _lo);
+        results.push(oneResult);
+      };
     };
-    report.users = [u1.id, u2.id];
-    report.task = task.id;
-    report.summary = lodash.countBy(items, it=>it[1]);
-    report.summary.sum = tasks.length;
-    report.summary.trueRatio = (report.summary.true??0)/report.summary.sum;
-    report.details = lodash.fromPairs(pairs);
+
+    let report = {};
+    report.summary = _lo.countBy(results, it=>it);
+    report.summary.num = results.length;
+    report.summary.trueRatio = (report.summary.true??0)/report.summary.num;
+    report.user_id = user.id;
     return report;
   }
 
-  static userPairs(sp22db, lodash) {
-    if (lodash == null) { lodash = sp22db.lo; };
+  static 所有用户在task1语料上的标注一致性报告(sp22db, _lo) {
+    if (_lo == null) { _lo = sp22db.lo; };
+
+    let dict = _lo.fromPairs(_lo.map(sp22db.users, it=>[it.id, []]));
+
+    for (let task of sp22db?.tasks??[]) {
+      if (!Sp22FN.inTask1(task)) {continue;};
+      let entry = sp22db?.entryDict?.[task.entry]; if (!entry) {continue;};
+      let localAnnos = _lo.map(entry.allAnnos, aid=>sp22db?.annoDict?.[aid]);
+      if (localAnnos.length<2) {continue;};
+      for (let a1 of localAnnos) {
+        for (let a2 of localAnnos) {
+          if ((a1.id!=a2.id) && (a1.user in dict) && (a2.user in dict)) {
+            let oneResult = Sp22FN.两条task1的标注是否一致(a1, a2, _lo);
+            dict[a1.user].push(oneResult);
+            dict[a2.user].push(oneResult);
+          };
+        };
+      };
+    };
+
+    let pairs = _lo.toPairs(dict);
+    let newPairs = [];
+    for (let [user_id, list] of pairs) {
+      let report = {};
+      report.summary = _lo.countBy(list, it=>it);
+      if (!list.length) {continue;};
+      report.summary.num = list.length;
+      report.summary.trueRatio = (report.summary.true??0)/report.summary.num;
+      report.user_id = user_id;
+      report.user_name = sp22db?.userDict?.[user_id]?.name;
+      report.ratio = report.summary.trueRatio;
+      newPairs.push([user_id, report]);
+    };
+    // let results = _lo.fromPairs(newPairs);
+    let results = _lo.sortBy(newPairs, it=>-it[1].ratio);
+
+    let report = {};
+    report.summary = _lo.countBy(results, it=>it[1].ratio.toFixed(1));
+    report.summary.num = results.length;
+    report.summary.max = _lo.max(_lo.map(results, it=>it[1].ratio));
+    report.summary.min = _lo.min(_lo.map(results, it=>it[1].ratio));
+    report.summary.avg = _lo.sum(_lo.map(results, it=>it[1].ratio)) / report.summary.num;
+    report.summary.mid = results[_lo.round(results.length/2)][1].ratio;
+    report.details = results;
+
+    return report;
+  }
+
+
+
+
+
+
+  static 一个人与其他每个人在共有的task1语料上的一致率报告(user, sp22db, _lo) {
+    if (_lo == null) { _lo = sp22db.lo; };
+    let singleReports = [];
+    for (let u2 of sp22db.users) {
+      if (user.id == u2.id) {continue;};
+      let singleReport = Sp22FN.两人在共有的task1语料上的一致率报告(user, u2, sp22db, _lo);
+      if (singleReport) {
+        singleReports.push(singleReport);
+      };
+    };
+    let report = {};
+    report.user_id = user.id;
+    report.summary = _lo.countBy(singleReports, it=>it.summary.trueRatio.toFixed(1));
+    report.summary.num = singleReports.length;
+    report.details = _lo.keyBy(singleReports, it=>it.users[1]);
+    return report;
+  }
+
+
+
+
+  static 两人在共有的task1语料上的一致率报告(u1, u2, sp22db, _lo) {
+    // 这个算法不太好
+
+    if (_lo == null) { _lo = sp22db.lo; };
+    let aa = _lo.map(u1?.allAnnos??[], aid=>sp22db?.annoDict?.[aid]?.task);
+    let bb = _lo.map(u2?.allAnnos??[], aid=>sp22db?.annoDict?.[aid]?.task);
+    let tids = _lo.intersectionBy(aa, bb);
+    if (!tids.length) {return;};
+    // console.log([u1.id, u2.id, tids.length, 'tids.length']);
+    let tasks = _lo.chain(tids)
+      .map(tid=>sp22db?.taskDict?.[tid])
+      .filter(it=>Sp22FN.inTask1(it))
+      .value();
+    // console.log([u1.id, u2.id, tasks.length, 'tasks.length']);
+    if (!tasks.length) {return;};
+    let pairs = [];
+    for (let task of tasks) {
+      let item = Sp22FN.两人对一条task1语料的标注是否一致(task, u1, u2, sp22db, _lo);
+      pairs.push([`task#${task.id}`, item]);
+    };
+    let report = {};
+    report.user_ids = [u1.id, u2.id];
+    report.summary = _lo.countBy(pairs, it=>it[1]);
+    report.summary.num = tasks.length;
+    report.summary.trueRatio = (report.summary.true??0)/report.summary.num;
+    report.details = _lo.fromPairs(pairs);
+    return report;
+  }
+
+
+
+
+
+  static userPairs(sp22db, _lo) {
+    if (_lo == null) { _lo = sp22db.lo; };
     let pairs = [];
     let users = sp22db.users??[];
     for (let u1 of users) {
       for (let u2 of users) {
-        let pair = lodash.sortBy([u1, u2], it=>(+it.id));
+        let pair = _lo.sortBy([u1, u2], it=>(+it.id));
         pairs.push(pair);
       };
     };
-    pairs = lodash.uniqBy(pairs, pair=>[pair[0].id, pair[1].id].join("&"));
+    pairs = _lo.uniqBy(pairs, pair=>[pair[0].id, pair[1].id].join("&"));
     return pairs;
   }
 
-  static 所有用户两两在共有的task1语料上的一致率报告(sp22db, lodash) {
-    if (lodash == null) { lodash = sp22db.lo; };
+  static 所有用户两两在共有的task1语料上的一致率报告(sp22db, _lo) {
+    if (_lo == null) { _lo = sp22db.lo; };
     let report = {
       details: {},
     };
-    let userPairs = Sp22FN.userPairs(sp22db, lodash);
+    let userPairs = Sp22FN.userPairs(sp22db, _lo);
     for (let pair of userPairs) {
       let [u1, u2] = pair;
       let key = `${u1.name}#${u1.id}&${u2.name}#${u2.id}`.replace(/ /g, "_");
-      let oneReport = Sp22FN.两人在共有的task1语料上的一致率报告(u1, u2, sp22db, lodash);
+      let oneReport = Sp22FN.两人在共有的task1语料上的一致率报告(u1, u2, sp22db, _lo);
       if (oneReport) {
         oneReport.key = key;
         report.details[key] = oneReport;
       };
     };
-    let values = lodash.values(report.details);
-    report.summary = lodash.countBy(values, it=>it.summary.trueRatio.toFixed(1));
-    report.summary.sum = values.length;
+    let values = _lo.values(report.details);
+    report.summary = _lo.countBy(values, it=>it.summary.trueRatio.toFixed(1));
+    report.summary.num = values.length;
     return report;
   }
 

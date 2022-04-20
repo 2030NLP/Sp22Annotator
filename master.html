@@ -151,11 +151,15 @@
             >配合语料文本更新 anno 细节</button>
           </div>
           <div class="col col-12 text-muted small my-2">
-            <div>上次刷新整个数据库的时间是 {{ctrl.lastTime}} 。</div>
-            <div>上次刷新 Entry 表的时间是 {{ctrl.lastTimeDict?.entries}} 。</div>
-            <div>上次刷新 User 表的时间是 {{ctrl.lastTimeDict?.users}} 。</div>
-            <div>上次刷新 Task 表的时间是 {{ctrl.lastTimeDict?.tasks}} 。</div>
-            <div>上次刷新 Anno 表的时间是 {{ctrl.lastTimeDict?.annos}} 。</div>
+            <div>
+              <button
+                v-if="(!spDB.completelyExtended || !spDB.allDictsBuilt) && spDB.isNotEmpty"
+                type="button"
+                class="btn btn-sm me-2 my-1 btn-outline-primary"
+                @click="async()=>{ctrl.started=false; await spDB.fix(); await saveDB();}"
+                title="数据补全(可能卡顿，请耐心等待)"
+              >数据补全 (可能卡顿，请耐心等待)</button>
+            </div>
             <div>
               <span>数据状态：</span>
               <span title="entries">{{spDB.entries.length ? '🟢' : '🔴'}}</span>
@@ -171,15 +175,11 @@
               <span title="annosExtended">{{spDB.state?.annosExtended ? '🟢' : '🔴'}}</span>
               <span title="annoDictBuilt">{{spDB.state?.annoDictBuilt ? '🟢' : '🔴'}}</span>
             </div>
-            <div>
-              <button
-                v-if="(!spDB.completelyExtended || !spDB.allDictsBuilt) && spDB.isNotEmpty"
-                type="button"
-                class="btn btn-sm me-2 my-1 btn-outline-dark"
-                @click="async()=>{ctrl.started=false; await spDB.fix(); await saveDB();}"
-                title="数据补全(可能卡顿，请耐心等待)"
-              >数据补全 (可能卡顿，请耐心等待)</button>
-            </div>
+            <div>上次刷新整个数据库的时间是 {{ctrl.lastTime}} 。</div>
+            <div>上次刷新 Entry 表的时间是 {{ctrl.lastTimeDict?.entries}} 。</div>
+            <div>上次刷新 User 表的时间是 {{ctrl.lastTimeDict?.users}} 。</div>
+            <div>上次刷新 Task 表的时间是 {{ctrl.lastTimeDict?.tasks}} 。</div>
+            <div>上次刷新 Anno 表的时间是 {{ctrl.lastTimeDict?.annos}} 。</div>
           </div>
 
           <div class="col col-12">
@@ -200,6 +200,7 @@
           <div class="col col-12">
             <button
               v-if="spDB.completelyExtended && spDB.allDictsBuilt && spDB.isNotEmpty"
+              v-show="false"
               type="button"
               class="btn btn-sm me-2 my-1"
               :class="`btn-info`"

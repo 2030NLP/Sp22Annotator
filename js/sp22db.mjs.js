@@ -604,7 +604,9 @@ class Sp22DB {
 
 
   consistanceReportForTask1() {
-    return Sp22FN.所有用户两两在共有的task1语料上的一致率报告(this);
+    let report = Sp22FN.所有用户在task1语料上的标注一致性报告(this);
+    console.log(report);
+    return report;
   }
 
 
