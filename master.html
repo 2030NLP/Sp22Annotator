@@ -10,7 +10,7 @@
   <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
   <META HTTP-EQUIV="Expires" CONTENT="0">
 
-  <title>Sp22Anno 管理后台</title>
+  <title>Sp22Anno Dashboard</title>
 
   <link href="css/bootstrap_5.1.3_.min.css" rel="stylesheet">
 
@@ -28,7 +28,7 @@
     <div class="page-cover" v-if="false">
       <div class="container pt-5 text-center">
         <div class="row">
-          <div><h2>空间关系理解数据标注 2022 后台</h2></div>
+          <div><h2>空间关系理解数据标注 2022 管理面板 (开发中)</h2></div>
         </div>
         <div class="row">
           <div>
@@ -39,9 +39,12 @@
     </div>
 
     <!-- navbar start -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav
+      class="navbar navbar-expand-lg navbar-dark"
+      :class="ctrl.developing ? 'bg-success' : 'bg-dark'"
+    >
       <div class="container">
-        <a class="navbar-brand" href="#">空间关系理解数据标注 2022 后台</a>
+        <a class="navbar-brand" href="#">空间关系理解数据标注 2022 管理面板 (开发中)</a>
       </div>
     </nav>
     <!-- navbar end -->
@@ -86,7 +89,7 @@
               type="button"
               class="btn btn-sm me-2 my-1"
               :class="`btn-outline-dark`"
-              @click="()=>{sync()}"
+              @click="async ()=>{ctrl.started=false; await sync()}"
               title="从服务器更新最新数据，包括 User, Task, Anno 表，以及 Entry 表中的基本信息"
             >刷新全部</button>
             <button
@@ -94,7 +97,7 @@
               __v-show="ctrl.haveCache"
               class="btn btn-sm me-2 my-1"
               :class="`btn-outline-dark`"
-              @click="()=>{loadCacheDB()}"
+              @click="async ()=>{ctrl.started=false; await loadCacheDB()}"
               title="加载缓存数据"
             >加载缓存</button>
             <span class="text-danger" v-show="workerState.working">辅助线程工作中，请稍等！！！</span>
@@ -104,29 +107,29 @@
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': theDB.entries?.length, 'btn-outline-secondary': !theDB.entries?.length}"
-              @click="()=>{syncEntryInfo()}"
+              :class="{'btn-outline-success': spDB.entries?.length, 'btn-outline-secondary': !spDB.entries?.length}"
+              @click="async ()=>{ctrl.started=false; await syncEntryInfo()}"
               title="从服务器更新 Entry 表 (仅基本信息，不含文本内容)"
             >刷新 Entry 表 (仅基本信息，不含文本内容)</button>
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': theDB.tasks?.length, 'btn-outline-secondary': !theDB.tasks?.length}"
-              @click="()=>{syncTask()}"
+              :class="{'btn-outline-success': spDB.tasks?.length, 'btn-outline-secondary': !spDB.tasks?.length}"
+              @click="async ()=>{ctrl.started=false; await syncTask()}"
               title="从服务器更新 Task 表"
             >刷新 Task 表</button>
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': theDB.annos?.length, 'btn-outline-secondary': !theDB.annos?.length}"
-              @click="()=>{syncAnno()}"
+              :class="{'btn-outline-success': spDB.annos?.length, 'btn-outline-secondary': !spDB.annos?.length}"
+              @click="async ()=>{ctrl.started=false; await syncAnno()}"
               title="从服务器更新 Anno 表"
             >刷新 Anno 表</button>
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': theDB.users?.length, 'btn-outline-secondary': !theDB.users?.length}"
-              @click="()=>{syncUser()}"
+              :class="{'btn-outline-success': spDB.users?.length, 'btn-outline-secondary': !spDB.users?.length}"
+              @click="async ()=>{ctrl.started=false; await syncUser()}"
               title="从服务器更新 User 表"
             >刷新 User 表</button>
           </div>
@@ -134,13 +137,13 @@
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': theDB.entries?.[0]?.content?.material?.tokenList?.length, 'btn-outline-secondary': !theDB.entries?.[0]?.content?.material?.tokenList?.length}"
+              :class="{'btn-outline-success': spDB.entries?.[0]?.content?.material?.tokenList?.length, 'btn-outline-secondary': !spDB.entries?.[0]?.content?.material?.tokenList?.length}"
               @click="modalBox_open('upload-entries')"
               title="因网络传输不太稳定，而语料库较大，故请从本地选择语料库文件进行加载"
             >导入 Entry 表（完整)</button>
             <button
               type="button"
-              v-if="theDB.entries?.[0]?.content?.material?.tokenList?.length"
+              v-if="spDB.entries?.[0]?.content?.material?.tokenList?.length"
               class="btn btn-sm me-2 my-1"
               :class="'btn-outline-primary'"
               @click="makeAnnoOnTexts"
@@ -153,7 +156,32 @@
             <div>上次刷新 User 表的时间是 {{ctrl.lastTimeDict?.users}} 。</div>
             <div>上次刷新 Task 表的时间是 {{ctrl.lastTimeDict?.tasks}} 。</div>
             <div>上次刷新 Anno 表的时间是 {{ctrl.lastTimeDict?.annos}} 。</div>
+            <div>
+              <span>数据状态：</span>
+              <span title="entries">{{spDB.entries.length ? '🟢' : '🔴'}}</span>
+              <span title="entriesExtended">{{spDB.state?.entriesExtended ? '🟢' : '🔴'}}</span>
+              <span title="entryDictBuilt">{{spDB.state?.entryDictBuilt ? '🟢' : '🔴'}}</span>
+              <span title="users">{{spDB.users.length ? '🟢' : '🔴'}}</span>
+              <span title="usersExtended">{{spDB.state?.usersExtended ? '🟢' : '🔴'}}</span>
+              <span title="userDictBuilt">{{spDB.state?.userDictBuilt ? '🟢' : '🔴'}}</span>
+              <span title="tasks">{{spDB.tasks.length ? '🟢' : '🔴'}}</span>
+              <span title="tasksExtended">{{spDB.state?.tasksExtended ? '🟢' : '🔴'}}</span>
+              <span title="taskDictBuilt">{{spDB.state?.taskDictBuilt ? '🟢' : '🔴'}}</span>
+              <span title="annos">{{spDB.annos.length ? '🟢' : '🔴'}}</span>
+              <span title="annosExtended">{{spDB.state?.annosExtended ? '🟢' : '🔴'}}</span>
+              <span title="annoDictBuilt">{{spDB.state?.annoDictBuilt ? '🟢' : '🔴'}}</span>
+            </div>
+            <div>
+              <button
+                v-if="(!spDB.completelyExtended || !spDB.allDictsBuilt) && spDB.isNotEmpty"
+                type="button"
+                class="btn btn-sm me-2 my-1 btn-outline-dark"
+                @click="async()=>{ctrl.started=false; await spDB.fix(); await saveDB();}"
+                title="数据补全(可能卡顿，请耐心等待)"
+              >数据补全 (可能卡顿，请耐心等待)</button>
+            </div>
           </div>
+
           <div class="col col-12">
             <button
               type="button"
@@ -171,6 +199,7 @@
           </div>
           <div class="col col-12">
             <button
+              v-if="spDB.completelyExtended && spDB.allDictsBuilt && spDB.isNotEmpty"
               type="button"
               class="btn btn-sm me-2 my-1"
               :class="`btn-info`"
@@ -200,26 +229,11 @@
           <div class="col">
             <ul class="nav nav-tabs">
               <li class="nav-item">
-                <a class="nav-link" :class="ctrl.tab == TABS.overview ? 'active' : ''" href="#" @click="goTab('overview')">总体进度</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" :class="ctrl.tab == TABS.entryAndTask ? 'active' : ''" href="#" @click="goTab('entryAndTask')">标注详情</a>
-              </li>
-              <li class="nav-item">
                 <a class="nav-link" :class="ctrl.tab == TABS.userProgress ? 'active' : ''" href="#" @click="goTab('userProgress')">用户进度</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" :class="ctrl.tab == TABS.functions ? 'active' : ''" href="#" @click="goTab('functions')">更多功能</a>
               </li>
-              <!-- <li class="nav-item">
-                <a class="nav-link" :class="ctrl.tab == TABS.memos ? 'active' : ''" href="#" @click="goTab('memos')">留言板</a>
-              </li> -->
-              <!-- <li class="nav-item">
-                <a class="nav-link" :class="ctrl.tab == TABS.todos ? 'active' : ''" href="#" @click="goTab('todos')">任务板</a>
-              </li> -->
-              <!-- <li class="nav-item">
-                <a class="nav-link" :class="ctrl.tab == TABS.userInfo ? 'active' : ''" href="#" @click="goTab('userInfo')">用户信息</a>
-              </li> -->
               <li class="nav-item">
                 <a class="nav-link" :class="ctrl.tab == TABS.taskAssign ? 'active' : ''" href="#" @click="goTab('taskAssign')">分配任务</a>
               </li>
@@ -227,248 +241,9 @@
           </div>
         </div>
 
-        <!-- <div class="row align-items-center my-2" v-if="ctrl.tab == TABS.todos">
-          <div class="col col-12">
-          </div>
-        </div> -->
 
 
-
-
-
-        <div class="row align-items-center my-2" v-if="ctrl.tab == TABS.overview">
-          <div class="col col-12">
-            <div>语料总量：一共有多少，其中删除的一共有多少。</div>
-            <div>纯原句多少，替换句多少，替换句对多少。任务是否已设置。</div>
-            <div>总体情况：</div>
-            <ul>
-              <li :title="`${tasks_computed.total.total_num} - ${tasks_computed.total.deleted_num}`">总任务量：{{ tasks_computed.total.total_num - tasks_computed.total.deleted_num }}</li>
-              <li>已分配量：{{ tasks_computed.total.assigned_num }}</li>
-              <li>非足量提交：{{ tasks_computed.total.working_num }}</li>
-              <li>已足量提交：{{ tasks_computed.total.done_num }}</li>
-            </ul>
-          </div>
-
-          <div class="col col-12">
-            <div>各批次情况：</div>
-            <ul>
-              <li v-for="pair in tasks_computed.by_batchName">
-                <span>{{pair[0]}}</span><span>：</span>
-                <ul>
-                  <li :title="`${pair[1]?.total_num} - ${pair[1]?.deleted_num}`">总量：{{pair[1]?.total_num - pair[1]?.deleted_num}}</li>
-                  <li>已分配：{{pair[1]?.assigned_num}}</li>
-                  <li>非足量提交：{{pair[1]?.working_num}}</li>
-                  <li>已足量提交：{{pair[1]?.done_num}}</li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-
-          <div class="col col-12">
-            <div>各标签数量：</div>
-            <ul>
-              <li v-for="kkvv in Object.entries(theDB.labelAnnoDict)">
-                <span>{{kkvv[0]}}</span><span>：</span><span>{{kkvv[1].length}}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-
-
-        <div class="row align-items-center my-2" v-if="ctrl.tab == TABS.entryAndTask">
-          <div class="col col-12">
-            <h4>检索</h4>
-          </div>
-          <div class="col col-12">
-            <p>说明：id 都是整数， id 与 id 之间用任意非数字字符（如逗号或空格）隔开</p>
-          </div>
-          <div class="col col-12 col-sm-6 col-md-3">
-            <label class="form-label">要检索哪些 entry.id</label>
-            <input
-             class="form-control form-control-sm"
-             type="text"
-             v-model="ctrl.entryIdBoxText"
-            >
-          </div>
-          <div class="col col-12 col-sm-6 col-md-3">
-            <label class="form-label">要检索哪些 task.id</label>
-            <input
-             class="form-control form-control-sm"
-             type="text"
-             v-model="ctrl.taskIdBoxText"
-            >
-          </div>
-          <div class="col col-12 col-sm-6 col-md-3">
-            <label class="form-label">要检索哪些 anno.id</label>
-            <input
-             class="form-control form-control-sm"
-             type="text"
-             v-model="ctrl.annoIdBoxText"
-            >
-          </div>
-          <div class="col col-12 col-sm-6 col-md-3">
-            <label class="form-label">要检索哪些 user.id</label>
-            <input
-             class="form-control form-control-sm"
-             type="text"
-             v-model="ctrl.userIdBoxText"
-            >
-          </div>
-          <div class="col col-12 col-sm-6 col-md-3">
-            <button
-              type="button"
-              class="btn btn-sm btn-primary my-1 me-2"
-              @click="search"
-            >检索</button>
-          </div>
-        </div>
-        <div class="row align-items-center my-2" v-if="ctrl.tab == TABS.entryAndTask">
-          <div class="col col-12">
-            <h4>检索结果</h4>
-          </div>
-
-          <div class="col col-12" v-if="ctrl.entryIdBoxList?.length">
-            <div
-              class="form-control form-control-sm overflow-auto my-2"
-            >
-              <h5>entries</h5>
-              <div class="form-control form-control-sm overflow-auto max-vh-40">
-                <template v-for="entry_id in ctrl.entryIdBoxList">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-light my-1 me-2"
-                    @click="modalBox_open('entry-detail', theDB.entryDict[entry_id])"
-                  >entry#{{entry_id}}</button>
-                </template>
-              </div>
-            </div>
-          </div>
-
-          <div class="col col-12" v-if="ctrl.taskIdBoxList?.length">
-            <div
-              class="form-control form-control-sm overflow-auto my-2"
-            >
-              <h5>tasks</h5>
-              <div class="form-control form-control-sm overflow-auto max-vh-40">
-                <template v-for="task_id in ctrl.taskIdBoxList">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-light my-1 me-2"
-                    @click="modalBox_open('task-detail', theDB.taskDict[task_id])"
-                  >task#{{task_id}}</button>
-                </template>
-              </div>
-            </div>
-          </div>
-
-          <div class="col col-12" v-if="ctrl.annoIdBoxList?.length">
-            <div
-              class="form-control form-control-sm overflow-auto my-2"
-            >
-              <h5>annos</h5>
-              <div class="form-control form-control-sm overflow-auto max-vh-40">
-                <template v-for="anno_id in ctrl.annoIdBoxList">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-light my-1 me-2"
-                    @click="modalBox_open('anno-detail', theDB.annoDict[anno_id])"
-                  >anno#{{anno_id}}</button>
-                </template>
-              </div>
-            </div>
-          </div>
-
-          <div class="col col-12" v-if="ctrl.userIdBoxList?.length">
-            <div
-              class="form-control form-control-sm overflow-auto my-2"
-            >
-              <h5>users</h5>
-              <div class="form-control form-control-sm overflow-auto max-vh-40">
-                <template v-for="user_id in ctrl.userIdBoxList">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-light my-1 me-2"
-                    @click="modalBox_open('user-progress', theDB.userDict[user_id])"
-                  >user#{{user_id}}</button>
-                </template>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-
-
-
-
-        <div class="row align-items-center my-4" v-if="ctrl.tab == TABS.entryAndTask">
-          <div class="col col-12">
-            <h4>质检题情况</h4>
-
-              <div
-                class="form-control form-control-sm overflow-auto my-2"
-                v-for="kkvv in Object.entries( lo.groupBy( theDB.tasks.filter(task=>task.polygraph&&task.submitters?.length), 'polygraph' ) )"
-              >
-                <h5>{{kkvv[0]}}</h5>
-                <div class="form-control form-control-sm overflow-auto max-vh-40">
-                  <template v-for="task in kkvv[1]">
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-light my-1 me-2"
-                      @click="modalBox_open('task-detail', task)"
-                    >task#{{task?.id}}</button>
-                  </template>
-                </div>
-              </div>
-
-          </div>
-        </div>
-
-        <div class="row align-items-center my-2" v-if="ctrl.tab == TABS.entryAndTask">
-          <div class="col col-12">
-            <h4>按标签分组</h4>
-
-              <div
-                class="form-control form-control-sm overflow-auto my-2"
-                v-for="kkvv in Object.entries(theDB.labelAnnoDict)"
-              >
-                <h5>{{kkvv[0]}}</h5>
-                <div class="form-control form-control-sm overflow-auto max-vh-40">
-                  <template v-for="anno_id in kkvv[1]" :key="`anno_id`">
-                    <!-- <anno-card
-                      v-for="anno in [theDB.annoDict[anno_id]]"
-                      :anno="anno"
-                      :db="theDB"
-                      :key="anno.id"
-                      @submit-review="(value)=>{saveAnnoReview(...value)}"
-                      @open-modal="(value)=>{modalBox_open(...value)}"
-                      @update-anno="(value)=>{updateOneAnno(value)}"
-                    ></anno-card> -->
-                    <button
-                      v-for="anno in [theDB.annoDict[anno_id]]"
-                      type="button"
-                      class="btn btn-sm btn-light my-1 me-2"
-                      @click="modalBox_open('anno-detail', anno)"
-                    >anno#{{anno?.id}}-{{theDB.userDict[anno?.user]?.name}}</button>
-                  </template>
-                </div>
-              </div>
-
-          </div>
-        </div>
-
-
-
-
-
-
-
-
-
-
-
-        <div class="row align-items-center my-2" v-if="ctrl.tab == TABS.taskAssign">
+        <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.taskAssign">
           <div class="col col-12">
             <div>说明：分配任务前，请先：1、在后端构建任务；2、刷新Task表；3、刷新Entry表。</div>
           </div>
@@ -545,7 +320,7 @@
               class="form-control form-control-sm overflow-auto max-vh-40"
             >
               <button
-                v-for="user in theDB.users"
+                v-for="user in spDB.users"
                 type="button"
                 class="btn btn-sm me-2 my-1"
                 :class="assignData.assignUserBoxDict[user.id] ? `btn-primary` : `btn-outline-secondary`"
@@ -563,7 +338,7 @@
 
 
 
-        <div class="row align-items-center my-2" v-if="ctrl.tab == TABS.taskAssign">
+        <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.taskAssign">
           <div class="col col-12">
             <button
               type="button"
@@ -588,7 +363,7 @@
               <ul class="list-group max-vh-40 overflow-auto border border-1">
                 <li class="list-group-item" v-for="pair in assignData.planPerUser">
                   <div>
-                    <span>{{ `#${pair[0]} ${theDB.userDict[pair[0]]?.name}` }}</span> 分配到的 {{pair[1]?.length}} 条任务是：
+                    <span>{{ `#${pair[0]} ${spDB.user(pair[0])?.name}` }}</span> 分配到的 {{pair[1]?.length}} 条任务是：
                   </div>
                   <div>
                     <button
@@ -612,14 +387,14 @@
                     <!-- <br v-if="item.new_to?.length"/> -->
                     <span v-if="item.new_to?.length">
                       分配给：
-                      <span class="me-2 text-success __fw-bold" v-for="guy in item.new_guys">#{{guy}} {{theDB.userDict[guy]?.name}}</span>
-                      <span class="me-2" v-for="guy in item.solid_guys">#{{guy}} {{theDB.userDict[guy]?.name}}</span>
+                      <span class="me-2 text-success __fw-bold" v-for="guy in item.new_guys">#{{guy}} {{spDB.user(guy)?.name}}</span>
+                      <span class="me-2" v-for="guy in item.solid_guys">#{{guy}} {{spDB.user(guy)?.name}}</span>
                       。
                     </span>
                     <!-- <br v-if="item.canceled_guys?.length"/> -->
                     <span v-if="item.canceled_guys?.length" class="text-muted">
                       不再分配给：
-                      <s class="me-2" v-for="guy in item.canceled_guys">#{{guy}} {{theDB.userDict[guy]?.name}}</s>
+                      <s class="me-2" v-for="guy in item.canceled_guys">#{{guy}} {{spDB.user(guy)?.name}}</s>
                       。
                     </span>
                   </div>
@@ -663,73 +438,33 @@
         </div>
 
 
+        <user-list-control
+          v-show="ctrl.tab == TABS.userProgress"
+          :db="spDB"
+          :settings="ctrl"
+          :managers="spDB.users.filter(user=>user.role?.includes?.('manager'))"
+        >
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-dark my-1 me-2"
+            @click="modalBox_open('user-importer')"
+            title="新增用户"
+          >新增用户</button>
+        </user-list-control>
 
-        <div class="row align-items-center my-2" v-if="ctrl.tab == TABS.userProgress">
+
+        <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.userProgress">
           <div class="col col-12 my-2">
-            <div>
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-dark my-1 me-2"
-                @click="modalBox_open('user-importer')"
-                title="新增用户"
-              >新增用户</button>
-              <button
-                type="button"
-                class="btn btn-sm my-1 me-2"
-                :class="ctrl.showOnlyMyMembers ? 'btn-primary' : 'btn-outline-primary'"
-                @click="ctrl.showOnlyMyMembers = !ctrl.showOnlyMyMembers"
-              >只显示我管理的人员</button>
-              <button
-                type="button"
-                class="btn btn-sm btn-light my-1 me-2"
-                @click="()=>{theDB.users.sort((a,b)=>+a.id-b.id);}"
-              >序号 升序</button>
-              <button
-                type="button"
-                class="btn btn-sm btn-light my-1 me-2"
-                @click="()=>{theDB.users.sort((a,b)=>+userProgress(a).ratio-userProgress(b).ratio);}"
-              >进度 升序</button>
-              <button
-                type="button"
-                class="btn btn-sm btn-light my-1 me-2"
-                @click="()=>{theDB.users.sort((b,a)=>+userProgress(a).ratio-userProgress(b).ratio);}"
-              >进度 降序</button>
-              <button
-                type="button"
-                class="btn btn-sm btn-light my-1 me-2"
-                @click="()=>{theDB.users.sort((a,b)=>+userProgress(a).cDoneLen-userProgress(b).cDoneLen);}"
-              >总完成量 升序</button>
-              <button
-                type="button"
-                class="btn btn-sm btn-light my-1 me-2"
-                @click="()=>{theDB.users.sort((b,a)=>+userProgress(a).cDoneLen-userProgress(b).cDoneLen);}"
-              >总完成量 降序</button>
-              <button
-                type="button"
-                class="btn btn-sm btn-light my-1 me-2"
-                @click="()=>{theDB.users.sort((a,b)=>sortFnByPassRatio(a,b))}"
-              >审核通过率 升序</button>
-              <button
-                type="button"
-                class="btn btn-sm btn-light my-1 me-2"
-                @click="()=>{theDB.users.sort((a,b)=>sortFnByPassRatioR(a,b))}"
-              >审核通过率 降序</button>
-            </div>
+            <div>已审核 {{spDB?.annos?.filter?.(it=>it?.content?.review)?.length}} / {{spDB?.annos?.length}}</div>
           </div>
         </div>
 
-        <div class="row align-items-center my-2" v-if="ctrl.tab == TABS.userProgress">
-          <div class="col col-12 my-2">
-            <div>已审核 {{theDB?.annos?.filter?.(it=>it?.content?.review)?.length}} / {{theDB?.annos?.length}}</div>
-          </div>
-        </div>
-
-        <div class="row align-items-center my-2" v-if="ctrl.tab == TABS.userProgress">
+        <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.userProgress">
           <div class="container my-2">
             <div
               class="row align-items-center my-1 border rounded p-2"
               v-show="ctrl.currentUser?.id==user.manager||!ctrl.showOnlyMyMembers"
-              v-for="user in theDB.users"
+              v-for="user in spDB.users"
               :key="user.id"
             >
               <div class="col col-12 col-md-6 col-lg-4 mb-1">
@@ -740,10 +475,10 @@
               <!-- </div>
               <div class="col col-12 col-sm-6 col-md-3 my-2"> -->
                 <span class="badge bg-light text-dark me-1" :title="组别">{{user.currTaskGroup}}</span>
-                <span class="badge bg-light text-dark me-1" v-if="user.manager" :title="`组长：${theDB.userDict[user.manager]?.name}`">{{theDB.userDict[user.manager]?.name}}</span>
+                <span class="badge bg-light text-dark me-1" v-if="user.manager" :title="`组长：${spDB.user(user.manager)?.name}`">{{spDB.user(user.manager)?.name}}</span>
               <!-- </div>
               <div class="col col-12 col-sm-6 col-md-3 my-2"> -->
-                <span class="badge bg-light text-dark me-1" :title="当前任务">{{user.currBatchName??topic_regulation(user.currTask)}}</span>
+                <span class="badge bg-light text-dark me-1" :title="当前任务">{{user.currBatchName??Sp22FN.topic_regulation(user.currTask)}}</span>
                 <span class="badge bg-light text-dark me-1">已标总量：{{user.allAnnos?.length}}</span>
                 <template v-for="sum in [inspectionSum(user)]"><span
                   class="badge me-1"
@@ -760,7 +495,7 @@
                     :aria-valuenow="userProgress(user).mn"
                     :aria-valuemax="userProgress(user).bg"
                     aria-valuemin="0"
-                  >当前任务进度　{{ userCurrDoneTasks(user).length }}/{{ userCurrTasks(user).length }}</div>
+                  >当前任务进度　{{ userProgress(user).cDoneLen }}/{{ userProgress(user).cDueLen }}</div>
                 </div>
               </div>
               <div class="col col-12 col-md-12 col-lg-2 mt-1">
@@ -808,7 +543,7 @@
                 <div class="col-12">
                   <entry-card
                     :entry="entry"
-                    :db="theDB"
+                    :db="dbBasic"
                     @open-modal="(value)=>{modalBox_open(...value)}"
                     @update-entry="(value)=>{updateOneEntry(value)}"
                   ></entry-card>
@@ -841,11 +576,11 @@
                 </div>
 
                 <div class="col-12" v-for="anno_id in entry.allAnnos">
-                  <div class="card my-1" v-for="anno in [theDB.annoDict[anno_id]]" :key="anno.id">
+                  <div class="card my-1" v-for="anno in [spDB.anno(anno_id)]" :key="anno.id">
                     <div class="col-12">
                       <anno-card
                         :anno="anno"
-                        :db="theDB"
+                        :db="dbBasic"
                         @submit-review="(value)=>{saveAnnoReview(...value)}"
                         @open-modal="(value)=>{modalBox_open(...value)}"
                         @update-anno="(value)=>{updateOneAnno(value)}"
@@ -859,18 +594,10 @@
                 </div>
 
                 <div class="col-12" v-for="task_id in entry.allTasks">
-                  <!-- <template v-for="task in [theDB.taskDict[task_id]]">
-                    <button
-                      type="button"
-                      class="btn btn-sm my-1 me-2"
-                      :class="task.deleted ? 'btn-danger' : 'btn-outline-dark'"
-                      @click="modalBox_open('task-detail', task)"
-                    >task-{{task?.topic}}-#{{task?.id}}</button><span v-if="task.batchName">批次：{{task.batchName}}</span>
-                  </template> -->
                   <task-card
-                    v-for="task in [theDB.taskDict[task_id]]"
+                    v-for="task in [spDB.task(task_id)]"
                     :task="task"
-                    :db="theDB"
+                    :db="dbBasic"
                     @open-modal="(value)=>{modalBox_open(...value)}"
                   ></task-card>
                 </div>
@@ -893,10 +620,10 @@
                   <h4>标注详情</h4>
                 </div>
 
-                <div class="col-12" v-for="entry in [theDB.entryDict[anno.entry]]">
+                <div class="col-12" v-for="entry in [spDB.entry(anno.entry)]">
                   <entry-card
                     :entry="entry"
-                    :db="theDB"
+                    :db="dbBasic"
                     @open-modal="(value)=>{modalBox_open(...value)}"
                     @update-entry="(value)=>{updateOneEntry(value)}"
                   ></entry-card>
@@ -906,7 +633,7 @@
                   <button
                     type="button"
                     class="btn btn-sm btn-outline-dark my-1 me-2"
-                  >anno-{{anno?.topic}}-#{{anno?.id}}-{{theDB.userDict[anno?.user]?.name}}</button>
+                  >anno-{{anno?.topic}}-#{{anno?.id}}-{{spDB.user(anno?.user)?.name}}</button>
                   <div v-for="annot in anno.content?.annotations??[]">
                     <span class="badge bg-light text-dark text-wrap my-1 me-2">{{annot}}</span>
                   </div>
@@ -921,13 +648,13 @@
                     <span>累计时长跨度：</span><span class="badge bg-light text-dark text-wrap my-1 me-2">{{anno?._timeInfo?.stride/1000}}s</span>
                   </div>
                   <task-card
-                    v-for="task in [theDB.taskDict[anno.task]]"
+                    v-for="task in [spDB.task(anno.task)]"
                     :task="task"
-                    :db="theDB"
+                    :db="dbBasic"
                     @open-modal="(value)=>{modalBox_open(...value)}"
                   ></task-card>
                   <button
-                    v-for="user in [theDB.userDict[anno.user]]"
+                    v-for="user in [spDB.user(anno.user)]"
                     type="button"
                     class="btn btn-sm btn-outline-dark my-1 me-2"
                     @click="modalBox_open('user-progress', user)"
@@ -963,10 +690,10 @@
                   </div>
                 </div>
 
-                <div class="col-12" v-for="entry in [theDB.entryDict[task.entry]]">
+                <div class="col-12" v-for="entry in [spDB.entry(task.entry)]">
                   <entry-card
                     :entry="entry"
-                    :db="theDB"
+                    :db="dbBasic"
                     @open-modal="(value)=>{modalBox_open(...value)}"
                     @update-entry="(value)=>{updateOneEntry(value)}"
                   ></entry-card>
@@ -975,11 +702,11 @@
                 <div class="col-12">
                   <h5>已提交的标注（{{task.submitters?.length}}）</h5>
                   <div class="card my-1" v-for="user_id in task.submitters">
-                    <div class="col-12" v-for="anno_id in [theDB.inf_user_task_anno[`${user_id}/${task.id}`]]">
+                    <div class="col-12" v-for="anno_id in [spDB.getAnnoByUserAndTask(user_id, task.id)]">
                       <!-- <anno-card
-                        v-for="anno in [theDB.annoDict[anno_id]]"
+                        v-for="anno in [spDB.anno(anno_id)]"
                         :anno="anno"
-                        :db="theDB"
+                        :db="dbBasic"
                         :key="anno.id"
                         @submit-review="(value)=>{saveAnnoReview(...value)}"
                         @open-modal="(value)=>{modalBox_open(...value)}"
@@ -993,7 +720,7 @@
                   <h5>分配给{{task.to?.length}}人</h5>
                   <template v-for="user_id in task.to">
                     <button
-                      v-for="user in [theDB.userDict[user_id]]"
+                      v-for="user in [spDB.user(user_id)]"
                       type="button"
                       class="btn btn-sm btn-outline-dark my-1 me-2"
                       @click="modalBox_open('user-progress', user)"
@@ -1014,7 +741,7 @@
             v-if="MODAL_THEMES[modalBox.data.theme] == MODAL_THEMES['user-editor']"
           >
             <user-editor
-              :db="theDB"
+              :db="dbBasic"
               :box="modalBox"
               :user="modalBox.data?.kwargs"
               @check-error-on-save="alertBox.pushAlert('存在错误，请检查！', 'warning')"
@@ -1027,7 +754,7 @@
             v-if="MODAL_THEMES[modalBox.data.theme] == MODAL_THEMES['user-importer']"
           >
             <user-importer
-              :db="theDB"
+              :db="dbBasic"
               :box="modalBox"
               @check-error-on-save="(value)=>{alertBox.pushAlert('存在错误，请检查！', 'warning', null, value)}"
               @save="async(value)=>{let messages = await makeNewUsers(value); let resultText='执行结果：\n'+messages.join('\n'); modalBox_open('confirm', {desc: resultText, action: ()=>{}, closetext: '关闭', confirmtext: '知道了'} );}"
@@ -1056,8 +783,8 @@
                 <div class="col-12">
                   <p>编号：{{user.id}}</p>
                   <p>分组：{{user.currTaskGroup}}</p>
-                  <p>组长：{{theDB.userDict[user.manager]?.name}}</p>
-                  <p>当前任务类型：{{topic_regulation(user.currTask)}}</p>
+                  <p>组长：{{spDB.user(user.manager)?.name}}</p>
+                  <p>当前任务类型：{{Sp22FN.topic_regulation(user.currTask)}}</p>
                   <p>机构缩写：{{user?.info?.inst_abbr}}</p>
                   <p>机构：{{user?.info?.institution}}</p>
                   <p>电话：{{user?.info?.phone}}</p>
@@ -1149,7 +876,7 @@
                         :aria-valuenow="userProgress(user).mn"
                         :aria-valuemax="userProgress(user).bg"
                         aria-valuemin="0"
-                      >{{ userCurrDoneTasks(user).length }}/{{ userCurrTasks(user).length }}</div>
+                      >{{ userProgress(user).cDoneLen }}/{{ userProgress(user).cDueLen }}</div>
                     </div>
                   </div>
                   <div class="col-12">
@@ -1159,7 +886,7 @@
                        class="form-select form-select-sm"
                        v-model="ctrl.userAnnoFilter.topic"
                       >
-                        <option v-for="topic in theDB.topics" :value="topic">{{topic}}</option>
+                        <option v-for="topic in spDB.topics()" :value="topic">{{topic}}</option>
                         <option value="【empty】">【empty】</option>
                         <option value="【all】">【all】</option>
                       </select>
@@ -1168,7 +895,7 @@
                        class="form-select form-select-sm"
                        v-model="ctrl.userAnnoFilter.batchName"
                       >
-                        <option v-for="batchName in theDB.batchNames" :value="batchName">{{batchName}}</option>
+                        <option v-for="batchName in spDB.batchNames()" :value="batchName">{{batchName}}</option>
                         <option value="【empty】">【empty】</option>
                         <option value="【all】">【all】</option>
                       </select>
@@ -1183,23 +910,23 @@
               <div
                 class="row align-items-center my-3 border border-secondary border-2 rounded"
                 v-for="anno in userAnnos.list"
-                __v-for="anno in lo.sortBy(user.allAnnos.map(it=>theDB.annoDict[it]), [annoSortFn, it=>(-it.batch)])"
+                __v-for="anno in lo.sortBy(user.allAnnos.map(it=>spDB.anno(it)), [annoSortFn, it=>(-it.batch)])"
                 :key="anno.id"
                 v-show="[anno.topic, '【all】'].includes(ctrl.userAnnoFilter.topic)&&[anno.batchName??'【empty】', '【all】'].includes(ctrl.userAnnoFilter.batchName??'【empty】')">
 
                 <div class="col-12">
                   <task-card
-                    v-for="task in [theDB.taskDict[anno.task]]"
+                    v-for="task in [spDB.task(anno.task)]"
                     :task="task"
-                    :db="theDB"
+                    :db="dbBasic"
                     @open-modal="(value)=>{modalBox_open(...value)}"
                   ></task-card>
                 </div>
 
-                <div class="col-12" v-for="entry in [theDB.entryDict[anno.entry]]">
+                <div class="col-12" v-for="entry in [spDB.entry(anno.entry)]">
                   <entry-card
                     :entry="entry"
-                    :db="theDB"
+                    :db="dbBasic"
                     @open-modal="(value)=>{modalBox_open(...value)}"
                     @update-entry="(value)=>{updateOneEntry(value)}"
                   ></entry-card>
@@ -1208,7 +935,7 @@
                 <div class="col-12">
                   <anno-card
                     :anno="anno"
-                    :db="theDB"
+                    :db="dbBasic"
                     @submit-review="(value)=>{saveAnnoReview(...value)}"
                     @open-modal="(value)=>{modalBox_open(...value)}"
                     @update-anno="(value)=>{updateOneAnno(value)}"
@@ -1304,7 +1031,7 @@
   </div>
   <!-- bodywrap end -->
 
-  <script type="module" src="js/manage.mjs.js"></script>
+  <script type="module" src="js/master.mjs.js"></script>
 </body>
 
 </html>
