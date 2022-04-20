@@ -505,7 +505,7 @@ class Sp22FN {
     };
 
     let pairs = _lo.toPairs(dict);
-    let newPairs = [];
+    let singleReports = [];
     for (let [user_id, list] of pairs) {
       let report = {};
       report.summary = _lo.countBy(list, it=>it);
@@ -515,18 +515,18 @@ class Sp22FN {
       report.user_id = user_id;
       report.user_name = sp22db?.userDict?.[user_id]?.name;
       report.ratio = report.summary.trueRatio;
-      newPairs.push([user_id, report]);
+      singleReports.push(report);
     };
-    // let results = _lo.fromPairs(newPairs);
-    let results = _lo.sortBy(newPairs, it=>-it[1].ratio);
+    // let results = _lo.fromPairs(singleReports);
+    let results = _lo.sortBy(singleReports, it=>-it.ratio);
 
     let report = {};
-    report.summary = _lo.countBy(results, it=>it[1].ratio.toFixed(1));
+    report.summary = _lo.countBy(results, it=>it.ratio.toFixed(1));
     report.summary.num = results.length;
-    report.summary.max = _lo.max(_lo.map(results, it=>it[1].ratio));
-    report.summary.min = _lo.min(_lo.map(results, it=>it[1].ratio));
-    report.summary.avg = _lo.sum(_lo.map(results, it=>it[1].ratio)) / report.summary.num;
-    report.summary.mid = results[_lo.round(results.length/2)][1].ratio;
+    report.summary.max = _lo.max(_lo.map(results, it=>it.ratio));
+    report.summary.min = _lo.min(_lo.map(results, it=>it.ratio));
+    report.summary.avg = _lo.sum(_lo.map(results, it=>it.ratio)) / report.summary.num;
+    report.summary.mid = results[_lo.round(results.length/2)].ratio;
     report.details = results;
 
     return report;
