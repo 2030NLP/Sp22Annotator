@@ -382,7 +382,9 @@ class Sp22FN {
   }
 
   static annoLabels(anno, _lo) {
-    return _lo.sortedUniq(anno?.content?.annotations.map(it=>it.label));
+    const result = _lo.sortedUniq(anno?.content?.annotations.map(it=>it.label));
+    // console.log(result);
+    return result;
   }
 
   static annoLabelText(anno, _lo) {
@@ -395,11 +397,11 @@ class Sp22FN {
 
   static 多数标签占比(labels, _lo) {
     let countDict = _lo.countBy(labels, it=>it);
-    // console._log(countDict);
+    // console.log(countDict);
     let vmax = _lo.max(_lo.values(countDict));
     let vsum = _lo.sum(_lo.values(countDict));
     let rr = vmax/vsum;
-    console.log(rr);
+    // console.log(rr);
     return rr;
   }
 
@@ -413,12 +415,17 @@ class Sp22FN {
       .map(aid=>sp22db?.annoDict?.[aid])
       .filter(anno=>anno.task==task.id)
       .value();
-    let labels = 标签函数(annos, _lo);
-    return 一致率计算函数(labels, _lo);
+    let finalLabels = _lo.map(annos, anno=>标签函数(anno, _lo));
+    // console.log(finalLabels);
+    return 一致率计算函数(finalLabels, _lo);
   }
 
   static 一条task1语料的多数标签占比(task, sp22db, _lo) {
     return Sp22FN.一条task的所有答题者的一致率(task, sp22db, Sp22FN.多数标签占比, Sp22FN.annoTask1LabelSideText, _lo);
+  }
+
+  static 一条task1语料的严格的多数标签占比(task, sp22db, _lo) {
+    return Sp22FN.一条task的所有答题者的一致率(task, sp22db, Sp22FN.多数标签占比, Sp22FN.annoLabelText, _lo);
   }
 
   static 两条标注是否一致(a1, a2, 标签函数, 一致性计算函数, _lo) {
