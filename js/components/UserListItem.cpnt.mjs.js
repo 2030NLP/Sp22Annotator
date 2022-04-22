@@ -103,7 +103,7 @@ const UserListItem = {
 
           h("span", {
             'class': "badge bg-light text-dark me-1", 'title': "当前批次的已审量"
-          }, ["已审 ", sum.value.sum]),
+          }, ["已审 ", sum.value?.sum]),
 
         ],),
 
