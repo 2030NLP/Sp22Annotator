@@ -608,7 +608,12 @@
               <ul class="list-group max-vh-40 overflow-auto border border-1">
                 <li class="list-group-item" v-for="item in assignData.analysis">
                   <div>
-                    <span>「{{item?.plan?.topic}} 任务 #{{item.id}}</span><span></span> / <span></span><span>语料 #{{item?.plan?.entry}}」</span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-light my-1 me-2"
+                      @click="modalBox_open('task-detail', theDB.taskDict[item?.plan?.id])"
+                    >task#{{item?.plan?.id}}</button>
+                    <span>「{{item?.plan?.topic}} 任务 #{{item.id}}</span><span> / </span><span>语料 #{{item?.plan?.entry}}」</span>
                     <!-- <br v-if="item.new_to?.length"/> -->
                     <span v-if="item.new_to?.length">
                       分配给：
