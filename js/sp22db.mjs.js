@@ -545,18 +545,14 @@ class Sp22DB {
 
   userCurrTasks(user, batchName) {
     let tt = user.allTasks ?? [];
-    if (batchName!=null) {
-      return this.lo.filter(tt, task_id => this.task(task_id).batchName==batchName);
-    };
-    return tt;
+    if (batchName==null) {batchName=user?.currBatchName};
+    return this.lo.filter(tt, task_id => this.task(task_id).batchName==batchName);
     // return this.lo.filter(tt, task_id => Sp22FN.topic_regulation(this.task(task_id).topic)==Sp22FN.topic_regulation(user.currTask));
   }
   userCurrDoneTasks(user, batchName) {
     let tt = user.doneTasks ?? [];
-    if (batchName!=null) {
-      return this.lo.filter(tt, task_id => this.task(task_id).batchName==batchName);
-    };
-    return tt;
+    if (batchName==null) {batchName=user?.currBatchName};
+    return this.lo.filter(tt, task_id => this.task(task_id).batchName==batchName);
     // return this.lo.filter(tt, task_id => Sp22FN.topic_regulation(this.task(task_id).topic)==Sp22FN.topic_regulation(user.currTask));
   }
   userProgress(user, batchName) {
@@ -622,8 +618,9 @@ class Sp22DB {
 
 
 
-    inspectionSum(user) {
-      let annos = (user?.allAnnos??[]).map(it=>this.anno(it)).filter(it=>it?.batchName==user?.currBatchName);
+    inspectionSum(user, batchName) {
+      if (batchName==null) {batchName=user?.currBatchName};
+      let annos = (user?.allAnnos??[]).map(it=>this.anno(it)).filter(it=>it?.batchName==batchName);
       let sum = this.lo.countBy(annos, anno=>anno?.content?.review?.accept);
       sum.sum = (sum.false??0) + (sum.true??0);
       sum.passRatio = sum.sum==0 ? null : (sum.true??0)/sum.sum;

@@ -36,15 +36,16 @@ const UserListItem = {
     const progressObj = computed(()=>{return userProgress(user, props.batchname);});
     const 当前进度文本 = computed(()=>{return `${progressObj.value.cDoneLen}/${progressObj.value.cDueLen}`;});
 
-    const inspectionSum = theDB.inspectionSum ? ( (user) => { return theDB.inspectionSum(user); }
-    ) : ( (user) => {
-      let annos = (user?.allAnnos??[]).map(it=>theDB.annoDict[it]).filter(it=>it?.props.batchname==user?.currBatchName);
+    const inspectionSum = theDB.inspectionSum ? ( (user, batchName) => { return theDB.inspectionSum(user, batchName); }
+    ) : ( (user, batchName) => {
+      if (batchName==null) {batchName=user?.currBatchName};
+      let annos = (user?.allAnnos??[]).map(it=>theDB.annoDict[it]).filter(it=>it?.props.batchname==batchName);
       let sum = lo.countBy(annos, anno=>anno?.content?.review?.accept);
       sum.sum = (sum.false??0) + (sum.true??0);
       sum.passRatio = sum.sum==0 ? null : (sum.true??0)/sum.sum;
       return sum;
     } );
-    const sum = computed(()=>{return inspectionSum(user);});
+    const sum = computed(()=>{return inspectionSum(user, batchName);});
 
 
 
@@ -80,13 +81,13 @@ const UserListItem = {
             'title': "当前任务",
           }, [theFN.topic_regulation(user.currTask)]),
 
-          // h("span", {
-          //   'class': "badge bg-light text-dark me-1", 'title': "已标总量"
-          // }, ["总 ", user.allAnnos?.length]),
+          h("span", {
+            'class': "badge bg-light text-dark me-1", 'title': "已标总量"
+          }, ["总 ", user.allAnnos?.length]),
 
           h("span", {
             'class': "badge bg-light text-dark me-1", 'title': "此类已标量"
-          }, ["此类 ", 当前进度文本.value]),
+          }, ["此批 ", 当前进度文本.value]),
 
           h("span", {
             'class': [
