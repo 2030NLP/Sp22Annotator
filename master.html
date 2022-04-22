@@ -158,7 +158,7 @@
                 class="btn btn-sm me-2 my-1 btn-outline-primary"
                 @click="async()=>{ctrl.started=false; await spDB.fix(); await saveDB();}"
                 title="数据补全(可能卡顿，请耐心等待)"
-              >数据补全 (可能卡顿，请耐心等待)</button>
+              >数据补全 (请等右下角无正在进行的任务再点此按钮；可能卡顿，请耐心等待)</button>
             </div>
             <div>
               <span>数据状态：</span>
@@ -200,11 +200,11 @@
           <div class="col col-12">
             <button
               v-if="spDB.completelyExtended && spDB.allDictsBuilt && spDB.isNotEmpty"
-              v-show="false"
+              __v-show="false"
               type="button"
               class="btn btn-sm me-2 my-1"
               :class="`btn-info`"
-              @click="async()=>{ctrl.started=true;await getMemoList();}"
+              @click="async()=>{ctrl.started=true;}"
               title="开始工作"
             >开始工作</button>
             <!-- <a
@@ -241,6 +241,18 @@
             </ul>
           </div>
         </div>
+
+
+        <user-list-panel
+          v-show="ctrl.tab == TABS.userProgress"
+          :functions="Sp22FN"
+          :settings="ctrl"
+          :db="spDB"
+          :me="ctrl.currentUser"
+          @click-add-user-btn="modalBox_open('user-importer')"
+          @click-user-detail-btn="(user)=>{modalBox_open('user-detail', user);}"
+          @click-user-progress-btn="(user)=>{sortUserAnnos(user);modalBox_open('user-progress', user);}"
+        ></user-list-panel>
 
 
 
@@ -436,85 +448,6 @@
               <div>异常： {{ assignData.result.strange }}</div>
             </div>
           </template>
-        </div>
-
-
-        <user-list-control
-          v-show="ctrl.tab == TABS.userProgress"
-          :db="spDB"
-          :settings="ctrl"
-          :managers="spDB.users.filter(user=>user.role?.includes?.('manager'))"
-        >
-          <button
-            type="button"
-            class="btn btn-sm btn-outline-dark my-1 me-2"
-            @click="modalBox_open('user-importer')"
-            title="新增用户"
-          >新增用户</button>
-        </user-list-control>
-
-
-        <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.userProgress">
-          <div class="col col-12 my-2">
-            <div>已审核 {{spDB?.annos?.filter?.(it=>it?.content?.review)?.length}} / {{spDB?.annos?.length}}</div>
-          </div>
-        </div>
-
-        <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.userProgress">
-          <div class="container my-2">
-            <div
-              class="row align-items-center my-1 border rounded p-2"
-              v-show="ctrl.currentUser?.id==user.manager||!ctrl.showOnlyMyMembers"
-              v-for="user in spDB.users"
-              :key="user.id"
-            >
-              <div class="col col-12 col-md-6 col-lg-4 mb-1">
-                <span class="__fw-bold fs-6 me-2">{{user.name}}</span>
-                <span class="badge rounded-pill bg-light text-dark me-1">#{{user.id}}</span>
-                <span v-for="role in user.role" class="badge rounded-pill bg-light _border _border-primary text-primary me-1">{{role}}</span>
-                <span v-if="user.quitted" class="badge rounded-pill bg-danger me-1">已退出</span>
-              <!-- </div>
-              <div class="col col-12 col-sm-6 col-md-3 my-2"> -->
-                <span class="badge bg-light text-dark me-1" :title="组别">{{user.currTaskGroup}}</span>
-                <span class="badge bg-light text-dark me-1" v-if="user.manager" :title="`组长：${spDB.user(user.manager)?.name}`">{{spDB.user(user.manager)?.name}}</span>
-              <!-- </div>
-              <div class="col col-12 col-sm-6 col-md-3 my-2"> -->
-                <span class="badge bg-light text-dark me-1" :title="当前任务">{{user.currBatchName??Sp22FN.topic_regulation(user.currTask)}}</span>
-                <span class="badge bg-light text-dark me-1">已标总量：{{user.allAnnos?.length}}</span>
-                <template v-for="sum in [inspectionSum(user)]"><span
-                  class="badge me-1"
-                  :class="sum?.passRatio>=0.9 ? 'bg-success text-light' : sum?.passRatio>=0.8 ? 'bg-light text-success border border-1 border-success' : sum?.passRatio==null ? 'bg-light text-dark' : sum?.passRatio<=0.6 ? 'bg-danger text-light' : 'bg-light text-danger border border-1 border-danger'"
-                >审核通过率：{{sum?.passRatio?.toFixed?.(3)??'null'}}</span>
-                <span class="badge bg-light text-dark me-1">已审：{{inspectionSum(user)?.sum}}</span></template>
-              </div>
-              <div class="col col-12 col-md-6 col-lg-6 my-1">
-                <div class="progress" :class="{'bg-success bg-opacity-25': userProgress(user).done}" title="当前任务进度">
-                  <div
-                    class="progress-bar bg-success"
-                    role="progressbar"
-                    :style="`width: ${userProgress(user).pct};`"
-                    :aria-valuenow="userProgress(user).mn"
-                    :aria-valuemax="userProgress(user).bg"
-                    aria-valuemin="0"
-                  >当前任务进度　{{ userProgress(user).cDoneLen }}/{{ userProgress(user).cDueLen }}</div>
-                </div>
-              </div>
-              <div class="col col-12 col-md-12 col-lg-2 mt-1">
-                <button
-                  type="button"
-                  class="btn btn-sm me-2 my-1 btn-light"
-                  :title="`查看 ${user.name} 所标注的具体情况`"
-                  @click="()=>{sortUserAnnos(user);modalBox_open('user-progress', user);}"
-                >标注详情</button>
-                <button
-                  type="button"
-                  class="btn btn-sm me-2 my-1 btn-light"
-                  :title="`查看更多关于 ${user.name} 的信息`"
-                  @click="modalBox_open('user-detail', user)"
-                >更多</button>
-              </div>
-            </div>
-          </div>
         </div>
 
       </div>

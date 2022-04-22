@@ -744,12 +744,13 @@
               <!-- </div>
               <div class="col col-12 col-sm-6 col-md-3 my-2"> -->
                 <span class="badge bg-light text-dark me-1" :title="当前任务">{{user.currBatchName??topic_regulation(user.currTask)}}</span>
-                <span class="badge bg-light text-dark me-1">已标总量：{{user.allAnnos?.length}}</span>
+                <!-- <span class="badge bg-light text-dark me-1" :title="已标总量">总 {{user.allAnnos?.length}}</span> -->
+                <span class="badge bg-light text-dark me-1" :title="当前进度">此类 {{ userCurrDoneTasks(user).length }}/{{ userCurrTasks(user).length }}</span>
                 <template v-for="sum in [inspectionSum(user)]"><span
                   class="badge me-1"
                   :class="sum?.passRatio>=0.9 ? 'bg-success text-light' : sum?.passRatio>=0.8 ? 'bg-light text-success border border-1 border-success' : sum?.passRatio==null ? 'bg-light text-dark' : sum?.passRatio<=0.6 ? 'bg-danger text-light' : 'bg-light text-danger border border-1 border-danger'"
                 >审核通过率：{{sum?.passRatio?.toFixed?.(3)??'null'}}</span>
-                <span class="badge bg-light text-dark me-1">已审：{{inspectionSum(user)?.sum}}</span></template>
+                <span class="badge bg-light text-dark me-1">已审：{{sum?.sum}}</span></template>
               </div>
               <div class="col col-12 col-md-6 col-lg-6 my-1">
                 <div class="progress" :class="{'bg-success bg-opacity-25': userProgress(user).done}" title="当前任务进度">
@@ -760,7 +761,7 @@
                     :aria-valuenow="userProgress(user).mn"
                     :aria-valuemax="userProgress(user).bg"
                     aria-valuemin="0"
-                  >当前任务进度　{{ userCurrDoneTasks(user).length }}/{{ userCurrTasks(user).length }}</div>
+                  >当前 {{userProgress(user).pct}} = {{ userCurrDoneTasks(user).length }}/{{ userCurrTasks(user).length }}</div>
                 </div>
               </div>
               <div class="col col-12 col-md-12 col-lg-2 mt-1">

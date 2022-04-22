@@ -1,9 +1,8 @@
 import {  reactive, onMounted, h  } from '../modules_lib/vue_3.2.31_.esm-browser.prod.min.js';
-import ModalContent from './ModalContent.cpnt.mjs.js';
 
-const UserListPanel = {
+const UserListControl = {
   props: ["db", "settings", "managers", 'manager_id', "user"],
-  emits: ['update:manager_id'],
+  // emits: ['update:manager_id'],
   setup(props, ctx) {
     const localData = reactive({
       showQuittedUsers: false,
@@ -20,8 +19,6 @@ const UserListPanel = {
           h("div", {}, [
 
             //
-
-            ctx?.slots?.default ? h("div", { 'class': "d-inline-block my-1 me-2 align-middle", }, ctx.slots.default()) : null,
 
             h("div", { 'class': "d-inline-block my-1 me-2 align-middle", }, [
               h("select", {
@@ -118,6 +115,8 @@ const UserListPanel = {
               },
             }, ["审核通过率 降序"]),
 
+            ctx?.slots?.default ? h("div", { 'class': "d-inline-block my-1 me-2 align-middle", }, ctx.slots.default()) : null,
+
             //
 
           ]),
@@ -130,5 +129,5 @@ const UserListPanel = {
   },
 };
 
-export default UserListPanel;
+export default UserListControl;
 

@@ -11,7 +11,7 @@ if (DEVELOPING) {
   console.log("PRODUCTION");
 };
 const API_BASE_DEV_LOCAL = "http://127.0.0.1:5000";
-const DEV_HOSTS = ["http://192.168.124.3:8888", "http://192.168.1.100:8888"];
+const DEV_HOSTS = ["http://192.168.124.3:8888", "http://192.168.1.100:8888", "http://10.1.108.200:8888/", "http://10.0.55.176:8888/"];
 const API_BASE_DEV = DEV_HOSTS[0];
 const API_BASE_PROD = "https://sp22.nlpsun.cn";
 const API_BASE = DEVELOPING ? API_BASE_DEV : API_BASE_PROD;
@@ -1978,10 +1978,12 @@ import TaskCard from './components/TaskCard.cpnt.mjs.js';
 the_app.component('task-card', TaskCard);
 
 
-import UserListControl from './components/UserListControl.cpnt.mjs.js';
-the_app.component('user-list-control', UserListControl);
 import UserListPanel from './components/UserListPanel.cpnt.mjs.js';
 the_app.component('user-list-panel', UserListPanel);
+// import UserListControl from './components/UserListControl.cpnt.mjs.js';
+// the_app.component('user-list-control', UserListControl);
+// import UserListItem from './components/UserListItem.cpnt.mjs.js';
+// the_app.component('user-list-panel', UserListItem);
 
 
 import UserEditor from './components/UserEditor.cpnt.mjs.js';
