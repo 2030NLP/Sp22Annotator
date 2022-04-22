@@ -73,8 +73,8 @@ const UserListPanel = {
         list = theDB.lo.sortBy(list, sortMethodsMap01[localData.listControlSettings.sortMethod]);
       };
       const sortMethodsMap02 = {
-        "pass+": (a,b) => theDB.sortFnByPassRatio(a,b),
-        "pass-": (a,b) => theDB.sortFnByPassRatioR(a,b),
+        "pass+": (a,b) => theDB.sortFnByPassRatio(a,b, localData.selectedBatchName),
+        "pass-": (a,b) => theDB.sortFnByPassRatioR(a,b, localData.selectedBatchName),
       };
       if (localData.listControlSettings.sortMethod in sortMethodsMap02) {
         list = list.sort(sortMethodsMap02[localData.listControlSettings.sortMethod]);

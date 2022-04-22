@@ -76,7 +76,7 @@ const UserListControl = {
 
             h("button", {
               'type': "button",
-              'class': ["btn btn-sm my-1 me-2", props.settings.showQuittedUsers ? 'btn-primary' : 'btn-outline-primary'],
+              'class': ["btn btn-sm my-1 me-2", props.settings.showQuittedUsers ? 'btn-primary' : 'btn-outline-dark'],
               'onClick': ()=>{
                 props.settings.showQuittedUsers = !props.settings.showQuittedUsers;
               },

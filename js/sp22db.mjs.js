@@ -627,9 +627,9 @@ class Sp22DB {
       return sum;
     };
 
-    sortFnByPassRatio(u1, u2) {
-      let ins1 = this.inspectionSum(u1);
-      let ins2 = this.inspectionSum(u2);
+    sortFnByPassRatio(u1, u2, batchName) {
+      let ins1 = this.inspectionSum(u1, batchName);
+      let ins2 = this.inspectionSum(u2, batchName);
       if (!ins1.false && !ins1.true) {return true};
       if (!ins2.false && !ins2.true) {return false};
       let r1 = ins1.passRatio - ins2.passRatio;
@@ -637,9 +637,9 @@ class Sp22DB {
       return (ins1.true??0) - (ins2.true??0);
     };
 
-    sortFnByPassRatioR(u1, u2) {
-      let ins1 = this.inspectionSum(u1);
-      let ins2 = this.inspectionSum(u2);
+    sortFnByPassRatioR(u1, u2, batchName) {
+      let ins1 = this.inspectionSum(u1, batchName);
+      let ins2 = this.inspectionSum(u2, batchName);
       if (!ins1.false && !ins1.true) {return true};
       if (!ins2.false && !ins2.true) {return false};
       let r1 = ins2.passRatio - ins1.passRatio;
