@@ -543,17 +543,25 @@ class Sp22DB {
 
 
 
-  userCurrTasks(user) {
+  userCurrTasks(user, batchName) {
     let tt = user.allTasks ?? [];
-    return this.lo.filter(tt, task_id => Sp22FN.topic_regulation(this.task(task_id).topic)==Sp22FN.topic_regulation(user.currTask));
+    if (batchName!=null) {
+      return this.lo.filter(tt, task_id => this.task(task_id).batchName==batchName);
+    };
+    return tt;
+    // return this.lo.filter(tt, task_id => Sp22FN.topic_regulation(this.task(task_id).topic)==Sp22FN.topic_regulation(user.currTask));
   }
-  userCurrDoneTasks(user) {
+  userCurrDoneTasks(user, batchName) {
     let tt = user.doneTasks ?? [];
-    return this.lo.filter(tt, task_id => Sp22FN.topic_regulation(this.task(task_id).topic)==Sp22FN.topic_regulation(user.currTask));
+    if (batchName!=null) {
+      return this.lo.filter(tt, task_id => this.task(task_id).batchName==batchName);
+    };
+    return tt;
+    // return this.lo.filter(tt, task_id => Sp22FN.topic_regulation(this.task(task_id).topic)==Sp22FN.topic_regulation(user.currTask));
   }
-  userProgress(user) {
-    let cDoneLen = this.userCurrDoneTasks(user).length;
-    let cDueLen = this.userCurrTasks(user).length;
+  userProgress(user, batchName) {
+    let cDoneLen = this.userCurrDoneTasks(user, batchName).length;
+    let cDueLen = this.userCurrTasks(user, batchName).length;
     let bg = Math.max(cDoneLen, cDueLen);
     let mn = Math.min(cDoneLen, cDueLen);
     let pct = bg==0 ? `0` : `${mn/bg*100}%`;
