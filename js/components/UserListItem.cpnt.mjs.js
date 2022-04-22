@@ -39,13 +39,13 @@ const UserListItem = {
     const inspectionSum = theDB.inspectionSum ? ( (user, batchName) => { return theDB.inspectionSum(user, batchName); }
     ) : ( (user, batchName) => {
       if (batchName==null) {batchName=user?.currBatchName};
-      let annos = (user?.allAnnos??[]).map(it=>theDB.annoDict[it]).filter(it=>it?.props.batchname==batchName);
+      let annos = (user?.allAnnos??[]).map(it=>theDB.annoDict[it]).filter(it=>it?.batchName==batchName);
       let sum = lo.countBy(annos, anno=>anno?.content?.review?.accept);
       sum.sum = (sum.false??0) + (sum.true??0);
       sum.passRatio = sum.sum==0 ? null : (sum.true??0)/sum.sum;
       return sum;
     } );
-    const sum = computed(()=>{return inspectionSum(user, batchName);});
+    const sum = computed(()=>{return inspectionSum(user, props.batchname);});
 
 
 
