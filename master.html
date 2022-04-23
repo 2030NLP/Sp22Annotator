@@ -50,139 +50,38 @@
     <!-- navbar end -->
 
 
-    <div class="container page my-4">
-      <div class="container py-2">
-        <div class="row align-items-center">
-          <div class="col col-12 col-md-3 col-lg-4 my-2">
-            <div class="form-floating">
-              <input
-               class="form-control form-control-sm"
-               type="text"
-               v-model="ctrl.currentUser.name"
-               placeholder="请输入您的姓名"
-              >
-              <label class="form-label">姓名</label>
-            </div>
-          </div>
-          <div class="col col-12 col-md-9 col-lg-8 my-2">
-            <div class="form-floating">
-              <input
-               class="form-control form-control-sm"
-               type="password"
-               v-model="ctrl.currentUser.token"
-               placeholder="请输入您的密码"
-              >
-              <label class="form-label">密码</label>
-            </div>
-          </div>
-        </div>
-        <div class="row align-items-center my-2">
-          <div class="col col-12 my-2">
-            <div>若要进行审核工作，请移步至 <a href="./inspect" target="_blank">审核工具</a> 。</div>
-            <div>操作步骤：</div>
-            <div>1、如果太久没刷新，点「刷新全部」；否则点「加载缓存」</div>
-            <div>2、等待处理完毕</div>
-            <div>3、点击「开始工作」，加载工作页面</div>
-          </div>
-          <div class="col col-12">
-            <button
-              type="button"
-              class="btn btn-sm me-2 my-1"
-              :class="`btn-outline-dark`"
-              @click="async ()=>{ctrl.started=false; await sync()}"
-              title="从服务器更新最新数据，包括 User, Task, Anno 表，以及 Entry 表中的基本信息"
-            >刷新全部</button>
-            <button
-              type="button"
-              __v-show="ctrl.haveCache"
-              class="btn btn-sm me-2 my-1"
-              :class="`btn-outline-dark`"
-              @click="async ()=>{ctrl.started=false; await loadCacheDB()}"
-              title="加载缓存数据"
-            >加载缓存</button>
-            <span class="text-danger" v-show="workerState.working">辅助线程工作中，请稍等！！！</span>
-            <span class="text-danger" v-show="workerState.works.length">（还有 {{workerState.works.length}} 项任务正在排队）</span>
-          </div>
-          <div class="col col-12">
-            <button
-              type="button"
-              class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': spDB.entries?.length, 'btn-outline-secondary': !spDB.entries?.length}"
-              @click="async ()=>{ctrl.started=false; await syncEntryInfo()}"
-              title="从服务器更新 Entry 表 (仅基本信息，不含文本内容)"
-            >刷新 Entry 表 (仅基本信息，不含文本内容)</button>
-            <button
-              type="button"
-              class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': spDB.tasks?.length, 'btn-outline-secondary': !spDB.tasks?.length}"
-              @click="async ()=>{ctrl.started=false; await syncTask()}"
-              title="从服务器更新 Task 表"
-            >刷新 Task 表</button>
-            <button
-              type="button"
-              class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': spDB.annos?.length, 'btn-outline-secondary': !spDB.annos?.length}"
-              @click="async ()=>{ctrl.started=false; await syncAnno()}"
-              title="从服务器更新 Anno 表"
-            >刷新 Anno 表</button>
-            <button
-              type="button"
-              class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': spDB.users?.length, 'btn-outline-secondary': !spDB.users?.length}"
-              @click="async ()=>{ctrl.started=false; await syncUser()}"
-              title="从服务器更新 User 表"
-            >刷新 User 表</button>
-          </div>
-          <div class="col col-12" v-show="false">
-            <button
-              type="button"
-              class="btn btn-sm me-2 my-1"
-              :class="{'btn-outline-success': spDB.entries?.[0]?.content?.material?.tokenList?.length, 'btn-outline-secondary': !spDB.entries?.[0]?.content?.material?.tokenList?.length}"
-              @click="modalBox_open('upload-entries')"
-              title="因网络传输不太稳定，而语料库较大，故请从本地选择语料库文件进行加载"
-            >导入 Entry 表（完整)</button>
-            <button
-              type="button"
-              v-if="spDB.entries?.[0]?.content?.material?.tokenList?.length"
-              class="btn btn-sm me-2 my-1"
-              :class="'btn-outline-primary'"
-              @click="makeAnnoOnTexts"
-              title="配合语料文本更新 anno 细节"
-            >配合语料文本更新 anno 细节</button>
-          </div>
-          <div class="col col-12 text-muted small my-2">
-            <div>
-              <button
-                v-if="(!spDB.completelyExtended || !spDB.allDictsBuilt) && spDB.isNotEmpty"
-                type="button"
-                class="btn btn-sm me-2 my-1 btn-outline-primary"
-                @click="async()=>{ctrl.started=false; await spDB.fix(); await saveDB();}"
-                title="数据补全(可能卡顿，请耐心等待)"
-              >数据补全 (请等右下角无正在进行的任务再点此按钮；可能卡顿，请耐心等待)</button>
-            </div>
-            <div>
-              <span>数据状态：</span>
-              <span title="entries">{{spDB.entries.length ? '🟢' : '🔴'}}</span>
-              <span title="entriesExtended">{{spDB.state?.entriesExtended ? '🟢' : '🔴'}}</span>
-              <span title="entryDictBuilt">{{spDB.state?.entryDictBuilt ? '🟢' : '🔴'}}</span>
-              <span title="users">{{spDB.users.length ? '🟢' : '🔴'}}</span>
-              <span title="usersExtended">{{spDB.state?.usersExtended ? '🟢' : '🔴'}}</span>
-              <span title="userDictBuilt">{{spDB.state?.userDictBuilt ? '🟢' : '🔴'}}</span>
-              <span title="tasks">{{spDB.tasks.length ? '🟢' : '🔴'}}</span>
-              <span title="tasksExtended">{{spDB.state?.tasksExtended ? '🟢' : '🔴'}}</span>
-              <span title="taskDictBuilt">{{spDB.state?.taskDictBuilt ? '🟢' : '🔴'}}</span>
-              <span title="annos">{{spDB.annos.length ? '🟢' : '🔴'}}</span>
-              <span title="annosExtended">{{spDB.state?.annosExtended ? '🟢' : '🔴'}}</span>
-              <span title="annoDictBuilt">{{spDB.state?.annoDictBuilt ? '🟢' : '🔴'}}</span>
-            </div>
-            <div>上次刷新整个数据库的时间是 {{ctrl.lastTime}} 。</div>
-            <div>上次刷新 Entry 表的时间是 {{ctrl.lastTimeDict?.entries}} 。</div>
-            <div>上次刷新 User 表的时间是 {{ctrl.lastTimeDict?.users}} 。</div>
-            <div>上次刷新 Task 表的时间是 {{ctrl.lastTimeDict?.tasks}} 。</div>
-            <div>上次刷新 Anno 表的时间是 {{ctrl.lastTimeDict?.annos}} 。</div>
-          </div>
+    <div class="container page my-4 py-2">
+      <login-panel
+        :user="ctrl.currentUser"
+        @connect="async()=>{await connect();}"
+        @disconnect="async()=>{await disconnect();}"
+        :connected="ctrl.connected"
+      ></login-panel>
 
-          <div class="col col-12">
+      <data-panel
+        v-if="ctrl.connected&&!ctrl.started"
+        :db="spDB"
+        :me="ctrl.currentUser"
+        :timedict="ctrl.lastTimeDict"
+        @load-cache="async ()=>{ctrl.started=false; await loadCacheDB()}"
+        @fix-data="async()=>{ctrl.started=false; await spDB.fix(); await saveDB();}"
+        @sync-all="async ()=>{ctrl.started=false; await sync()}"
+        @export="async (listName)=>{await win.console.log(spDB[listName]);}"
+
+        @sync-entries="async ()=>{ctrl.started=false; await syncEntryInfo()}"
+        @sync-tasks="async ()=>{ctrl.started=false; await syncTask()}"
+        @sync-annos="async ()=>{ctrl.started=false; await syncAnno()}"
+        @sync-users="async ()=>{ctrl.started=false; await syncUser()}"
+      ></data-panel>
+
+      <div class="container">
+
+        <div class="row align-items-center my-2">
+
+          <div
+            class="col col-12"
+            v-if="ctrl.currentUser?.role?.includes?.('manager')"
+          >
             <button
               type="button"
               class="btn btn-sm me-2 my-1"
@@ -197,28 +96,36 @@
               target="_blank"
             >查看数据格式说明</a>
           </div>
-          <div class="col col-12">
-            <button
-              v-if="spDB.completelyExtended && spDB.allDictsBuilt && spDB.isNotEmpty"
-              __v-show="false"
-              type="button"
-              class="btn btn-sm me-2 my-1"
-              :class="`btn-info`"
-              @click="async()=>{ctrl.started=true;}"
-              title="开始工作"
-            >开始工作</button>
-            <!-- <a
-              class="btn btn-sm me-2 my-1"
-              :class="'btn-outline-dark'"
-              href="./todos"
-              target="_blank"
-            >打开任务板</a> -->
+          <div
+            class="col col-12"
+            v-if="ctrl.currentUser?.role?.includes?.('manager')"
+          >
             <a
               class="btn btn-sm me-2 my-1"
               :class="'btn-outline-dark'"
               href="./memos"
               target="_blank"
             >打开留言板</a>
+          </div>
+          <div class="col col-12">
+            <button
+              v-if="spDB.completelyExtended && spDB.allDictsBuilt && spDB.isNotEmpty"
+              v-show="!ctrl.started"
+              type="button"
+              class="btn btn-sm me-2 my-1"
+              :class="`btn-info`"
+              @click="async()=>{ctrl.started=true;}"
+              title="开始工作"
+            >开始工作</button>
+            <button
+              v-if="spDB.completelyExtended && spDB.allDictsBuilt && spDB.isNotEmpty"
+              v-show="ctrl.started"
+              type="button"
+              class="btn btn-sm me-2 my-1"
+              :class="`btn-info`"
+              @click="async()=>{ctrl.started=false;}"
+              title="管理数据"
+            >管理数据</button>
           </div>
         </div>
       </div>
@@ -232,12 +139,12 @@
               <li class="nav-item">
                 <a class="nav-link" :class="ctrl.tab == TABS.userProgress ? 'active' : ''" href="#" @click="goTab('userProgress')">用户进度</a>
               </li>
-              <li class="nav-item">
+              <!-- <li class="nav-item">
                 <a class="nav-link" :class="ctrl.tab == TABS.functions ? 'active' : ''" href="#" @click="goTab('functions')">更多功能</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" :class="ctrl.tab == TABS.taskAssign ? 'active' : ''" href="#" @click="goTab('taskAssign')">分配任务</a>
-              </li>
+              </li> -->
             </ul>
           </div>
         </div>
@@ -255,203 +162,51 @@
         ></user-list-panel>
 
 
-
-        <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.taskAssign">
-          <div class="col col-12">
-            <div>说明：分配任务前，请先：1、在后端构建任务；2、刷新Task表；3、刷新Entry表。</div>
-          </div>
-          <div class="col col-12">
-            <div>请进行参数设置：</div>
-          </div>
-          <div class="col col-12 col-sm-6 col-lg-4 my-2">
-            <label class="form-label">每个用户多少任务</label>
-            <input
-             class="form-control form-control-sm"
-             type="number"
-             v-model="assignData.settings.tasks_per_user"
-            >
-          </div>
-          <div class="col col-12 col-sm-6 col-lg-4 my-2">
-            <label class="form-label">每个任务需要几名用户参与</label>
-            <input
-             class="form-control form-control-sm"
-             type="number"
-             v-model="assignData.settings.users_per_task"
-            >
-          </div>
-          <div class="col col-12 col-sm-6 col-lg-4 my-2">
-            <label class="form-label">任务类型</label>
-            <select
-             class="form-select form-select-sm"
-             v-model="assignData.settings.topic"
-            >
-              <option v-for="topic in assignTopics" :value="topic.value">{{topic.desc}}</option>
-            </select>
-          </div>
-          <div class="col col-12 col-sm-6 col-lg-4 my-2">
-            <label class="form-label">任务批次名称（用于筛选）</label>
-            <input
-             class="form-control form-control-sm"
-             type="text"
-             v-model="assignData.settings.batchName"
-            >
-          </div>
-          <div class="col col-12 my-2">
-            <label class="form-label">质检题设置（Json字符串）</label>
-            <textarea
-              class="form-control form-control-sm"
-              v-model="assignData.settings.polygraphs_per_user_json_string"
-              :class="{'is-invalid': assignData.polygraphs_per_user_json_string_error}"
-            ></textarea>
-            <div
-              class="invalid-feedback"
-              v-show="assignData.polygraphs_per_user_json_string_error"
-            >Json解析失败，请检查</div>
-          </div>
-          <div class="col col-12 my-2">
-            <label class="form-label">
-              <span>选择用户</span>
-            </label>
-            <div>
-              <button
-                type="button"
-                class="btn btn-sm mx-2 my-1 btn-outline-dark"
-                @click="selectUsersAuto"
-              >自动</button>
-              <button
-                type="button"
-                class="btn btn-sm mx-2 my-1 btn-outline-dark"
-                @click="selectUsersAll"
-              >全选</button>
-              <button
-                type="button"
-                class="btn btn-sm mx-2 my-1 btn-outline-dark"
-                @click="selectUsersNone"
-              >清除</button>
-            </div>
-            <div
-              class="form-control form-control-sm overflow-auto max-vh-40"
-            >
-              <button
-                v-for="user in spDB.users"
-                type="button"
-                class="btn btn-sm me-2 my-1"
-                :class="assignData.assignUserBoxDict[user.id] ? `btn-primary` : `btn-outline-secondary`"
-                @click="()=>{assignData.assignUserBoxDict[user.id]=!assignData.assignUserBoxDict[user.id]}"
-              >{{ user.currTaskGroup }} #{{ user.id }} {{ user.name }}</button>
-            </div>
-          </div>
-          <div class="col col-12 col-sm-6 col-lg-4 my-2">
-            <div class="form-check form-switch" :title="`通常大家在标注时要分配新任务的话，选「否」；\n如果要总地进行下一轮分配，通常选「是」`">
-              <input class="form-check-input" type="checkbox" role="switch" v-model="assignData.settings.retrieve">
-              <label class="form-check-label">是否收回未完成的任务（{{assignData.settings.retrieve?'是':'否'}}）</label>
-            </div>
-          </div>
-        </div>
-
-
-
-        <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.taskAssign">
-          <div class="col col-12">
-            <button
-              type="button"
-              class="btn btn-sm me-2 my-1 btn-outline-primary"
-              @click="planAssigment"
-              title="对任务分配进行规划"
-            >开始规划</button>
-          </div>
-          <template v-if="assignData.analysis.length">
-            <div class="col col-12">
-              <h4 class="mt-3 mb-2">{{ assignData.undone ? '规划' : '执行'}}结果</h4>
-            </div>
-            <div class="col col-12">
-              <div class="text-muted">批次编号：{{ assignData.batch }}</div>
-            </div>
-            <div class="col col-12 my-2">
-              <div class="fw-bold">具体到每个标注者：</div>
-              <div class="text-muted">绿色表示新任务，灰色表示之前就分配给他了</div>
-              <div class="text-muted">着色表示正常任务，框线表示为质检题</div>
-            </div>
-            <div class="col col-12">
-              <ul class="list-group max-vh-40 overflow-auto border border-1">
-                <li class="list-group-item" v-for="pair in assignData.planPerUser">
-                  <div>
-                    <span>{{ `#${pair[0]} ${spDB.user(pair[0])?.name}` }}</span> 分配到的 {{pair[1]?.length}} 条任务是：
-                  </div>
-                  <div>
-                    <button
-                      v-for="task_id in pair[1]"
-                      type="button"
-                      class="btn btn-sm me-2 my-1"
-                      :class="classAssignAnalisisByUser(pair[0], task_id)"
-                    >#{{ task_id }}</button>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="col col-12 my-2">
-              <div class="fw-bold">具体到每个任务：</div>
-            </div>
-            <div class="col col-12">
-              <ul class="list-group max-vh-40 overflow-auto border border-1">
-                <li class="list-group-item" v-for="item in assignData.analysis">
-                  <div>
-                    <span>「{{item?.plan?.topic}} 任务 #{{item.id}}</span><span></span> / <span></span><span>语料 #{{item?.plan?.entry}}」</span>
-                    <!-- <br v-if="item.new_to?.length"/> -->
-                    <span v-if="item.new_to?.length">
-                      分配给：
-                      <span class="me-2 text-success __fw-bold" v-for="guy in item.new_guys">#{{guy}} {{spDB.user(guy)?.name}}</span>
-                      <span class="me-2" v-for="guy in item.solid_guys">#{{guy}} {{spDB.user(guy)?.name}}</span>
-                      。
-                    </span>
-                    <!-- <br v-if="item.canceled_guys?.length"/> -->
-                    <span v-if="item.canceled_guys?.length" class="text-muted">
-                      不再分配给：
-                      <s class="me-2" v-for="guy in item.canceled_guys">#{{guy}} {{spDB.user(guy)?.name}}</s>
-                      。
-                    </span>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="col col-12 my-2">
-              <button
-                type="button"
-                class="btn btn-sm me-2 my-1 btn-danger"
-                __click="doAssigment"
-                @click="modalBox_open('confirm', {desc: '确定要执行规划好的任务安排吗？', action: doAssigment})"
-                title="开始执行规划好的任务安排"
-                v-if="assignData.undone"
-              >开始执行</button>
-              <button
-                type="button"
-                class="btn btn-sm me-2 my-1 btn-primary"
-                __click="doAssigment"
-                @click="exportPlan"
-                title="开始执行规划好的任务安排"
-                v-if="assignData.undone"
-              >导出计划</button>
-              <button
-                type="button"
-                class="btn btn-sm me-2 my-1"
-                :class="assignData.undone ? 'btn-outline-secondary' : 'btn-outline-success'"
-                @click="()=>{if(assignData.undone){cancelAssigment();}else{cleanAssigment();}}"
-                :title="assignData.undone ? '撤除规划好的任务安排' : '清除以上信息'"
-              >{{ assignData.undone ? '撤除规划' : '知道了，清除'}}</button>
-            </div>
-            <div class="col col-12 my-2" v-if="'inserted' in assignData.result">
-              <div>执行结果：</div>
-            </div>
-            <div class="col col-12 my-2" v-if="'inserted' in assignData.result">
-              <div>修改： {{ assignData.result.replaced }}</div>
-              <div>新增： {{ assignData.result.inserted }}</div>
-              <div>异常： {{ assignData.result.strange }}</div>
-            </div>
-          </template>
-        </div>
-
       </div>
     </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -575,9 +330,12 @@
                     <span>Schema：</span><span class="badge bg-light text-dark text-wrap my-1 me-2">{{anno?.content?._ctrl?.schema}}</span>
                   </div>
                   <div v-if="anno?._timeInfo">
-                    <span>最后提交时间：</span><span class="badge bg-light text-dark text-wrap my-1 me-2">{{(new Date(anno?._timeInfo?.lastAt)).toLocaleString()}}</span><br/>
                     <span>首次操作时长：</span><span class="badge bg-light text-dark text-wrap my-1 me-2">{{anno?._timeInfo?.firstDur/1000}}s</span><br/>
                     <span>累计操作次数：</span><span class="badge bg-light text-dark text-wrap my-1 me-2">{{anno?._timeInfo?.detail?.length}}次</span><br/>
+                    <span>审核前最后提交时间：</span><span class="badge bg-light text-dark text-wrap my-1 me-2">{{(new Date(anno?._timeInfo?.pureLastAt)).toLocaleString()}}</span><br/>
+                    <span>审核前累计操作时长：</span><span class="badge bg-light text-dark text-wrap my-1 me-2">{{anno?._timeInfo?.pureTotalDur/1000}}s</span><br/>
+                    <span>审核前累计时长跨度：</span><span class="badge bg-light text-dark text-wrap my-1 me-2">{{anno?._timeInfo?.pureStride/1000}}s</span><br/>
+                    <span>最后提交时间：</span><span class="badge bg-light text-dark text-wrap my-1 me-2">{{(new Date(anno?._timeInfo?.lastAt)).toLocaleString()}}</span><br/>
                     <span>累计操作时长：</span><span class="badge bg-light text-dark text-wrap my-1 me-2">{{anno?._timeInfo?.totalDur/1000}}s</span><br/>
                     <span>累计时长跨度：</span><span class="badge bg-light text-dark text-wrap my-1 me-2">{{anno?._timeInfo?.stride/1000}}s</span>
                   </div>
@@ -880,7 +638,10 @@
             </div>
 
             <div class="modal-footer" v-for="user in [modalBox.data?.kwargs]">
-              <button type="button" class="btn btn-sm btn-outline-dark me-2" @click="modalBox_open('user-detail', user)">用户资料</button>
+              <button
+                v-if="ctrl.currentUser?.role?.includes?.('manager')"
+                type="button" class="btn btn-sm btn-outline-dark me-2" @click="modalBox_open('user-detail', user)"
+              >用户资料</button>
               <button type="button" class="btn btn-sm btn-secondary" @click="()=>{modalBox.hide()}">关闭</button>
               <button type="button" class="btn btn-sm btn-secondary" @click="()=>{modalBox.hideTotal();}" v-show="modalBox.data.history.length>1">关闭全部 ({{modalBox.data.history.length}})</button>
             </div>
