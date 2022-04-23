@@ -442,7 +442,7 @@ class Sp22DB {
       await this.extendEntryByTask(entry, task);
     };
     const entryAnnos = this.annos.filter(it=>it.entry==entry.id);
-    for await (let anno of userAnnos) {
+    for await (let anno of entryAnnos) {
       await this.extendEntryByAnno(entry, anno);
     };
   }
@@ -560,7 +560,7 @@ class Sp22DB {
     let cDueLen = this.userCurrTasks(user, batchName).length;
     let bg = Math.max(cDoneLen, cDueLen);
     let mn = Math.min(cDoneLen, cDueLen);
-    let pct = bg==0 ? `0` : `${mn/bg*100}%`;
+    let pct = bg==0 ? `0` : `${(mn/bg*100).toFixed(2)}%`;
     let ratio = cDoneLen/cDueLen;
     ratio = isNaN(ratio) ? 0 : ratio;
     let done = cDoneLen >= cDueLen;
