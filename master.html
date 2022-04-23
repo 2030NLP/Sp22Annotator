@@ -397,7 +397,7 @@
                   <h5>已提交的标注（{{task.submitters?.length}}）</h5>
                   <div class="card my-1" v-for="user_id in task.submitters">
                     <div class="col-12" v-for="anno_id in [spDB.getAnnoByUserAndTask(user_id, task.id)]">
-                      <!-- <anno-card
+                      <anno-card
                         v-for="anno in [spDB.anno(anno_id)]"
                         :anno="anno"
                         :db="dbBasic"
@@ -405,7 +405,7 @@
                         @submit-review="(value)=>{saveAnnoReview(...value)}"
                         @open-modal="(value)=>{modalBox_open(...value)}"
                         @update-anno="(value)=>{updateOneAnno(value)}"
-                      ></anno-card> -->
+                      ></anno-card>
                     </div>
                   </div>
                 </div>
