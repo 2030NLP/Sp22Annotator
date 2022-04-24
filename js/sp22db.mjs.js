@@ -375,6 +375,7 @@ class Sp22DB {
 
     for (let task_id of [anno.task]) {
       let task = this.task(anno.task);
+      if (!task) {continue};
       if (!anno.topic) {
         anno.topic = task.topic;
       };
