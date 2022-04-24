@@ -179,28 +179,28 @@ class Sp22DB {
   get allDictsNotBuilt() { return !this.state.entryDictBuilt && !this.state.taskDictBuilt && !this.state.userDictBuilt && !this.state.annoDictBuilt; }
 
   entry(id) {
-    if (!Object.keys(this.entryDict)) {
-      this.buildEntryDict();
-    };
-    return this.entryDict[id];
+    // if (!Object.keys(this.db.entryDict??{})) {
+    //   this.buildEntryDict();
+    // };
+    return this.db.entryDict[id];
   }
   task(id) {
-    if (!Object.keys(this.taskDict)) {
-      this.buildTaskDict();
-    };
-    return this.taskDict[id];
+    // if (!Object.keys(this.db.taskDict??{})) {
+    //   this.buildTaskDict();
+    // };
+    return this.db.taskDict[id];
   }
   user(id) {
-    if (!Object.keys(this.userDict)) {
-      this.buildUserDict();
-    };
-    return this.userDict[id];
+    // if (!Object.keys(this.db.userDict??{})) {
+    //   this.buildUserDict();
+    // };
+    return this.db.userDict[id];
   }
   anno(id) {
-    if (!Object.keys(this.annoDict)) {
-      this.buildAnnoDict();
-    };
-    return this.annoDict[id];
+    // if (!Object.keys(this.db.annoDict??{})) {
+    //   this.buildAnnoDict();
+    // };
+    return this.db.annoDict[id];
   }
 
   getAnnoByUserAndTask(user_id, task_id) {
