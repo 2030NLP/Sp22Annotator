@@ -87,7 +87,7 @@ const UserListItem = {
 
           h("span", {
             'class': "badge bg-light text-dark me-1", 'title': "此类已标量"
-          }, ["此批 ", 当前进度文本.value]),
+          }, [`${props.batchname}: `, 当前进度文本.value]),
 
           h("span", {
             'class': [
