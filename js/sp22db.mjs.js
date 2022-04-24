@@ -179,42 +179,26 @@ class Sp22DB {
   get allDictsNotBuilt() { return !this.state.entryDictBuilt && !this.state.taskDictBuilt && !this.state.userDictBuilt && !this.state.annoDictBuilt; }
 
   entry(id) {
-    if (!(id in this.entryDict) || !(this.entryDict[id])) {
-      let found = this.lo.find(this.entries, it=>it.id==id);
-      if (found) {
-        this.entryDict[id];
-        this.updateModified();
-      };
+    if (!Object.keys(this.entryDict)) {
+      this.buildEntryDict();
     };
     return this.entryDict[id];
   }
   task(id) {
-    if (!(id in this.taskDict) || !(this.taskDict[id])) {
-      let found = this.lo.find(this.tasks, it=>it.id==id);
-      if (found) {
-        this.taskDict[id];
-        this.updateModified();
-      };
+    if (!Object.keys(this.taskDict)) {
+      this.buildTaskDict();
     };
     return this.taskDict[id];
   }
   user(id) {
-    if (!(id in this.userDict) || !(this.userDict[id])) {
-      let found = this.lo.find(this.users, it=>it.id==id);
-      if (found) {
-        this.userDict[id];
-        this.updateModified();
-      };
+    if (!Object.keys(this.userDict)) {
+      this.buildUserDict();
     };
     return this.userDict[id];
   }
   anno(id) {
-    if (!(id in this.annoDict) || !(this.annoDict[id])) {
-      let found = this.lo.find(this.annos, it=>it.id==id);
-      if (found) {
-        this.annoDict[id];
-        this.updateModified();
-      };
+    if (!Object.keys(this.annoDict)) {
+      this.buildAnnoDict();
     };
     return this.annoDict[id];
   }
@@ -552,14 +536,14 @@ class Sp22DB {
   userCurrTasks(user, batchName) {
     let tt = user.allTasks ?? [];
     if (batchName==null) {batchName=user?.currBatchName};
-    return this.lo.filter(tt, task_id => this.task(task_id).batchName==batchName);
-    // return this.lo.filter(tt, task_id => Sp22FN.topic_regulation(this.task(task_id).topic)==Sp22FN.topic_regulation(user.currTask));
+    return this.lo.filter(tt, task_id => this.task(task_id)?.batchName==batchName);
+    // return this.lo.filter(tt, task_id => Sp22FN.topic_regulation(this.task(task_id)?.topic)==Sp22FN.topic_regulation(user.currTask));
   }
   userCurrDoneTasks(user, batchName) {
     let tt = user.doneTasks ?? [];
     if (batchName==null) {batchName=user?.currBatchName};
-    return this.lo.filter(tt, task_id => this.task(task_id).batchName==batchName);
-    // return this.lo.filter(tt, task_id => Sp22FN.topic_regulation(this.task(task_id).topic)==Sp22FN.topic_regulation(user.currTask));
+    return this.lo.filter(tt, task_id => this.task(task_id)?.batchName==batchName);
+    // return this.lo.filter(tt, task_id => Sp22FN.topic_regulation(this.task(task_id)?.topic)==Sp22FN.topic_regulation(user.currTask));
   }
   userProgress(user, batchName) {
     let cDoneLen = this.userCurrDoneTasks(user, batchName).length;
@@ -582,11 +566,11 @@ class Sp22DB {
   }
   userCurrBatchTasks(user) {
     let tt = user.allTasks ?? [];
-    return this.lo.filter(tt, task_id => this.task(task_id).batchName==user.currBatchName);
+    return this.lo.filter(tt, task_id => this.task(task_id)?.batchName==user.currBatchName);
   }
   userCurrBatchDoneTasks(user) {
     let tt = user.doneTasks ?? [];
-    return this.lo.filter(tt, task_id => this.task(task_id).batchName==user.currBatchName);
+    return this.lo.filter(tt, task_id => this.task(task_id)?.batchName==user.currBatchName);
   }
   userCurrBatchProgress(user) {
     let cDoneLen = this.userCurrBatchDoneTasks(user).length;
