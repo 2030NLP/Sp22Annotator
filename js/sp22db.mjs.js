@@ -83,7 +83,12 @@ class Sp22DB {
 
   toObject() {
     const object = {
-      db: this.lo.pick(this.db, ['entries', 'tasks', 'users', 'annos']),
+      db: {
+        entries: this.db.entries,
+        tasks: this.db.tasks,
+        users: this.db.users,
+        annos: this.db.annos,
+      },  // this.lo.pick(this.db, ['entries', 'tasks', 'users', 'annos']),
       cache: this.cache,
       state: JSON.parse(JSON.stringify(this.state)),
     };
