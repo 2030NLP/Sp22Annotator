@@ -288,12 +288,6 @@ const RootComponent = {
     };
 
     const saveDB = async () => {
-      // await frg.setItem(`${APP_NAME}:DB`, {
-      //   users: foolCopy(spDB.users),
-      //   tasks: foolCopy(spDB.tasks),
-      //   annos: foolCopy(spDB.annos),
-      //   entries: foolCopy(spDB.entries),
-      // });
       await frg.setItem(`${APP_NAME}:DB`, foolCopy(spDB.toSave()));
       console.log(await frg.getItem(`${APP_NAME}:DB`));
       alertBox.pushAlert('数据已缓存', 'info', 1000);
@@ -547,7 +541,7 @@ const RootComponent = {
         // entry.allAnnos = spDB.inf_entry_all_annos[entry.id];
         Object.assign(entry,  entryResp.data.data);
 
-        spDB.extendEntry(entry);
+        await spDB.extendEntry(entry);
 
         // let entry_annos = spDB.annos.filter(anno => anno.entry==entry.id);
         // console.log('entry_annos:', entry_annos);
@@ -667,7 +661,7 @@ const RootComponent = {
         new_anno._timeInfo = _annoTimeCompute(new_anno);
         Object.assign(anno_in_dict, new_anno);
 
-        spDB.extendAnno(anno_in_dict);
+        await spDB.extendAnno(anno_in_dict);
 
       } else {
         alertBox.removeAlert(aidx);

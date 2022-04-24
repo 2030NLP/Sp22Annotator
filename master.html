@@ -112,7 +112,7 @@
           <div class="col col-12">
             <button
               v-if="spDB.completelyExtended && spDB.allDictsBuilt && spDB.isNotEmpty"
-              v-show="!ctrl.started"
+              v-show="ctrl.connected&&!ctrl.started"
               type="button"
               class="btn btn-sm me-2 my-1"
               :class="`btn-info`"
@@ -121,7 +121,7 @@
             >开始工作</button>
             <button
               v-if="spDB.completelyExtended && spDB.allDictsBuilt && spDB.isNotEmpty"
-              v-show="ctrl.started"
+              v-show="ctrl.connected&&ctrl.started"
               type="button"
               class="btn btn-sm me-2 my-1"
               :class="`btn-info`"
@@ -133,7 +133,9 @@
       </div>
     </div>
 
-    <div class="container page my-4" v-if="ctrl.started">
+    <div class="container page my-4"
+      v-if="ctrl.started"
+    >
       <div class="container py-2">
         <div class="row mt-2 mb-4">
           <div class="col">
@@ -555,7 +557,8 @@
                   <div class="col-6 col-sm-6 col-md-3 my-1">
                     <h5>{{user.name}}</h5>
                   </div>
-                  <div class="col-6 col-sm-6 col-md-3 my-1">
+
+                  <!-- <div class="col-6 col-sm-6 col-md-3 my-1">
                     <span v-for="sum in [inspectionSum(user)]"
                       class="badge me-1"
                       :class="sum?.passRatio>=0.9 ? 'bg-success text-light' : sum?.passRatio>=0.8 ? 'bg-light text-success border border-1 border-success' : sum?.passRatio==null ? 'bg-light text-dark' : sum?.passRatio<=0.6 ? 'bg-danger text-light' : 'bg-light text-danger border border-1 border-danger'"
@@ -572,7 +575,8 @@
                         aria-valuemin="0"
                       >{{ userProgress(user).cDoneLen }}/{{ userProgress(user).cDueLen }}</div>
                     </div>
-                  </div>
+                  </div> -->
+
                   <div class="col-12">
                     <div class="input-group input-group-sm my-2">
                       <label class="input-group-text">任务</label>
