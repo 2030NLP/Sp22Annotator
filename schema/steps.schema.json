@@ -357,9 +357,9 @@
       "start": {
         "ref": "start",
         "name": "开始",
-        "mode": "selectValue",
+        "mode": "interlude",
         "props": {
-          "instruction": "这段话似乎存在异常，原因是？",
+          "instruction": "这段话似乎存在异常，原因有？",
           "optionBtns": [
             {
               "text": "搭配不当",
@@ -377,32 +377,44 @@
               "style": "outline-danger"
             },
             {
-              "text": "高亮词存在分词错误",
-              "go": "handleErrorSeg",
+              "text": "其他",
+              "go": "handleReasonOther",
               "style": "outline-danger"
             },
             {
               "text": "并无异常",
               "data": {
-                "label": "fine",
-                "desc": "这段话不存在上述问题"
+                "label": "ExceptionNotFound",
+                "desc": "这段话不存在异常"
               },
               "go": "end",
               "style": "outline-primary"
             }
-          ]
+          ],
+          "okBtn": {
+            "text": "完成",
+            "go": "end",
+            "style": "outline-success"
+          },
+          "canReset": true,
+          "resetBtn": {
+            "text": "重置",
+            "go": "start",
+            "style": "outline-dark"
+          }
         }
       },
       "handleReasonImproperCollocation": {
         "ref": "handleReasonImproperCollocation",
-        "name": "处理搭配不当",
+        "name": "处理归因：搭配不当",
         "mode": "multiSpans",
         "props": {
           "instruction": "请在文中依次划选造成搭配不当的全部文本片段。选择完成后，可将其加入列表。",
-          "listTitle": "造成搭配不当的文本片段是：",
+          "listTitle": "造成搭配不当的文本片段有：",
           "lengthTip": "提示：请至少选择2个片段",
           "data": {
             "label": "ReasonImproperCollocation",
+            "desc": "搭配不当",
             "tokenarrays": []
           },
           "addBtn": {
@@ -419,26 +431,27 @@
           },
           "okBtn": {
             "text": "不再添加，完成",
-            "go": "manageReasons",
+            "go": "start",
             "style": "success"
           },
           "cancelBtn": {
             "text": "取消",
-            "go": "manageReasons",
+            "go": "start",
             "style": "light"
           }
         }
       },
       "handleReasonSemanticConflict": {
         "ref": "handleReasonSemanticConflict",
-        "name": "处理语义冲突",
+        "name": "处理归因：语义冲突",
         "mode": "multiSpans",
         "props": {
           "instruction": "请在文中依次划选造成语义冲突的全部文本片段。选择完成后，可将其加入列表。",
-          "listTitle": "造成搭配不当的文本片段是：",
+          "listTitle": "造成搭配不当的文本片段有：",
           "lengthTip": "提示：请至少选择2个片段",
           "data": {
-            "label": "ReasonImproperCollocation",
+            "label": "ReasonSemanticConflict",
+            "desc": "语义冲突",
             "tokenarrays": []
           },
           "addBtn": {
@@ -455,16 +468,68 @@
           },
           "okBtn": {
             "text": "不再添加，完成",
-            "go": "manageReasons",
+            "go": "start",
             "style": "success"
           },
           "cancelBtn": {
             "text": "取消",
-            "go": "manageReasons",
+            "go": "start",
             "style": "light"
           }
         }
       },
+      "handleReasonAgainstCommenSense": {
+        "ref": "handleReasonAgainstCommenSense",
+        "name": "处理归因：不符合常识",
+        "mode": "text",
+        "props": {
+          "selectInstruction": "请在文中划选不符合常识的文本片段",
+          "selectedTitle": "当前选中的不符合常识的文本片段是：",
+          "instruction": "请填写该片段所不符合的常识",
+          "data": {
+            "label": "ReasonAgainstCommenSense",
+            "desc": "不符合常识",
+            "on": [],
+            "withText": ""
+          },
+          "okBtn": {
+            "text": "确定",
+            "go": "start",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "start",
+            "style": "light"
+          }
+        }
+      },
+      "handleReasonOther": {
+        "ref": "handleReasonOther",
+        "name": "处理归因：其他",
+        "mode": "text",
+        "props": {
+          "selectInstruction": "请在文中划选造成异常的文本片段",
+          "selectedTitle": "当前选中的造成异常的文本片段是：",
+          "instruction": "请填写异常的具体原因",
+          "data": {
+            "label": "ReasonOther",
+            "desc": "存在其他问题",
+            "on": [],
+            "withText": ""
+          },
+          "okBtn": {
+            "text": "确定",
+            "go": "start",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "start",
+            "style": "light"
+          }
+        }
+      }
     }
   }
 }

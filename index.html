@@ -385,7 +385,7 @@
               </div>
               <!-- 选项按钮 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.optionBtns">
-                <button v-for="btn in currentStep.props.optionBtns" :key="btn.text" type="button" @click="stepCtrl.goRefStep(btn.go)" class="btn btn-sm my-1 me-1" :class="`btn-${btn.style}`">{{ btn.text }}</button>
+                <button v-for="btn in currentStep.props.optionBtns" :key="btn.text" type="button" @click="stepCtrl.goRefStep(btn.go, btn.data)" class="btn btn-sm my-1 me-1" :class="`btn-${btn.style}`">{{ btn.text }}</button>
               </div>
               <!-- 完成按钮 -->
               <div class="col col-12 my-1" v-if="currentStep?.props?.okBtn">
