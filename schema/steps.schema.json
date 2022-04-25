@@ -393,6 +393,78 @@
           ]
         }
       },
+      "handleReasonImproperCollocation": {
+        "ref": "handleReasonImproperCollocation",
+        "name": "处理搭配不当",
+        "mode": "multiSpans",
+        "props": {
+          "instruction": "请在文中依次划选造成搭配不当的全部文本片段。选择完成后，可将其加入列表。",
+          "listTitle": "造成搭配不当的文本片段是：",
+          "lengthTip": "提示：请至少选择2个片段",
+          "data": {
+            "label": "ReasonImproperCollocation",
+            "tokenarrays": []
+          },
+          "addBtn": {
+            "text": "将所选片段加入列表",
+            "style": "primary"
+          },
+          "clearBtn": {
+            "text": "清除选区",
+            "style": "info"
+          },
+          "cleanBtn": {
+            "text": "清除已选片段",
+            "style": "light"
+          },
+          "okBtn": {
+            "text": "不再添加，完成",
+            "go": "manageReasons",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "manageReasons",
+            "style": "light"
+          }
+        }
+      },
+      "handleReasonSemanticConflict": {
+        "ref": "handleReasonSemanticConflict",
+        "name": "处理语义冲突",
+        "mode": "multiSpans",
+        "props": {
+          "instruction": "请在文中依次划选造成语义冲突的全部文本片段。选择完成后，可将其加入列表。",
+          "listTitle": "造成搭配不当的文本片段是：",
+          "lengthTip": "提示：请至少选择2个片段",
+          "data": {
+            "label": "ReasonImproperCollocation",
+            "tokenarrays": []
+          },
+          "addBtn": {
+            "text": "将所选片段加入列表",
+            "style": "primary"
+          },
+          "clearBtn": {
+            "text": "清除选区",
+            "style": "info"
+          },
+          "cleanBtn": {
+            "text": "清除已选片段",
+            "style": "light"
+          },
+          "okBtn": {
+            "text": "不再添加，完成",
+            "go": "manageReasons",
+            "style": "success"
+          },
+          "cancelBtn": {
+            "text": "取消",
+            "go": "manageReasons",
+            "style": "light"
+          }
+        }
+      },
     }
   }
 }
