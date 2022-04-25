@@ -7,234 +7,14 @@ import {
 } from '../modules_lib/vue_3.2.31_.esm-browser.prod.min.js';
 
 const TaskAssignPanel = {
-  props: ["name", "token", "settings"],
-  emits: ["happy", 'connect'],
+  props: ["dude", "guy"],
+  emits: ["happy", 'good'],
   component: {
   },
 
-
-
-  template: `
-
-
-        <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.taskAssign">
-          <div class="col col-12">
-            <div>说明：分配任务前，请先：1、在后端构建任务；2、刷新Task表；3、刷新Entry表。</div>
-          </div>
-          <div class="col col-12">
-            <div>请进行参数设置：</div>
-          </div>
-          <div class="col col-12 col-sm-6 col-lg-4 my-2">
-            <label class="form-label">每个用户多少任务</label>
-            <input
-             class="form-control form-control-sm"
-             type="number"
-             v-model="assignData.settings.tasks_per_user"
-            >
-          </div>
-          <div class="col col-12 col-sm-6 col-lg-4 my-2">
-            <label class="form-label">每个任务需要几名用户参与</label>
-            <input
-             class="form-control form-control-sm"
-             type="number"
-             v-model="assignData.settings.users_per_task"
-            >
-          </div>
-          <div class="col col-12 col-sm-6 col-lg-4 my-2">
-            <label class="form-label">任务类型</label>
-            <select
-             class="form-select form-select-sm"
-             v-model="assignData.settings.topic"
-            >
-              <option v-for="topic in assignTopics" :value="topic.value">{{topic.desc}}</option>
-            </select>
-          </div>
-          <div class="col col-12 col-sm-6 col-lg-4 my-2">
-            <label class="form-label">任务批次名称（用于筛选）</label>
-            <input
-             class="form-control form-control-sm"
-             type="text"
-             v-model="assignData.settings.batchName"
-            >
-          </div>
-          <div class="col col-12 my-2">
-            <label class="form-label">质检题设置（Json字符串）</label>
-            <textarea
-              class="form-control form-control-sm"
-              v-model="assignData.settings.polygraphs_per_user_json_string"
-              :class="{'is-invalid': assignData.polygraphs_per_user_json_string_error}"
-            ></textarea>
-            <div
-              class="invalid-feedback"
-              v-show="assignData.polygraphs_per_user_json_string_error"
-            >Json解析失败，请检查</div>
-          </div>
-          <div class="col col-12 my-2">
-            <label class="form-label">
-              <span>选择用户</span>
-            </label>
-            <div>
-              <button
-                type="button"
-                class="btn btn-sm mx-2 my-1 btn-outline-dark"
-                @click="selectUsersAuto"
-              >自动</button>
-              <button
-                type="button"
-                class="btn btn-sm mx-2 my-1 btn-outline-dark"
-                @click="selectUsersAll"
-              >全选</button>
-              <button
-                type="button"
-                class="btn btn-sm mx-2 my-1 btn-outline-dark"
-                @click="selectUsersNone"
-              >清除</button>
-            </div>
-            <div
-              class="form-control form-control-sm overflow-auto max-vh-40"
-            >
-              <button
-                v-for="user in spDB.users"
-                type="button"
-                class="btn btn-sm me-2 my-1"
-                :class="assignData.assignUserBoxDict[user.id] ? `btn-primary` : `btn-outline-secondary`"
-                @click="()=>{assignData.assignUserBoxDict[user.id]=!assignData.assignUserBoxDict[user.id]}"
-              >{{ user.currTaskGroup }} #{{ user.id }} {{ user.name }}</button>
-            </div>
-          </div>
-          <div class="col col-12 col-sm-6 col-lg-4 my-2">
-            <div class="form-check form-switch" :title="`通常大家在标注时要分配新任务的话，选「否」；\n如果要总地进行下一轮分配，通常选「是」`">
-              <input class="form-check-input" type="checkbox" role="switch" v-model="assignData.settings.retrieve">
-              <label class="form-check-label">是否收回未完成的任务（{{assignData.settings.retrieve?'是':'否'}}）</label>
-            </div>
-          </div>
-        </div>
-
-
-
-        <div class="row align-items-center my-2" v-show="ctrl.tab == TABS.taskAssign">
-          <div class="col col-12">
-            <button
-              type="button"
-              class="btn btn-sm me-2 my-1 btn-outline-primary"
-              @click="planAssigment"
-              title="对任务分配进行规划"
-            >开始规划</button>
-          </div>
-          <template v-if="assignData.analysis.length">
-            <div class="col col-12">
-              <h4 class="mt-3 mb-2">{{ assignData.undone ? '规划' : '执行'}}结果</h4>
-            </div>
-            <div class="col col-12">
-              <div class="text-muted">批次编号：{{ assignData.batch }}</div>
-            </div>
-            <div class="col col-12 my-2">
-              <div class="fw-bold">具体到每个标注者：</div>
-              <div class="text-muted">绿色表示新任务，灰色表示之前就分配给他了</div>
-              <div class="text-muted">着色表示正常任务，框线表示为质检题</div>
-            </div>
-            <div class="col col-12">
-              <ul class="list-group max-vh-40 overflow-auto border border-1">
-                <li class="list-group-item" v-for="pair in assignData.planPerUser">
-                  <div>
-                    <span>{{ `#${pair[0]} ${spDB.user(pair[0])?.name}` }}</span> 分配到的 {{pair[1]?.length}} 条任务是：
-                  </div>
-                  <div>
-                    <button
-                      v-for="task_id in pair[1]"
-                      type="button"
-                      class="btn btn-sm me-2 my-1"
-                      :class="classAssignAnalisisByUser(pair[0], task_id)"
-                    >#{{ task_id }}</button>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="col col-12 my-2">
-              <div class="fw-bold">具体到每个任务：</div>
-            </div>
-            <div class="col col-12">
-              <ul class="list-group max-vh-40 overflow-auto border border-1">
-                <li class="list-group-item" v-for="item in assignData.analysis">
-                  <div>
-                    <span>「{{item?.plan?.topic}} 任务 #{{item.id}}</span><span></span> / <span></span><span>语料 #{{item?.plan?.entry}}」</span>
-                    <!-- <br v-if="item.new_to?.length"/> -->
-                    <span v-if="item.new_to?.length">
-                      分配给：
-                      <span class="me-2 text-success __fw-bold" v-for="guy in item.new_guys">#{{guy}} {{spDB.user(guy)?.name}}</span>
-                      <span class="me-2" v-for="guy in item.solid_guys">#{{guy}} {{spDB.user(guy)?.name}}</span>
-                      。
-                    </span>
-                    <!-- <br v-if="item.canceled_guys?.length"/> -->
-                    <span v-if="item.canceled_guys?.length" class="text-muted">
-                      不再分配给：
-                      <s class="me-2" v-for="guy in item.canceled_guys">#{{guy}} {{spDB.user(guy)?.name}}</s>
-                      。
-                    </span>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="col col-12 my-2">
-              <button
-                type="button"
-                class="btn btn-sm me-2 my-1 btn-danger"
-                __click="doAssigment"
-                @click="modalBox_open('confirm', {desc: '确定要执行规划好的任务安排吗？', action: doAssigment})"
-                title="开始执行规划好的任务安排"
-                v-if="assignData.undone"
-              >开始执行</button>
-              <button
-                type="button"
-                class="btn btn-sm me-2 my-1 btn-primary"
-                __click="doAssigment"
-                @click="exportPlan"
-                title="开始执行规划好的任务安排"
-                v-if="assignData.undone"
-              >导出计划</button>
-              <button
-                type="button"
-                class="btn btn-sm me-2 my-1"
-                :class="assignData.undone ? 'btn-outline-secondary' : 'btn-outline-success'"
-                @click="()=>{if(assignData.undone){cancelAssigment();}else{cleanAssigment();}}"
-                :title="assignData.undone ? '撤除规划好的任务安排' : '清除以上信息'"
-              >{{ assignData.undone ? '撤除规划' : '知道了，清除'}}</button>
-            </div>
-            <div class="col col-12 my-2" v-if="'inserted' in assignData.result">
-              <div>执行结果：</div>
-            </div>
-            <div class="col col-12 my-2" v-if="'inserted' in assignData.result">
-              <div>修改： {{ assignData.result.replaced }}</div>
-              <div>新增： {{ assignData.result.inserted }}</div>
-              <div>异常： {{ assignData.result.strange }}</div>
-            </div>
-          </template>
-        </div>
-
-  `
-
-
-
-
-
-
-
   setup(props, ctx) {
     const localData = reactive({
-      userInfo: {
-        name: "",
-        token: "",
-      },
     });
-
-
-
-
-
-
-
-
-
 
     const assignTopics = [
       {value: "清洗", desc: "清洗"},
@@ -272,6 +52,7 @@ const TaskAssignPanel = {
     watch(() => assignData.settings, async () => {
       await saveBasic();
     }, { deep: true });
+
 
     const selectUsersAuto = () => {
       for (let user of theDB.users) {
@@ -598,54 +379,204 @@ const TaskAssignPanel = {
 
 
     return () => [
-      h("div", { 'class': "container", }, [
-
-        h("div", { 'class': "row align-items-center my-2", }, [
-
-          h("div", { 'class': "col col-12 col-md-3 col-lg-4 my-2", }, [
-            h("div", { 'class': "form-floating", }, [
-              h("input", {
-                'class': "form-control form-control-sm",
-                'type': "text",
-                'placeholder': "请输入您的姓名",
-                'value': localData.userInfo.name,
-                'onInput': (event) => {
-                  localData.userInfo.name = event?.target?.value;
-                },
-              }, null),
-              h("label", { 'class': "form-label", }, ["姓名"],),
-            ],),
-          ],),
-
-          h("div", { 'class': "col col-12 col-md-9 col-lg-8 my-2", }, [
-            h("div", { 'class': "form-floating", }, [
-              h("input", {
-                'class': "form-control form-control-sm",
-                'type': "password",
-                'placeholder': "请输入您的密码",
-                'value': localData.userInfo.token,
-                'onInput': (event) => {
-                  localData.userInfo.token = event?.target?.value;
-                },
-              }, null),
-              h("label", { 'class': "form-label", }, ["密码"],),
-            ],),
-          ],),
-
-        ],),
-
-        h("div", { 'class': "row align-items-center my-2", }, [
-          h("div", { 'class': "col col-12", }, [
+      h("div", { 'class': "row align-items-center my-2", }, [
+        h("div", { 'class': "col col-12", }, [
+          h("p", {}, ["说明：分配任务前，请先：1、在后端构建任务；2、刷新Task表；3、刷新Entry表。"], ),
+        ], ),
+        h("div", { 'class': "col col-12", }, [
+          h("p", {}, ["请进行参数设置："], ),
+        ], ),
+        h("div", { 'class': "col col-12 col-sm-6 col-lg-4 my-2", }, [
+          h("label", { 'class': "form-label", }, ["每个用户多少任务"], ),
+          h("input", {
+           'class': "form-control form-control-sm"
+           'type': "number"
+           'v-model': "assignData.settings.tasks_per_user"
+          }, [], ),
+        ], ),
+        h("div", { 'class': "col col-12 col-sm-6 col-lg-4 my-2", }, [
+          h("label", { 'class': "form-label", }, ["每个任务需要几名用户参与"], ),
+          h("input", {
+           'class': "form-control form-control-sm"
+           'type': "number"
+           'v-model': "assignData.settings.users_per_task"
+          }, [], ),
+        ], ),
+        h("div", { 'class': "col col-12 col-sm-6 col-lg-4 my-2", }, [
+          h("label", { 'class': "form-label", }, ["任务类型"], ),
+          h("select", {
+           'class': "form-select form-select-sm"
+           'v-model': "assignData.settings.topic"
+          }, [
+            `<option 'v-for': "topic in assignTopics" ':value': "topic.value">{{topic.desc}}</option>`
+          ], ),
+        ], ),
+        h("div", { 'class': "col col-12 col-sm-6 col-lg-4 my-2", }, [
+          h("label", { 'class': "form-label", }, ["任务批次名称（用于筛选）"], ),
+          h("input", {
+           'class': "form-control form-control-sm"
+           'type': "text"
+           'v-model': "assignData.settings.batchName"
+          }, [], ),
+        ], ),
+        h("div", { 'class': "col col-12 my-2", }, [
+          h("label", { 'class': "form-label", }, ["质检题设置（Json字符串）"], ),
+          h("textarea", {
+            'class': "form-control form-control-sm"
+            'v-model': "assignData.settings.polygraphs_per_user_json_string"
+            ':class': "{'is-invalid': assignData.polygraphs_per_user_json_string_error}"
+          }, [], ),
+          h("div", {
+            'class': "invalid-feedback"
+            'v-show': "assignData.polygraphs_per_user_json_string_error"
+          }, ["Json解析失败，请检查"], ),
+        ], ),
+        h("div", { 'class': "col col-12 my-2", }, [
+          h("label", { 'class': "form-label", }, [
+            h("span", {}, ["选择用户"], ),
+          ], ),
+          h("div", {}, [
             h("button", {
-              'type': "button",
-              'class': "btn btn-sm btn-outline-primary my-1 me-2",
-              'title': "连接",
-              'onClick': ()=>{ctx.emit('connect', localData.userInfo)},
-            }, ["连接"]),
-          ],),
-        ],),
+              'type': "button"
+              'class': "btn btn-sm mx-2 my-1 btn-outline-dark"
+              'onClick': ()=>{selectUsersAuto();},
+            }, ["自动"], ),
+            h("button", {
+              'type': "button"
+              'class': "btn btn-sm mx-2 my-1 btn-outline-dark"
+              'onClick': ()=>{selectUsersAll();},
+            }, ["全选"], ),
+            h("button", {
+              'type': "button"
+              'class': "btn btn-sm mx-2 my-1 btn-outline-dark"
+              'onClick': ()=>{selectUsersNone();},
+            }, ["清除"], ),
+          ], ),
+          h("div", {
+            'class': "form-control form-control-sm overflow-auto max-vh-40"
+          }, [
+            h("button", {
+              'v-for': "user in spDB.users"
+              'type': "button"
+              'class': "btn btn-sm me-2 my-1"
+              ':class': "assignData.assignUserBoxDict[user.id] ? `btn-primary` : `btn-outline-secondary`"
+              'onClick': ()=>{assignData.assignUserBoxDict[user.id]=!assignData.assignUserBoxDict[user.id]},
+            }, [`${ user.currTaskGroup } #${ user.id } ${ user.name }`], ),
+          ], ),
+        ], ),
+        h("div", { 'class': "col col-12 col-sm-6 col-lg-4 my-2", }, [
+          h("div", { 'class': "form-check form-switch" ':title': "`通常大家在标注时要分配新任务的话，选「否」；\n如果要总地进行下一轮分配，通常选「是」`", }, [
+            h("input", { 'class': "form-check-input" 'type': "checkbox" 'role': "switch" 'v-model': "assignData.settings.retrieve",}, [], ),
+            h("label", { 'class': "form-check-label",}, [`是否收回未完成的任务（{{assignData.settings.retrieve?'是':'否'}}）`], ),
+          ], ),
+        ], ),
+      ], ),
 
-      ],),
+
+
+      h("div", { 'class': "row align-items-center my-2" 'v-show': "ctrl.tab == TABS.taskAssign", }, [
+        h("div", { 'class': "col col-12", }, [
+          h("button", {
+            'type': "button"
+            'class': "btn btn-sm me-2 my-1 btn-outline-primary"
+            'onClick': ()=>{planAssigment();},
+            'title': "对任务分配进行规划"
+          }, ["开始规划"], ),
+        ], ),
+        assignData.analysis.length ? (...[
+          h("div", { 'class': "col col-12", }, [
+            h("h4", { 'class': "mt-3 mb-2", }, [`{{ assignData.undone ? '规划' : '执行'}}结果`], ),
+          ], ),
+          h("div", { 'class': "col col-12", }, [
+            h("div", { 'class': "text-muted", }, ["批次编号：{{ assignData.batch }}"], ),
+          ], ),
+          h("div", { 'class': "col col-12 my-2", }, [
+            h("div", { 'class': "fw-bold", }, ["具体到每个标注者："], ),
+            h("div", { 'class': "text-muted", }, ["绿色表示新任务，灰色表示之前就分配给他了"], ),
+            h("div", { 'class': "text-muted", }, ["着色表示正常任务，框线表示为质检题"], ),
+          ], ),
+          h("div", { 'class': "col col-12", }, [
+            h("ul", { 'class': "list-group max-vh-40 overflow-auto border border-1", }, [
+              h("li", { 'class': "list-group-item" 'v-for': "pair in assignData.planPerUser", }, [
+                h("div", {}, [
+                  h("span", {}, [`#${pair[0]} ${spDB.user(pair[0])?.name}`], ),
+                  "分配到的 {{pair[1]?.length}} 条任务是：",
+                ], ),
+                h("div", {}, [
+                  h("button", {
+                    'v-for': "task_id in pair[1]"
+                    'type': "button"
+                    'class': "btn btn-sm me-2 my-1"
+                    ':class': "classAssignAnalisisByUser(pair[0], task_id)"
+                  }, ["#{{ task_id }}"], ),
+                ], ),
+              ], ),
+            ], ),
+          ], ),
+          h("div", { 'class': "col col-12 my-2", }, [
+            h("div", { 'class': "fw-bold", }, ["具体到每个任务："], ),
+          ], ),
+          h("div", { 'class': "col col-12", }, [
+            h("ul", { 'class': "list-group max-vh-40 overflow-auto border border-1", }, [
+              h("li", { 'class': "list-group-item" 'v-for': "item in assignData.analysis", }, [
+                h("div", {}, [
+                  h("span", {}, [
+                    `「{{item?.plan?.topic}} 任务 #{{item.id}}`,
+                    h("span", {}, [" / "], ),
+                    h("span", {}, [`语料 #{{item?.plan?.entry}}」`], ),
+                  ], ),
+                  h("span", { 'v-if': "item.new_to?.length", }, [
+                    "分配给：",
+                    h("span", { 'class': "me-2 text-success __fw-bold" 'v-for': "guy in item.new_guys", }, [`#{{guy}} {{spDB.user(guy)?.name}}`], ),
+                    h("span", { 'class': "me-2" 'v-for': "guy in item.solid_guys", }, [`#{{guy}} {{spDB.user(guy)?.name}}`], ),
+                    "。",
+                  ], ),
+                  h("span", { 'v-if': "item.canceled_guys?.length" 'class': "text-muted", }, [
+                    "不再分配给：",
+                    h("s", { 'class': "me-2" 'v-for': "guy in item.canceled_guys", }, [
+                      `#{{guy}} {{spDB.user(guy)?.name}}`,
+                    ], ),
+                    "。",
+                  ], ),
+                ], ),
+              ], ),
+            ], ),
+          ], ),
+          h("div", { 'class': "col col-12 my-2", }, [
+            h("button", {
+              'type': "button"
+              'class': "btn btn-sm me-2 my-1 btn-danger"
+              '__click': "doAssigment"
+              'onClick': ()=>{modalBox_open('confirm', {desc: '确定要执行规划好的任务安排吗？', action: doAssigment})();},
+              'title': "开始执行规划好的任务安排"
+              'v-if': "assignData.undone"
+            }, ["开始执行"], ),
+            h("button", {
+              'type': "button"
+              'class': "btn btn-sm me-2 my-1 btn-primary"
+              '__click': "doAssigment"
+              'onClick': ()=>{exportPlan();},
+              'title': "开始执行规划好的任务安排"
+              'v-if': "assignData.undone"
+            }, ["导出计划"], ),
+            h("button", {
+              'type': "button"
+              'class': "btn btn-sm me-2 my-1"
+              ':class': "assignData.undone ? 'btn-outline-secondary' : 'btn-outline-success'"
+              'onClick': ()=>{if(assignData.undone){cancelAssigment();}else{cleanAssigment();}},
+              ':title': "assignData.undone ? '撤除规划好的任务安排' : '清除以上信息'"
+            }, ["{{ assignData.undone ? '撤除规划' : '知道了，清除'}}"], ),
+          ], ),
+          h("div", { 'class': "col col-12 my-2" 'v-if': "'inserted' in assignData.result", }, [
+            h("div", {}, ["执行结果："], ),
+          ], ),
+          h("div", { 'class': "col col-12 my-2" 'v-if': "'inserted' in assignData.result", }, [
+            h("div", {}, ["修改： {{ assignData.result.replaced }}"], ),
+            h("div", {}, ["新增： {{ assignData.result.inserted }}"], ),
+            h("div", {}, ["异常： {{ assignData.result.strange }}"], ),
+          ], ),
+        ]) : null,
+      ], ),
     ];
   },
 };

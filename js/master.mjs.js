@@ -12,7 +12,7 @@ if (DEVELOPING) {
 };
 const API_BASE_DEV_LOCAL = "http://127.0.0.1:5000";
 const DEV_HOSTS = ["http://192.168.124.3:8888", "http://192.168.1.101:8888", "http://10.1.108.200:8888/", "http://10.0.55.176:8888/"];
-const API_BASE_DEV = DEV_HOSTS[1];
+const API_BASE_DEV = DEV_HOSTS[0];
 const API_BASE_PROD = "https://sp22.nlpsun.cn";
 const API_BASE = DEVELOPING ? API_BASE_DEV : API_BASE_PROD;
 
@@ -272,18 +272,22 @@ const RootComponent = {
 
 
     const extendTasks = async () => {
+      ctrl.started=false;
       await spDB.extendTasks();
     };
 
     const extendAnnos = async () => {
+      ctrl.started=false;
       await spDB.extendAnnos();
     };
 
     const extendUsers = async () => {
+      ctrl.started=false;
       await spDB.extendUsers();
     };
 
     const extendEntries = async () => {
+      ctrl.started=false;
       await spDB.extendEntries();
     };
 
@@ -852,7 +856,7 @@ const RootComponent = {
           alertBox.pushAlert(message, 'danger', 5000, error);
         };
       };
-      await syncUser(true);
+      await syncUser();
       await saveDB();
       return messages;
     };

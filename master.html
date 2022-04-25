@@ -453,7 +453,7 @@
               :db="dbBasic"
               :box="modalBox"
               @check-error-on-save="(value)=>{alertBox.pushAlert('存在错误，请检查！', 'warning', null, value)}"
-              @save="async(value)=>{let messages = await makeNewUsers(value); let resultText='执行结果：\n'+messages.join('\n'); modalBox_open('confirm', {desc: resultText, action: ()=>{}, closetext: '关闭', confirmtext: '知道了'} );}"
+              @save="async(value)=>{ctrl.started=false; let messages = await makeNewUsers(value); let resultText='执行结果：\n'+messages.join('\n'); modalBox_open('confirm', {desc: resultText, action: ()=>{}, closetext: '关闭', confirmtext: '知道了'} );}"
             ></user-importer>
           </template>
 
