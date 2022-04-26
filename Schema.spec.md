@@ -1,5 +1,7 @@
 Schema.spec.md
 
+> [TOC]
+
 
 
 本项目通过一种 Json 格式的文件来控制标注的具体流程，我们将此文件称为 StepsSchema 。在当前项目中，该文件的路径为：`/schema/steps.schema.json`。
@@ -103,6 +105,110 @@ Schema.spec.md
 ```
 
 #### 4  步骤的各种模式及其参数
+
+说明
+
+##### 结果呈现  finalResult
+
+界面：
+
+- 操作区
+  - 指导语
+  - “重置”按钮（可选）
+  - “取消”按钮：回到之前的某个步骤（由按钮的 go 字段定义）
+  - “下一条”按钮：加载下一条语料
+  - “保存并继续”按钮（仅限网络版，不可配置）：保存到服务器并加载下一条语料
+- 结果区：显示目前已有的全部标注结果
+
+参数：
+
+- instruction | 指导语
+- canReset 👎 | 是否提供重置按钮
+  - ⚠️ 建议直接通过是否存在 resetBtn 来判断
+- resetBtn | “重置”按钮的细节
+  - text | 按钮文本
+  - go | 前往哪个 step
+  - style | 外观风格，为 bootstrap 的按钮样式去除 “btn-” 前缀之后的部分
+- cancelBtn | “取消”按钮的细节
+- nextBtn | “下一条”按钮的细节
+
+数据：无
+
+例子：
+
+```json
+{
+  "<stepRef>": {
+    "ref": "<stepRef>",
+    "name": "<给人类看的步骤名，可以是中文>",
+    "mode": "finalResult",
+    "props": {
+      "instruction": "标注已完成。",
+      "canReset": true,
+      "resetBtn": {
+        "text": "清空并重新标注",
+        "go": "start",
+        "style": "outline-danger"
+      },
+      "cancelBtn": {
+        "text": "继续增加标注",
+        "go": "start",
+        "style": "outline-danger"
+      },
+      "nextBtn": {
+        "text": "下一条",
+        "style": "outline-primary"
+      }
+    }
+  }
+}
+```
+
+
+
+##### 选择值  selectValue
+
+
+
+##### 幕间  interlude  👎
+
+
+
+##### 添加  add
+
+
+
+##### 修改  modify
+
+
+
+##### 删除  delete
+
+
+
+##### 选择多个片段  multiSpans
+
+
+
+##### 选择单个片段并选择描述选项  choose  👎
+
+
+
+##### 选择单个片段并输入描述文本  text  👎
+
+
+
+###### 特例：处理错误字符串  handleErrorString  👎
+
+
+
+##### 初始  root  👎
+
+
+
+
+
+
 
 
 

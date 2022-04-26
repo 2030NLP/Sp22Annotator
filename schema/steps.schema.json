@@ -357,7 +357,7 @@
       "start": {
         "ref": "start",
         "name": "开始",
-        "mode": "interlude",
+        "mode": "selectValue",
         "props": {
           "instruction": "这段话似乎存在异常，原因有？",
           "optionBtns": [
