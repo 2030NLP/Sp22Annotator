@@ -1,6 +1,6 @@
 
 // 基本信息 变量
-const APP_NAME = "Sp22-Anno-Manager";
+const APP_NAME = "Sp22-Anno-Master";
 const APP_VERSION = "22-0424-1807";
 
 // 开发环境 和 生产环境 的 控制变量
