@@ -140,6 +140,9 @@
         <div class="row mt-2 mb-4">
           <div class="col">
             <ul class="nav nav-tabs">
+              <li class="nav-item" v-show="isManager(ctrl.currentUser)">
+                <a class="nav-link" :class="ctrl.tab == TABS.overview ? 'active' : ''" href="#" @click="goTab('overview')">总体进度</a>
+              </li>
               <li class="nav-item">
                 <a class="nav-link" :class="ctrl.tab == TABS.userProgress ? 'active' : ''" href="#" @click="goTab('userProgress')">用户进度</a>
               </li>
@@ -154,8 +157,15 @@
         </div>
 
 
+        <statistic-panel
+          :show="ctrl.tab == TABS.overview && isManager(ctrl.currentUser)"
+          :functions="Sp22FN"
+          :db="spDB"
+        ></statistic-panel>
+
+
         <user-list-panel
-          v-show="ctrl.tab == TABS.userProgress"
+          :show="ctrl.tab == TABS.userProgress"
           :functions="Sp22FN"
           :settings="ctrl"
           :db="spDB"

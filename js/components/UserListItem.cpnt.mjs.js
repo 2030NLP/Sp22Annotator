@@ -48,6 +48,9 @@ const UserListItem = {
     const sum = computed(()=>{return inspectionSum(user, props.batchname);});
 
 
+    const firstInspectionSum = (user, batchName) => { return theDB.firstInspectionSum(user, batchName); };
+    const fstsum = computed(()=>{return firstInspectionSum(user, props.batchname);});
+
 
     const shouldShow = computed(()=>{
       return true;
@@ -96,10 +99,22 @@ const UserListItem = {
               sum.value?.passRatio>=0.8 ? 'bg-light text-success border border-1 border-success' :
               sum.value?.passRatio==null ? 'bg-light text-dark' :
               sum.value?.passRatio<=0.6 ? 'bg-danger text-light' :
-              'bg-light text-danger border border-1 border-danger'
+              'bg-light text-danger border border-1 border-danger',
             ],
             'title': "审核通过率",
           }, ["审核通过率 ", sum.value?.passRatio?.toFixed?.(3)??'null']),
+
+          h("span", {
+            'class': [
+              "badge me-1",
+              fstsum.value?.passRatio>=0.9 ? 'bg-success text-light' :
+              fstsum.value?.passRatio>=0.8 ? 'bg-light text-success border border-1 border-success' :
+              fstsum.value?.passRatio==null ? 'bg-light text-dark' :
+              fstsum.value?.passRatio<=0.6 ? 'bg-danger text-light' :
+              'bg-light text-danger border border-1 border-danger',
+            ],
+            'title': "初审通过率",
+          }, ["初审通过率 ", fstsum.value?.passRatio?.toFixed?.(3)??'null']),
 
           h("span", {
             'class': "badge bg-light text-dark me-1", 'title': "当前批次的已审量"

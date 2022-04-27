@@ -608,34 +608,83 @@ class Sp22DB {
 
 
 
-    inspectionSum(user, batchName) {
-      if (batchName==null) {batchName=user?.currBatchName};
-      let annos = (user?.allAnnos??[]).map(it=>this.anno(it)).filter(it=>it?.batchName==batchName);
-      let sum = this.lo.countBy(annos, anno=>anno?.content?.review?.accept);
-      sum.sum = (sum.false??0) + (sum.true??0);
-      sum.passRatio = sum.sum==0 ? null : (sum.true??0)/sum.sum;
-      return sum;
-    };
+  inspectionSum(user, batchName) {
+    if (batchName==null) {batchName=user?.currBatchName};
+    let annos = (user?.allAnnos??[]).map(it=>this.anno(it)).filter(it=>it?.batchName==batchName);
+    let sum = this.lo.countBy(annos, anno=>anno?.content?.review?.accept);
+    sum.sum = (sum.false??0) + (sum.true??0);
+    sum.passRatio = sum.sum==0 ? null : (sum.true??0)/sum.sum;
+    return sum;
+  };
 
-    sortFnByPassRatio(u1, u2, batchName) {
-      let ins1 = this.inspectionSum(u1, batchName);
-      let ins2 = this.inspectionSum(u2, batchName);
-      if (!ins1.false && !ins1.true) {return true};
-      if (!ins2.false && !ins2.true) {return false};
-      let r1 = ins1.passRatio - ins2.passRatio;
-      if (r1!=0) {return r1;};
-      return (ins1.true??0) - (ins2.true??0);
+  firstInspectionSum(user, batchName) {
+    const 求标签不连续出现次数 = (labels, label) => {
+      let num = 0;
+      let lastLabel;
+      for (let lb of labels) {
+        if (lb === label && lastLabel != label) {
+          num++;
+        };
+        lastLabel = lb;
+      };
+      return num;
     };
+    const 是否经过审核 = (anno) => {
+      return 求标签不连续出现次数(anno?.content?._ctrl?.timeLog?.map?.(it=>it[0]), "check") > 0;
+    };
+    const 是否只审核了一次 = (anno) => {
+      return 求标签不连续出现次数(anno?.content?._ctrl?.timeLog?.map?.(it=>it[0]), "check") === 1;
+    };
+    const 是否初审就通过 = (anno) => {
+      return anno?.content?.review?.accept && 是否只审核了一次(anno);
+    };
+    if (batchName==null) {batchName=user?.currBatchName};
+    let annos = (user?.allAnnos??[]).map(it=>this.anno(it)).filter(it=>it?.batchName==batchName&&是否经过审核(it));
+    let sum = this.lo.countBy(annos, anno=>是否初审就通过(anno));
+    sum.sum = (sum.false??0) + (sum.true??0);
+    sum.passRatio = sum.sum==0 ? null : (sum.true??0)/sum.sum;
+    return sum;
+  };
 
-    sortFnByPassRatioR(u1, u2, batchName) {
-      let ins1 = this.inspectionSum(u1, batchName);
-      let ins2 = this.inspectionSum(u2, batchName);
-      if (!ins1.false && !ins1.true) {return true};
-      if (!ins2.false && !ins2.true) {return false};
-      let r1 = ins2.passRatio - ins1.passRatio;
-      if (r1!=0) {return r1;};
-      return (ins2.true??0) - (ins1.true??0);
-    };
+  sortFnByPassRatio(u1, u2, batchName) {
+    let ins1 = this.inspectionSum(u1, batchName);
+    let ins2 = this.inspectionSum(u2, batchName);
+    if (!ins1.false && !ins1.true) {return true};
+    if (!ins2.false && !ins2.true) {return false};
+    let r1 = ins1.passRatio - ins2.passRatio;
+    if (r1!=0) {return r1;};
+    return (ins1.true??0) - (ins2.true??0);
+  };
+
+  sortFnByPassRatioR(u1, u2, batchName) {
+    let ins1 = this.inspectionSum(u1, batchName);
+    let ins2 = this.inspectionSum(u2, batchName);
+    if (!ins1.false && !ins1.true) {return true};
+    if (!ins2.false && !ins2.true) {return false};
+    let r1 = ins2.passRatio - ins1.passRatio;
+    if (r1!=0) {return r1;};
+    return (ins2.true??0) - (ins1.true??0);
+  };
+
+  sortFnByPrimaryPassRatio(u1, u2, batchName) {
+    let ins1 = this.firstInspectionSum(u1, batchName);
+    let ins2 = this.firstInspectionSum(u2, batchName);
+    if (!ins1.false && !ins1.true) {return true};
+    if (!ins2.false && !ins2.true) {return false};
+    let r1 = ins1.passRatio - ins2.passRatio;
+    if (r1!=0) {return r1;};
+    return (ins1.true??0) - (ins2.true??0);
+  };
+
+  sortFnByPrimaryPassRatioR(u1, u2, batchName) {
+    let ins1 = this.firstInspectionSum(u1, batchName);
+    let ins2 = this.firstInspectionSum(u2, batchName);
+    if (!ins1.false && !ins1.true) {return true};
+    if (!ins2.false && !ins2.true) {return false};
+    let r1 = ins2.passRatio - ins1.passRatio;
+    if (r1!=0) {return r1;};
+    return (ins2.true??0) - (ins1.true??0);
+  };
 
 
 
@@ -651,11 +700,11 @@ class Sp22DB {
 
 
   computeTopicTaskDict() {
-    return this.lo.keyBy(this.tasks, 'topic');
+    return this.lo.groupBy(this.tasks, 'topic');
   }
 
   computeBatchNameTaskDict() {
-    return this.lo.keyBy(this.tasks, 'batchName');
+    return this.lo.groupBy(this.tasks, 'batchName');
   }
 
 
@@ -665,7 +714,9 @@ class Sp22DB {
 
 
 
-
+  labelAnnoDict() {
+    return Sp22FN.labelAnnoDict(this.annos, this.lo);
+  }
 
 
 

@@ -8,7 +8,7 @@ import UserListControl from './UserListControl.cpnt.mjs.js';
 import UserListItem from './UserListItem.cpnt.mjs.js';
 
 const UserListPanel = {
-  props: ["db", "me", "functions"],
+  props: ["db", "me", "functions", "show"],
   emits: ["happy", 'click-add-user-btn', 'click-user-progress-btn', 'click-user-detail-btn'],
   component: {
     UserListControl,
@@ -75,6 +75,8 @@ const UserListPanel = {
       const sortMethodsMap02 = {
         "pass+": (a,b) => theDB.sortFnByPassRatio(a,b, localData.selectedBatchName),
         "pass-": (a,b) => theDB.sortFnByPassRatioR(a,b, localData.selectedBatchName),
+        "primary_pass+": (a,b) => theDB.sortFnByPrimaryPassRatio(a,b, localData.selectedBatchName),
+        "primary_pass-": (a,b) => theDB.sortFnByPrimaryPassRatioR(a,b, localData.selectedBatchName),
       };
       if (localData.listControlSettings.sortMethod in sortMethodsMap02) {
         list = list.sort(sortMethodsMap02[localData.listControlSettings.sortMethod]);
@@ -85,7 +87,7 @@ const UserListPanel = {
 
     return () => [
       h("div", {
-          'class': "container",
+          'class': ["container", props.show ? null : "d-none"],
         }, [
 
           h("div", { 'class': "row align-items-center my-2", }, [

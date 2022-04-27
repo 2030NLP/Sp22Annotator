@@ -71,6 +71,8 @@ const UserListControl = {
                 h("option", { 'value': "done-", }, ["总完成量 降序"]),
                 h("option", { 'value': "pass+", }, ["审核通过率 升序"]),
                 h("option", { 'value': "pass-", }, ["审核通过率 降序"]),
+                h("option", { 'value': "primary_pass+", }, ["初审通过率 升序"]),
+                h("option", { 'value': "primary_pass-", }, ["初审通过率 降序"]),
               ]),
             ]),
 

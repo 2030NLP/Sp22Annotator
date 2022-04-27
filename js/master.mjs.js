@@ -1,7 +1,7 @@
 
 // 基本信息 变量
 const APP_NAME = "Sp22-Anno-Master";
-const APP_VERSION = "22-0424-1807";
+const APP_VERSION = "22-0428-0139";
 
 // 开发环境 和 生产环境 的 控制变量
 const DEVELOPING = location?.hostname=="2030nlp.github.io" ? 0 : 1;
@@ -995,7 +995,9 @@ const RootComponent = {
 
 
 
-
+    const isManager = (user) => {
+      return user.role?.includes?.('manager') || user.role?.includes?.('admin');
+    };
 
     const userProgress = (user) => {
       return spDB.userProgress(user);
@@ -1020,7 +1022,7 @@ const RootComponent = {
       disconnect,
 
 
-
+      isManager,
       userProgress,
 
 
@@ -1118,6 +1120,10 @@ import LoginPanel from './components/LoginPanel.cpnt.mjs.js';
 the_app.component('login-panel', LoginPanel);
 import DataPanel from './components/DataPanel.cpnt.mjs.js';
 the_app.component('data-panel', DataPanel);
+import StatisticPanel from './components/StatisticPanel.cpnt.mjs.js';
+the_app.component('statistic-panel', StatisticPanel);
+
+
 
 import UserListPanel from './components/UserListPanel.cpnt.mjs.js';
 the_app.component('user-list-panel', UserListPanel);
