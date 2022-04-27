@@ -56,6 +56,7 @@ const LoginPanel = {
                 'value': localData.userInfo.name,
                 'onInput': (event) => {
                   localData.userInfo.name = event?.target?.value;
+                  ctx.emit('update-user', localData.userInfo);
                 },
               }, null),
               h("label", { 'class': "form-label", }, ["姓名"],),
@@ -71,6 +72,7 @@ const LoginPanel = {
                 'value': localData.userInfo.token,
                 'onInput': (event) => {
                   localData.userInfo.token = event?.target?.value;
+                  ctx.emit('update-user', localData.userInfo);
                 },
               }, null),
               h("label", { 'class': "form-label", }, ["密码"],),

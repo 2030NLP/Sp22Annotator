@@ -53,6 +53,7 @@
     <div class="container page my-4 py-2">
       <login-panel
         :user="ctrl.currentUser"
+        @update-user="(info)=>{Object.assign(ctrl.currentUser, info)}"
         @connect="async()=>{await connect();}"
         @disconnect="async()=>{await disconnect();}"
         :connected="ctrl.connected"
