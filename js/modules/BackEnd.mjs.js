@@ -408,6 +408,17 @@ class BackEnd {
     return response;
   }
 
+  async postBackup(settings) {
+    let response = await this.request({
+      method: "post",
+      url: `/backup`,
+      data: {
+        settings: settings,
+      },
+    });
+    return response;
+  }
+
 }
 
 export default BackEnd;
