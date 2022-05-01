@@ -194,8 +194,9 @@
           :show="ctrl.tab == TABS.taskAssign && isManager(ctrl.currentUser)"
           :functions="Sp22FN"
           :db="spDB"
-          dude
-          guy
+          :settings="ctrl"
+          :frg="frg"
+          :alert-box="alertBox"
         ></task-assign-panel>
 
 
