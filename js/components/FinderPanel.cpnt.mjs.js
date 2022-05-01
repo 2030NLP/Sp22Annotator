@@ -102,7 +102,10 @@ export default {
 
     return () => [
       h("div", { 'class': ["container", (props.show) ? null : "d-none"], }, [
-        h("div", { 'class': "row align-items-center my-2", }, [
+        h("div", { 'class': "row align-items-center my-2" }, [
+          h("div", { 'class': "col col-12", }, [
+            h("p", { 'class': "text-danger" }, ["开发中，谨慎使用！！！"] ),
+          ]),
           h("div", { 'class': "col col-12", }, [
             h("p", { 'class': "", }, ["提示：初次使用或数据发生变化时，需要手动重建索引。"]),
             h("p", { 'class': "", }, ["提示：检索结果只涉及已下载到本地的数据。"]),

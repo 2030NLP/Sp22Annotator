@@ -7,22 +7,36 @@ import {
 } from '../modules_lib/vue_3.2.31_.esm-browser.prod.min.js';
 import { APP_NAME, APP_VERSION } from '../master_constants.mjs.js';
 import { dateString, foolCopy } from '../util.mjs.js';
+import assign_tasks from '../assign_tasks_new.mjs.js';
 
 const TaskAssignPanel = {
-  props: ["functions", "db", "settings", "frg", "alertBox"],
+  props: ["functions", "db", "settings", "frg", "alertBox", "modalBox", "backend", "saver"],
   emits: [],
   component: {
   },
 
   setup(props, ctx) {
+    const theBackEnd = props.backend;
+    const theSaver = props.saver;
+    const spFN = props.functions;
     const spDB = props.db;
-    const lo = _; // 模仿master的
-    // theBackEnd;
-    // assign_tasks;
-    // theSaver;
-    // _setMe;
-    // goTab;
-    // modalBox_open;
+    const lo = spDB.lo;
+    const ctrl = props.settings;
+
+
+    const _setMe = async () => {
+      if (spDB.users.length) {
+        let me = lo.find(spDB.users, it=>it.token==ctrl.currentUser.token);
+        if (!me) {
+          me = lo.find(spDB.users, it=>it.name==ctrl.currentUser.name);
+        };
+        if (me) {
+          ctrl.currentUser = me;
+          await props.frg.setItem(`${APP_NAME}:currentUser`, foolCopy(ctrl.currentUser));
+        };
+      };
+    };
+
 
     const localData = reactive({
     });
@@ -67,7 +81,7 @@ const TaskAssignPanel = {
 
     const selectUsersAuto = () => {
       for (let user of spDB.users) {
-        let jd = props.functions.topic_regulation(user.currTask)==assignData.settings.topic && !user.quitted;
+        let jd = spFN.topic_regulation(user.currTask)==assignData.settings.topic && !user.quitted;
         assignData.assignUserBoxDict[user.id] = jd ? true : false;
       };
     };
@@ -261,7 +275,7 @@ const TaskAssignPanel = {
       };
 
       // let users = spDB.users.filter(it => (
-      //   props.functions.topic_tags(topic).includes(it['currTask'])
+      //   spFN.topic_tags(topic).includes(it['currTask'])
       //   && (user_tag==null||(it['tags']?.length&&it['tags'].includes(user_tag)))
       //   && !it['quitted']
       // ));
@@ -269,7 +283,7 @@ const TaskAssignPanel = {
       let users = spDB.users.filter(it => assignData.assignUserBoxDict[it.id]);
 
       let tasks = spDB.tasks.filter(it => (
-        props.functions.topic_tags(topic).includes(it['topic'])
+        spFN.topic_tags(topic).includes(it['topic'])
         && it['batchName'] == batchName
         && (task_tag==null||(it['tags']?.length&&it['tags'].includes(task_tag)))
         && !it['deleted']
@@ -288,7 +302,7 @@ const TaskAssignPanel = {
         entries: entries,
         users: users,
         tasks: tasks,
-        topic: props.functions.topic_regulation(topic),
+        topic: spFN.topic_regulation(topic),
         batchName: batchName,
         exclusion: exclusion,
         users_per_task: users_per_task,
@@ -334,37 +348,19 @@ const TaskAssignPanel = {
 
 
     const saveBasic = async () => {
-      await props.frg.setItem(`${APP_NAME}:version`, APP_VERSION);
-      await props.frg.setItem(`${APP_NAME}:currentUser`, foolCopy(props.settings.currentUser));
-      await props.frg.setItem(`${APP_NAME}:tab`, foolCopy(props.settings.tab));
-      await props.frg.setItem(`${APP_NAME}:lastTime`, foolCopy(props.settings.lastTime));
-      await props.frg.setItem(`${APP_NAME}:lastTimeDict`, foolCopy(props.settings.lastTimeDict));
       await props.frg.setItem(`${APP_NAME}:assignData_settings`, foolCopy(assignData.settings));
     };
 
     const loadBasic = async () => {
-      let storedVersion = await props.frg.getItem(`${APP_NAME}:version`);
-      let storedUser = await props.frg.getItem(`${APP_NAME}:currentUser`);
-      if (storedUser != null) {
-        props.settings.currentUser = storedUser;
-        await _setMe();
-      };
-      let storedTime = await props.frg.getItem(`${APP_NAME}:lastTime`);
-      if (storedTime != null) {
-        props.settings.lastTime = storedTime;
-      };
-      let storedTimeDict = await props.frg.getItem(`${APP_NAME}:lastTimeDict`);
-      if (storedTimeDict != null) {
-        props.settings.lastTimeDict = storedTimeDict;
-      };
-
-      await goTab(await props.frg.getItem(`${APP_NAME}:tab`));
-
       let stored_assignData_settings = await props.frg.getItem(`${APP_NAME}:assignData_settings`);
       if (stored_assignData_settings != null) {
         assignData.settings = stored_assignData_settings;
       };
     };
+
+    onMounted(async () => {
+      await loadBasic();
+    });
 
 
 
@@ -391,6 +387,9 @@ const TaskAssignPanel = {
 
     return () => [
       h("div", { 'class': "row align-items-center my-2", }, [
+        h("div", { 'class': "col col-12", }, [
+          h("p", { 'class': "text-danger" }, ["开发中，存在严重 BUG ，请勿使用！！！"], ),
+        ], ),
         h("div", { 'class': "col col-12", }, [
           h("p", {}, ["说明：分配任务前，请先：1、在后端构建任务；2、刷新Task表；3、刷新Entry表。"], ),
         ], ),
@@ -562,7 +561,7 @@ const TaskAssignPanel = {
                 'type': "button",
                 'class': "btn btn-sm me-2 my-1 btn-danger",
                 '__click': doAssigment,
-                'onClick': ()=>{modalBox_open('confirm', {desc: '确定要执行规划好的任务安排吗？', action: doAssigment})();},
+                'onClick': ()=>{props.modalBox.open('confirm', {desc: '确定要执行规划好的任务安排吗？', action: doAssigment})();},
                 'title': "开始执行规划好的任务安排",
               }, ["开始执行"], ),
               h("button", {

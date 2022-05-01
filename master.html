@@ -147,10 +147,10 @@
               <li class="nav-item">
                 <a class="nav-link" :class="ctrl.tab == TABS.userProgress ? 'active' : ''" href="#" @click="goTab('userProgress')">用户进度</a>
               </li>
-              <li class="nav-item">
+              <li class="nav-item" v-show="isManager(ctrl.currentUser)">
                 <a class="nav-link" :class="ctrl.tab == TABS.finder ? 'active' : ''" href="#" @click="goTab('finder')">检索</a>
               </li>
-              <li class="nav-item">
+              <li class="nav-item" v-show="isMaster(ctrl.currentUser)">
                 <a class="nav-link" :class="ctrl.tab == TABS.taskAssign ? 'active' : ''" href="#" @click="goTab('taskAssign')">分配任务</a>
               </li>
               <!-- <li class="nav-item">
@@ -191,12 +191,15 @@
 
 
         <task-assign-panel
-          :show="ctrl.tab == TABS.taskAssign && isManager(ctrl.currentUser)"
+          :show="ctrl.tab == TABS.taskAssign && isMaster(ctrl.currentUser)"
           :functions="Sp22FN"
           :db="spDB"
           :settings="ctrl"
           :frg="frg"
           :alert-box="alertBox"
+          :modal-box="modalBox"
+          :backend="theBackEnd"
+          :saver="theSaver"
         ></task-assign-panel>
 
 

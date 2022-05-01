@@ -984,6 +984,9 @@ const RootComponent = {
     const isManager = (user) => {
       return user.role?.includes?.('manager') || user.role?.includes?.('admin');
     };
+    const isMaster = (user) => {
+      return user.role?.includes?.('admin');
+    };
 
     const userProgress = (user) => {
       return spDB.userProgress(user);
@@ -1009,6 +1012,7 @@ const RootComponent = {
 
 
       isManager,
+      isMaster,
       userProgress,
 
 
