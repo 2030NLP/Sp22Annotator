@@ -84,6 +84,7 @@ const RootComponent = {
       "functions": "functions",
       "memos": "memos",
       "todos": "todos",
+      "finder": "finder",
       "userInfo": "userInfo",
       "userProgress": "userProgress",
       "overview": "overview",
@@ -1123,7 +1124,11 @@ the_app.component('data-panel', DataPanel);
 import StatisticPanel from './components/StatisticPanel.cpnt.mjs.js';
 the_app.component('statistic-panel', StatisticPanel);
 
+import FinderPanel from './components/FinderPanel.cpnt.mjs.js';
+the_app.component('finder-panel', FinderPanel);
 
+import TaskAssignPanel from './components/TaskAssignPanel.cpnt.mjs.js';
+the_app.component('task-assign-panel', TaskAssignPanel);
 
 import UserListPanel from './components/UserListPanel.cpnt.mjs.js';
 the_app.component('user-list-panel', UserListPanel);

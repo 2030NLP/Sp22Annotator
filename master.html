@@ -147,6 +147,12 @@
               <li class="nav-item">
                 <a class="nav-link" :class="ctrl.tab == TABS.userProgress ? 'active' : ''" href="#" @click="goTab('userProgress')">用户进度</a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="ctrl.tab == TABS.finder ? 'active' : ''" href="#" @click="goTab('finder')">检索</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="ctrl.tab == TABS.taskAssign ? 'active' : ''" href="#" @click="goTab('taskAssign')">分配任务</a>
+              </li>
               <!-- <li class="nav-item">
                 <a class="nav-link" :class="ctrl.tab == TABS.functions ? 'active' : ''" href="#" @click="goTab('functions')">更多功能</a>
               </li>
@@ -175,6 +181,22 @@
           @click-user-detail-btn="(user)=>{modalBox_open('user-detail', user);}"
           @click-user-progress-btn="(user)=>{sortUserAnnos(user);modalBox_open('user-progress', user);}"
         ></user-list-panel>
+
+
+        <finder-panel
+          :show="ctrl.tab == TABS.finder && isManager(ctrl.currentUser)"
+          :functions="Sp22FN"
+          :db="spDB"
+        ></finder-panel>
+
+
+        <task-assign-panel
+          :show="ctrl.tab == TABS.taskAssign && isManager(ctrl.currentUser)"
+          :functions="Sp22FN"
+          :db="spDB"
+          dude
+          guy
+        ></task-assign-panel>
 
 
       </div>
