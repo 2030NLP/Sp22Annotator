@@ -82,7 +82,7 @@ const TaskAssignPanel = {
     const selectUsersAuto = () => {
       for (let user of spDB.users) {
         let jd = spFN.topic_regulation(user.currTask)==assignData.settings.topic && !user.quitted;
-        assignData.assignUserBoxDict[user.id] = jd ? true : false;
+        assignData.assignUserBoxDict[user.id] = (jd ? true : false);
       };
     };
 
@@ -533,8 +533,18 @@ const TaskAssignPanel = {
             h("ul", { 'class': "list-group max-vh-40 overflow-auto border border-1", }, [
               assignData.analysis.map(item=>h("li", { 'class': "list-group-item", }, [
                 h("div", {}, [
+                  // <button
+                  //     type="button"
+                  //     class="btn btn-sm btn-light my-1 me-2"
+                  //     @click="modalBox_open('task-detail', theDB.taskDict[item?.plan?.id])"
+                  //   >task#{{item?.plan?.id}}</button>
                   h("span", {}, [
-                    `「${item?.plan?.topic} 任务 #${item.id}`,
+                    '「',
+                    h("button", {
+                      type: "button",
+                      class: "btn btn-sm btn-light my-1 me-2",
+                      onClick: ()=>props.modalBox.open('task-detail', spDB.taskDict[item?.plan?.id]),
+                    },  [`${item?.plan?.topic} 任务 #${item.id}`]),
                     h("span", {}, [" / "], ),
                     h("span", {}, [`语料 #${item?.plan?.entry}」`], ),
                   ], ),
@@ -556,21 +566,20 @@ const TaskAssignPanel = {
             ], ),
           ], ),
           h("div", { 'class': "col col-12 my-2", }, [
-            assignData.undone ? (
-              h("button", {
-                'type': "button",
-                'class': "btn btn-sm me-2 my-1 btn-danger",
-                '__click': doAssigment,
-                'onClick': ()=>{props.modalBox.open('confirm', {desc: '确定要执行规划好的任务安排吗？', action: doAssigment})();},
-                'title': "开始执行规划好的任务安排",
-              }, ["开始执行"], ),
-              h("button", {
-                'type': "button",
-                'class': "btn btn-sm me-2 my-1 btn-primary",
-                '__click': doAssigment,
-                'onClick': ()=>{exportPlan();},
-                'title': "开始执行规划好的任务安排",
-              }, ["导出计划"], )) : '',   
+            assignData.undone ? h("button", {
+              'type': "button",
+              'class': "btn btn-sm me-2 my-1 btn-danger",
+              // '__click': doAssigment,
+              'onClick': ()=>{props.modalBox.open('confirm', {desc: '确定要执行规划好的任务安排吗？', action: doAssigment});},
+              'title': "开始执行规划好的任务安排",
+            }, ["开始执行"], ) : null,
+            h("button", {
+              'type': "button",
+              'class': "btn btn-sm me-2 my-1 btn-primary",
+              // '__click': doAssigment,
+              'onClick': ()=>{exportPlan();},
+              'title': "开始执行规划好的任务安排",
+            }, ["导出计划"], ),    
             h("button", {
               'type': "button",
               'class': `btn btn-sm me-2 my-1 ${assignData.undone ? 'btn-outline-secondary' : 'btn-outline-success'}`,
