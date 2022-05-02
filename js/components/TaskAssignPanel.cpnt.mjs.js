@@ -387,9 +387,9 @@ const TaskAssignPanel = {
 
     return () => [
       h("div", { 'class': "row align-items-center my-2", }, [
-        h("div", { 'class': "col col-12", }, [
-          h("p", { 'class': "text-danger" }, ["开发中，存在严重 BUG ，请勿使用！！！"], ),
-        ], ),
+        // h("div", { 'class': "col col-12", }, [
+        //   h("p", { 'class': "text-danger" }, ["开发中，存在严重 BUG ，请勿使用！！！"], ),
+        // ], ),
         h("div", { 'class': "col col-12", }, [
           h("p", {}, ["说明：分配任务前，请先：1、在后端构建任务；2、刷新Task表；3、刷新Entry表。"], ),
         ], ),
