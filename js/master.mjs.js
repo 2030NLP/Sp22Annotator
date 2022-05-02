@@ -1134,6 +1134,10 @@ the_app.component('user-importer', UserImporter);
 
 
 
+// import BsBadge from './components/bs/BsBadge.cpnt.mjs.js';
+// the_app.component('bs-badge', BsBadge);
+
+
 const app = the_app.mount('#bodywrap');
 window.app = app;
 // the_app.config.globalProperties.$axios = axios;  // 用 app.theBackEnd 就可以调试了。
