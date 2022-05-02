@@ -264,7 +264,7 @@ const TaskAssignPanel = {
       exclusion=[],
       polygraphs_per_user={},  // TODO 选项配置
       retrieve=false,
-      tasks_idx_base=_.max(spDB.tasks.map(it=>+it.id)),
+      tasks_idx_base=lo.max(spDB.tasks.map(it=>+it.id)),
       lo,
     ) {
       console.log(arguments);
@@ -292,7 +292,7 @@ const TaskAssignPanel = {
       let e_ids = tasks.map(task => task['entry']);
       let entries = [];
       for (let e_id of e_ids) {
-        let entry_found = _.find(spDB.entries, it => (it['id']==e_id && !it['deleted']));
+        let entry_found = lo.find(spDB.entries, it => (it['id']==e_id && !it['deleted']));
         if (entry_found) {
           entries.push(entry_found);
         };
