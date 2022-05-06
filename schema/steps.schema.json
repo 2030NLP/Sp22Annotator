@@ -1,10 +1,10 @@
 {
   "name": "SpaCE2022",
-  "version": "220503v0",
+  "version": "220507",
   "versions": {
     "清洗": "220330",
     "第1期": "220421",
-    "第2期": "220503v0",
+    "第2期": "220507",
     "第3期": null,
     "精标": null
   },
@@ -372,7 +372,7 @@
               "style": "outline-danger"
             },
             {
-              "text": "不符合常识",
+              "text": "与常识或背景信息不符",
               "go": "handleReasonAgainstCommenSense",
               "style": "outline-danger"
             },
@@ -480,15 +480,15 @@
       },
       "handleReasonAgainstCommenSense": {
         "ref": "handleReasonAgainstCommenSense",
-        "name": "处理归因：不符合常识",
+        "name": "处理归因：与常识或背景信息不符",
         "mode": "text",
         "props": {
-          "selectInstruction": "请在文中划选不符合常识的文本片段",
-          "selectedTitle": "当前选中的不符合常识的文本片段是：",
-          "instruction": "请填写该片段所不符合的常识",
+          "selectInstruction": "请在文中划选有问题的文本片段",
+          "selectedTitle": "当前选中的文本片段是：",
+          "instruction": "请填写该片段所不符合的常识或背景信息",
           "data": {
             "label": "ReasonAgainstCommenSense",
-            "desc": "不符合常识",
+            "desc": "与常识或背景信息不符",
             "on": [],
             "withText": ""
           },

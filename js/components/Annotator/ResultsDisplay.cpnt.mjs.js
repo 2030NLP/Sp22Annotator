@@ -26,7 +26,7 @@ export default {
       if (!props.tokens?.length) {
         return JSON.stringify(idxes);
       };
-      return idxes.map(idx => props.tokens[idx]?.to?.word ?? props.tokens[idx]?.word ?? `[字符${idx}]`).join("");
+      return idxes.map(idx => props.tokens[idx]?.to?.word ?? props.tokens[idx]?.word ?? `[无效索引${idx}]`).join("");
     };
 
     const makeChildren = (annot) => {
