@@ -139,8 +139,8 @@ export default {
     return () => h("div", { },
       (props.annotations?.map?.(
         annot=>[
-          h(BsBadge, {
-            class: props.eachClass,
+          !annot.hidden ? h(BsBadge, {
+            class: [props.eachClass, {'d-none': annot.hidden}],
             key: annot.idx,
             title: props.showTitleDetail ? JSON.stringify(annot) : null,
             'data-mode': annot.mode,
@@ -149,8 +149,8 @@ export default {
             onClose: props.canClose ? (()=>{
               ctx.emit("close", annot);
             }) : (()=>{}),
-          }, makeChildren(annot)),
-          props.wrap ? h("br") : null,
+          }, makeChildren(annot)) : null,
+          !annot.hidden&&props.wrap ? h("br") : null,
         ] ?? []).flat()
       )
     );

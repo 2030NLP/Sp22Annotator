@@ -253,7 +253,7 @@
             <!-- 替换前原文区 结束 -->
             <!-- 便捷选择操作区 开始 -->
             <div class="row my-2" v-show="selection.array.length" id="convenient-ctrl">
-              <div class="col col-12 col-lg-12">
+              <div class="col col-12 col-lg-12 d-flex justify-content-end">
                 <button v-if=" 'multiSpans' == (currentStep.mode) && currentStep?.props?.addBtn" type="button" @click="currentStep?.props?.data.tokenarrays.push(selection.array)" class="btn btn-sm my-1 me-1" :class="`btn-outline-primary`">{{ currentStep.props.addBtn.text }}</button>
                 <button type="button" @click="tokenSelector.clear(getTokenList())" class="btn btn-sm my-1 me-1" :class="`btn-outline-info`">清除选区</button>
                 <button
@@ -289,6 +289,7 @@
               :tokens="example?.material?.tokenList"
               :modified-text="modifiedText"
               :selection="selection"
+              :alert-box="alertBox"
               @web-next="bEU.next(example)"
               @web-save="bEU.save(example)"
               @web-save-and-next="bEU.saveAndNext(example)"

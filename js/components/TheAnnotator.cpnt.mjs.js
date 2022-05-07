@@ -2,7 +2,7 @@ import {  reactive, computed, onMounted, h  } from '../modules_lib/vue_3.2.31_.e
 import BsBadge from './bs/BsBadge.cpnt.mjs.js';
 
 export default {
-  props: ["step", "engine", "tokenSelector", "stepCtrl", "tokens", "selection", "modifiedText"],
+  props: ["step", "engine", "tokenSelector", "stepCtrl", "tokens", "selection", "alertBox", "modifiedText"],
   emits: ["yy", "xx"],
   component: {
     BsBadge,
@@ -11,6 +11,10 @@ export default {
 
     const div = (attrs, children) => {
       return h("div", attrs, children);
+    };
+
+    const span = (attrs, children) => {
+      return h("span", attrs, children);
     };
 
     const someBtn = (btnSettings, clickFn, defaultText, disabled) => {
@@ -29,8 +33,14 @@ export default {
     };
 
     const someKeyText = (key) => {
-      return step_configs.value?.[key] ? div({ 'class': "col col-12 my-1", }, [
-        div({ }, [ step_configs.value?.[key], ]),
+      return step_props.value?.[key] ? div({ 'class': "col col-12 my-1", }, [
+        div({ }, [ step_props.value?.[key], ]),
+      ]) : null;
+    };
+
+    const someKeyString = (key) => {
+      return step_props.value?.strings?.[key] ? div({ 'class': "col col-12 my-1", }, [
+        div({ }, [ step_props.value?.strings?.[key], ]),
       ]) : null;
     };
 
@@ -49,6 +59,7 @@ export default {
     };
 
     const tokenSelector = props.tokenSelector;
+    const alertBox = props.alertBox;
     const stepCtrl = props.stepCtrl;
 
     const mode = computed(()=>props.step?.mode);
@@ -58,7 +69,7 @@ export default {
 
     const selection_length = computed(()=>(props.selection?.array?.length??0));
 
-    const step_configs = computed(()=>props.step?.props);
+    const step_props = computed(()=>props.step?.props);
 
     const isWeb = computed(()=>(props.engine??"").toLowerCase() == "web");
 
@@ -125,12 +136,12 @@ export default {
       Object.assign(disableDict, disableObj);
 
       return div({ 'class': "col col-12 my-1", }, [
-        someBtn(step_configs.value?.okBtn, fnDict['ok'], "完成", disableDict['ok']()),
-        someBtn(step_configs.value?.startBtn, fnDict['start'], "开始", disableDict['start']()),
-        // someBtn(step_configs.value?.cleanBtn, fnDict['clean'], "清除", disableDict['clean']()),
-        someBtn(step_configs.value?.cancelBtn, fnDict['cancel'], "取消", disableDict['cancel']()),
-        someBtn(step_configs.value?.resetBtn, fnDict['reset'], "重置", disableDict['reset']()),
-        isWeb.value ? null : someBtn(step_configs.value?.nextBtn, fnDict['next'], "下一条", disableDict['next']()),  // 仅限离线版
+        someBtn(step_props.value?.okBtn, fnDict['ok'], "完成", disableDict['ok']()),
+        someBtn(step_props.value?.startBtn, fnDict['start'], "开始", disableDict['start']()),
+        // someBtn(step_props.value?.cleanBtn, fnDict['clean'], "清除", disableDict['clean']()),
+        someBtn(step_props.value?.cancelBtn, fnDict['cancel'], "取消", disableDict['cancel']()),
+        someBtn(step_props.value?.resetBtn, fnDict['reset'], "重置", disableDict['reset']()),
+        isWeb.value ? null : someBtn(step_props.value?.nextBtn, fnDict['next'], "下一条", disableDict['next']()),  // 仅限离线版
       ]);
     };
 
@@ -147,9 +158,9 @@ export default {
       !selection_length.value ? someKeyText("selectInstruction") : null,
 
       // selected 已选指导语 + 已选片段(限1个token) | selectedTitle + selection
-      selection_length.value&&step_configs.value?.selectedTitle ? div({ 'class': "col col-12 my-1", }, [
+      selection_length.value&&step_props.value?.selectedTitle ? div({ 'class': "col col-12 my-1", }, [
         div({ }, [
-          step_configs.value?.selectedTitle,  // 类似于“选中的文本是”
+          step_props.value?.selectedTitle,  // 类似于“选中的文本是”
           "“",
           idxesToText([props.selection?.array?.[0]]),  // 只能选一个 token 所以是 [0]
           "”",
@@ -167,9 +178,9 @@ export default {
         div({ 'class': "col col-12 my-1", }, [
           h("select", {
             'class': "form-select form-select-sm",
-            'onChange': (value)=>{props.step.props.data.side=value;},
+            'onChange': (event)=>{step_props.value.data.side=event.target.value;},
           }, [
-            step_configs.value?.options?.map?.((option, index) => h('option', {
+            step_props.value?.options?.map?.((option, index) => h('option', {
               'key': index,
               'value': option.value,
             }, [option.text])),
@@ -185,8 +196,8 @@ export default {
           h("input", {
             'class': "form-control form-control-sm",
             'type': "text",
-            'onInput': (value)=>{props.step.props.data.target=value;},
-            'placeholder': step_configs.value?.addInstruction,
+            'onInput': (event)=>{step_props.value.data.target=event.target.value;},
+            'placeholder': step_props.value?.addInstruction,
           }),
         ]),
       ] : []),
@@ -202,18 +213,18 @@ export default {
           h("input", {
             'class': "form-control form-control-sm",
             'type': "text",
-            'onInput': (value)=>{props.step.props.data.target=value;},
-            'placeholder': step_configs.value?.instruction,
+            'onInput': (event)=>{step_props.value.data.target=event.target.value;},
+            'placeholder': step_props.value?.instruction,
           }),
         ]),
       ] : []),
 
       // 通用结束按钮区
       generalButtonsDiv({
-        'ok': ()=>{stepCtrl.handleWord(step_configs.value?.okBtn?.go, step_configs.value?.data)},
-        'cancel': ()=>{stepCtrl.cancelStep(step_configs.value?.cancelBtn?.go)},
+        'ok': ()=>{stepCtrl.handleWord(step_props.value?.okBtn?.go, step_props.value?.data)},
+        'cancel': ()=>{stepCtrl.cancelStep(step_props.value?.cancelBtn?.go)},
       }, {
-        'ok': ()=> (!selection_length.value)||(modeMatch("add", "modify") && !step_configs.value?.data?.target?.length),
+        'ok': ()=> (!selection_length.value)||(modeMatch("add", "modify") && !step_props.value?.data?.target?.length),
         'cancel': ()=>false,
       }),
 
@@ -228,18 +239,17 @@ export default {
 
       // selected 已选指导语 + 已选片段(不限token数) | selectedTitle + selection
       modeMatch("choose", "text")&&
-      selection_length.value&&step_configs.value?.selectedTitle ? div({ 'class': "col col-12 my-1", }, [
+      selection_length.value&&step_props.value?.selectedTitle ? div({ 'class': "col col-12 my-1", }, [
         div({ }, [
-          step_configs.value?.selectedTitle,  // 类似于“选中的文本是”
+          step_props.value?.selectedTitle,  // 类似于“选中的文本是”
           "“",
           idxesToText(props.selection?.array),  // 可以和上面 editModeSection 代码合并
           "”",
         ]),
       ]) : null,
 
-
       // choose || text 模式 专属内容
-      ...( (selection_length.value || step_configs.value?.canSkipSelection) ? [
+      ...( (selection_length.value || step_props.value?.canSkipSelection) ? [
         // 指导语
         // 类似于“要附加的说明性文本是”
         someKeyText("instruction"),
@@ -248,9 +258,9 @@ export default {
         modeMatch("choose") ? div({ 'class': "col col-12 my-1", }, [
           h("select", {
             'class': "form-select form-select-sm",
-            'onChange': (event)=>{props.step.props.data.withText=event.target.value;},
+            'onChange': (event)=>{step_props.value.data.withText=event.target.value;},
           }, [
-            step_configs.value?.options?.map?.((option) => h('option', {
+            step_props.value?.options?.map?.((option) => h('option', {
               'key': index,
               'value': option,
             }, [option])),
@@ -262,8 +272,8 @@ export default {
           h("input", {
             'class': "form-control form-control-sm",
             'type': "text",
-            'onInput': (event)=>{props.step.props.data.withText=event.target.value;},
-            'placeholder': step_configs.value?.instruction,
+            'onInput': (event)=>{step_props.value.data.withText=event.target.value;},
+            'placeholder': step_props.value?.instruction,
           }),
         ]) : null,
 
@@ -271,12 +281,12 @@ export default {
 
       // 通用结束按钮区
       generalButtonsDiv({
-        'ok': ()=>{stepCtrl.handleChooseOrText(step_configs.value?.okBtn?.go, step_configs.value?.data)},
-        'cancel': ()=>{stepCtrl.cancelStep(step_configs.value?.cancelBtn?.go)},
+        'ok': ()=>{stepCtrl.handleChooseOrText(step_props.value?.okBtn?.go, step_props.value?.data)},
+        'cancel': ()=>{stepCtrl.cancelStep(step_props.value?.cancelBtn?.go)},
       }, {
         'ok': ()=>
-          (!step_configs.value?.canSkipSelection&&!selection_length.value)||
-          (!step_configs.value?.canSkipText&&!step_configs.value?.data?.withText?.length),
+          (!step_props.value?.canSkipSelection&&!selection_length.value)||
+          (!step_props.value?.canSkipText&&!step_props.value?.data?.withText?.length),
         'cancel': ()=>false,
       }),
 
@@ -291,9 +301,9 @@ export default {
         ]),
         div({ 'class': "col col-12 my-1", }, [
           div({ 'class': "text-muted small" }, [
-            h("span", {}, [ prps.modifiedText.sideL ]),
-            h("span", { 'class': "text-danger fw-bold" }, [ prps.modifiedText.sideM ]),
-            h("span", {}, [ prps.modifiedText.sideR ]),
+            h("span", {}, [ props.modifiedText.sideL ]),
+            h("span", { 'class': "text-danger fw-bold" }, [ props.modifiedText.sideM ]),
+            h("span", {}, [ props.modifiedText.sideR ]),
           ]),
         ]),
       ] : []),
@@ -307,12 +317,12 @@ export default {
       // 增加到列表
       // 清除选区
       div({ 'class': "col col-12 my-1", }, [
-        someBtn(step_configs.value?.addBtn, (go)=>{
+        someBtn(step_props.value?.addBtn, (go)=>{
           ctx.emit('add-to-list', go);
-          step_configs.value?.data?.tokenarrays?.push?.(props.selection?.array);
+          step_props.value?.data?.tokenarrays?.push?.(props.selection?.array);
           clearSelector();
         }, "add to list", selection_length.value<1),
-        someBtn(step_configs.value?.clearBtn, (go)=>{
+        someBtn(step_props.value?.clearBtn, (go)=>{
           ctx.emit('clear-selection', go);
           clearSelector();
         }, "clear selection"),
@@ -324,7 +334,7 @@ export default {
       // 已选列表
       div({ 'class': "col col-12 my-1", }, [
         div({ 'class': "card" }, [
-          div({ 'class': "card-body" }, (step_configs.value?.data?.tokenarrays??[]).map((tokenIdxArray, idx) => h(
+          div({ 'class': "card-body" }, (step_props.value?.data?.tokenarrays??[]).map((tokenIdxArray, idx) => h(
             BsBadge, {
               'class': "rounded-pill m-1",
               'key': "idx",
@@ -340,24 +350,264 @@ export default {
       ]),
 
       // 选择数量提示 | 至少选2个片段
-      (step_configs.value?.data?.tokenarrays?.length??0)<2 ? someKeyText("lengthTip") : null,
+      (step_props.value?.data?.tokenarrays?.length??0)<2 ? someKeyText("lengthTip") : null,
 
       // 通用结束按钮区
       generalButtonsDiv({
         'ok': ()=>{
-          stepCtrl.handleMultiSpans(step_configs.value?.okBtn?.go, step_configs.value?.data);
+          stepCtrl.handleMultiSpans(step_props.value?.okBtn?.go, step_props.value?.data);
           clearSelector();
         },
         'cancel': ()=>{
-          stepCtrl.cancelStep(step_configs.value?.cancelBtn?.go);
+          stepCtrl.cancelStep(step_props.value?.cancelBtn?.go);
           clearSelector();
         },
       }, {
-        'ok': ()=>(step_configs.value?.data?.tokenarrays?.length<2),
+        'ok': ()=>(step_props.value?.data?.tokenarrays?.length<2),
         'cancel': ()=>false,
       }),
 
     ];
+
+
+    const theSpaCE2022_Task2_ModeSection = () => {
+      // 目前包括两种 actualMode:
+      //   doubleSpans, spanWithComment
+      // 各种指导语写在 step_props.value?.strings 对象里，通过 someKeyString 函数调用
+      //   chooseInstruction, selectInstruction
+
+      // data 里有 items 数组，存放各个子 data
+      // 需要 StepControl.mjs.js 相应配合???不用了，直接输出多个 data 到 annotations 里
+
+      const ensureOptionItem = (optIdx) => {
+        if (!('items' in step_props.value.data)) {
+          step_props.value.data.items=[];
+        };
+        if (!step_props.value.data.items[optIdx]) {
+          step_props.value.data.items[optIdx]={};
+        };
+      };
+      const ensureSlot = (optIdx, slotIdx) => {
+        ensureOptionItem(optIdx);
+        if (!('slots' in step_props.value.data.items[optIdx])) {
+          step_props.value.data.items[optIdx].slots=[];
+        };
+        if (!step_props.value.data.items[optIdx].slots[slotIdx]) {
+          step_props.value.data.items[optIdx].slots[slotIdx]={};
+        };
+      };
+      const getOptionItem = (optIdx) => {
+        return step_props.value?.data?.items?.[optIdx];
+      };
+      const touchOptionItem = (optIdx) => {
+        ensureOptionItem(optIdx);
+        return getOptionItem(optIdx);
+      };
+      const getSlot = (optIdx, slotIdx) => {
+        return step_props.value?.data?.items?.[optIdx]?.slots?.[slotIdx];
+      };
+      const touchSlot = (optIdx, slotIdx) => {
+        ensureSlot(optIdx, slotIdx);
+        return getSlot(optIdx, slotIdx);
+      };
+      // const setSlot = (optIdx, slotIdx, data) => {
+      //   ensureSlot(optIdx, slotIdx);
+      //   step_props.value.data.items[optIdx].slots[slotIdx] = data;
+      // };
+      const 已填 = (optIdx, slotIdx) => {
+        return null != getSlot(optIdx, slotIdx)?.tokenarray;
+      };
+
+      const dealWithData = (data) => {
+        if (!stepCtrl?.ewp?.example?.annotations?.length) {
+          stepCtrl.ewp.example.annotations = [];
+        };
+        let idx = stepCtrl.ewp.example.annotations.length;
+        data.idx = idx;
+        data.mode = data.displayMode;
+
+        stepCtrl.ewp.example.annotations.push(JSON.parse(JSON.stringify(data)));
+        return data;
+      };
+
+      const processDataList = () => {
+        let dataList = [];
+        for (let optIdx in step_props.value?.data?.items??[]) {
+          let item = step_props.value?.data?.items?.[optIdx];
+          if (!!item && item.shouldTake) {
+            let data = step_props.value?.options?.[optIdx]?.data;
+            for (let slot of item.slots??[]) {
+              if (slot?.withText?.length && 'withText' in data) {
+                data.withText = slot.withText;
+              };
+              if (slot?.tokenarray?.length && 'tokenarrays' in data) {
+                data.tokenarrays.push(slot.tokenarray);
+              };
+              if (slot?.tokenarray?.length && 'on' in data) {
+                data.on = slot.tokenarray;
+              };
+            };
+            dataList.push(data);
+          };
+        };
+        return dataList;
+      };
+
+      const canSubmit = () => {
+        const items = step_props.value?.data?.items?.filter?.(it=>it?.shouldTake)??[];
+        const jj1 = items.length>0;
+        let jj2 = true;
+        outter:
+        for (let item of items) {
+          const slots = item?.slots?.filter?.(it=>it)??[];
+          if ((slots?.length??0)<2) {jj2 = false; break outter;};
+          for (let slot of slots??[]) {
+            if ('tokenarray' in slot && !slot.tokenarray?.length) {jj2 = false; break outter;};
+            if ('withText' in slot && !slot.withText?.length) {jj2 = false; break outter;};
+          };
+        };
+        return jj1 && jj2;
+      };
+
+      const checkBeforeSubmit = () => {
+        let checkResult = true;
+        const items = step_props.value?.data?.items?.filter?.(it=>it?.shouldTake)??[];
+        outter:
+        for (let item of items) {
+          const slots = item?.slots?.filter?.(it=>it)??[];
+          let tokenarrays = [];
+          for (let slot of slots??[]) {
+            if ('tokenarray' in slot && slot.tokenarray?.length) {
+              tokenarrays.push(slot.tokenarray);
+              if (tokenarrays.length>1) {
+                let aa = tokenarrays.at(-1);
+                let bb = tokenarrays.at(-2);
+                if (_.intersection(aa, bb).length>0) {
+                  alertBox.pushAlert('某条标注中的两个文本片段存在交集，请确认无误再保存', 'warning', 5000);
+                  break outter;
+                };
+              };
+            };
+          };
+        };
+        return checkResult;
+      };
+
+      return [
+        // 总指导语
+        someKeyString("instruction"),
+
+        // options 列出了每个选项的情况
+        // option.actualMode  -- 实际模式
+        // option.data  -- 最后要保存的数据形式
+        //   根据 option.data.displayMode 来决定提供什么样的数据格式
+        // option.slots  -- 显示时罗列的槽位信息
+        //   slot.type   -- select 在文中选择文本片段, solid-text 固定的文本, input-text 输入文本
+        //   slot.value  -- 目前仅是 solid-text 的 文本内容
+        div({ 'class': "col col-12 my-1", }, [
+          div({}, step_props.value?.options?.map?.((option, optIdx)=>{
+
+            const onInputFn = option.actualMode == "spanWithComment" ? (optIdx, slotIdx, event)=>{
+              touchSlot(optIdx, slotIdx).withText=event.target.value;
+            } : ()=>{};
+
+            return div({'class': "--d-inline-block"}, div({
+              'class': "input-group input-group-sm my-1",
+              'key': optIdx,
+            }, [
+              span({'class': "input-group-text"}, h("input", {
+                'class': "form-check-input mt-0",
+                'type': "checkbox",
+                'checked': touchOptionItem(optIdx)?.shouldTake,
+                'onChange': (event)=>{
+                  // console.log(event.target.checked);
+                  let shouldTake = event.target.checked;
+                  touchOptionItem(optIdx).shouldTake = shouldTake;
+                },
+              })),
+              ...option?.slots?.map?.((slot, slotIdx)=>{
+                if (slot.type=="solid-text") {
+                  return span({'class': "input-group-text", 'key': slotIdx}, [slot.value]);
+                };
+                if (slot.type=="select") {
+                  if (!已填(optIdx, slotIdx)||!touchOptionItem(optIdx).shouldTake) {
+                    // 还没填写时
+                    // 1、如果还没选文本，则显示「💬」，鼠标移上去的时候显示「 selectInstruction “请在文中选择文本” 」
+                    // 2、如果选择了文本，则显示「⤵️」，鼠标移上去的时候显示「 insertInstruction “将选中的文本填入此处” 」
+                    return div({
+                      'class': ["form-control d-inline-block text-center", {
+                        "disabled bg-gray-200": !touchOptionItem(optIdx).shouldTake,
+                        "cursor-pointer": touchOptionItem(optIdx).shouldTake&&selection_length.value,
+                      }], 'key': slotIdx,
+                      'title': step_props.value?.strings?.[selection_length.value?'insertInstruction':null],
+                      'disabled': !touchOptionItem(optIdx).shouldTake,
+                    }, touchOptionItem(optIdx).shouldTake ? h(BsBadge, {
+                      'class': ["rounded-pill m-1", {
+                        "cursor-help": !selection_length.value,
+                      }],
+                      'title': step_props.value?.strings?.[selection_length.value?'insertInstruction':'selectInstruction'],
+                      'onClick': (event)=>{
+                        if (!selection_length.value) {return;};
+                        touchSlot(optIdx, slotIdx).tokenarray = props.selection.array;
+                        clearSelector();
+                      },
+                    }, [selection_length.value?"填入 ⤵️":"💬"]) : null);
+                  };
+                  if (已填(optIdx, slotIdx)&&touchOptionItem(optIdx).shouldTake) {
+                    let text = idxesToText(getSlot(optIdx, slotIdx)?.tokenarray??[]);
+                    return div({'class': "form-control d-inline-block text-center text-break", 'key': slotIdx}, [h(BsBadge, {
+                      'class': "rounded-pill m-1 text-wrap text-break",
+                      'canRemove': true,
+                      'onRemove': (event)=>{
+                        touchSlot(optIdx, slotIdx).tokenarray = null;
+                      },
+                    }, [text])]);
+                  };
+                };
+                if (slot.type=="input-text") {return h("textarea", {
+                  'class': "form-control form-control-sm text-center",
+                  'disabled': !touchOptionItem(optIdx).shouldTake,
+                  'row': "1",
+                  // 'type': "text",
+                  'key': slotIdx,
+                  'onInput': (event)=>{onInputFn(optIdx, slotIdx, event)},
+                  // 'placeholder': step_props.value?.instruction,
+                })}
+              }),
+
+
+            ]));
+          })),
+        ]),
+
+        // 通用结束按钮区
+        generalButtonsDiv({
+          'ok': async(go)=>{
+            const checkResult = checkBeforeSubmit();
+            if (!checkResult) {return;};
+            // await stepCtrl.handle_SpaCE2022_Task2(step_props.value?.okBtn?.go, step_props.value?.data);
+            const dataList = processDataList();
+            for (let data of dataList) {
+              dealWithData(data);
+            };
+            clearSelector();
+            await stepCtrl.goRefStep(go);
+          },
+          'reset': ()=>{
+            step_props.value.data.items=[];
+            clearSelector();
+          },
+          'cancel': ()=>{
+            stepCtrl.cancelStep(step_props.value?.cancelBtn?.go);
+            clearSelector();
+          },
+        }, {
+          'ok': ()=>!canSubmit(),
+          'cancel': ()=>false,
+        }),
+
+      ];
+    };
 
 
 
@@ -367,6 +617,7 @@ export default {
       ...(modeMatch("add", "modify", "delete") ? editModeSection() : []),
       ...(modeMatch("choose", "text") ? commentModeSection() : []),
       ...(modeMatch("multiSpans") ? multiSpansModeSection() : []),
+      ...(modeMatch("SpaCE2022_Task2") ? theSpaCE2022_Task2_ModeSection() : []),
 
       // 指导语
       // finalResult 模式
@@ -374,14 +625,14 @@ export default {
       // interlude 模式 且 showResults 👎
       // root 模式 👎
       modeMatch("finalResult", "selectValue", "root") ? someKeyText("instruction") : null,
-      modeMatch("interlude") /*&& step_configs.value?.showResults*/ ? someKeyText("instruction") : null,
+      modeMatch("interlude") /*&& step_props.value?.showResults*/ ? someKeyText("instruction") : null,
 
       // 选项按钮组
       // selectValue 模式
       // interlude 模式 👎
       modeMatch("selectValue", "interlude") &&
-      step_configs.value?.optionBtns ? div({ 'class': "col col-12 my-1", }, [
-        ...step_configs.value?.optionBtns.map(btn => someBtn(btn, ()=>{
+      step_props.value?.optionBtns ? div({ 'class': "col col-12 my-1", }, [
+        ...step_props.value?.optionBtns.map(btn => someBtn(btn, ()=>{
           ctx.emit('option', btn);
           stepCtrl.goRefStep(btn.go, btn.data);
         })),
@@ -396,11 +647,11 @@ export default {
       // 重置按钮 reset    | selectValue | interlude 👎 | finalResult
       // 下一条按钮 next   | finalResult ⛔️
       modeMatch("finalResult", "selectValue", "interlude", "root") ? generalButtonsDiv({
-        'cancel': ()=>{stepCtrl.cancelStep(step_configs.value?.cancelBtn?.go)},
-        'start': ()=>{stepCtrl.cancelStep(step_configs.value?.startBtn?.go)},
-        'reset': ()=>{stepCtrl.resetStep(step_configs.value?.resetBtn?.go)},
-        'next': ()=>{stepCtrl.nextStep(step_configs.value?.nextBtn?.go)},
-        'ok': ()=>{stepCtrl.goRefStep(step_configs.value?.okBtn?.go)},
+        'cancel': ()=>{stepCtrl.cancelStep(step_props.value?.cancelBtn?.go)},
+        'start': ()=>{stepCtrl.cancelStep(step_props.value?.startBtn?.go)},
+        'reset': ()=>{stepCtrl.resetStep(step_props.value?.resetBtn?.go)},
+        'next': ()=>{stepCtrl.nextStep(step_props.value?.nextBtn?.go)},
+        'ok': ()=>{stepCtrl.goRefStep(step_props.value?.okBtn?.go)},
       }) : null,
 
 
