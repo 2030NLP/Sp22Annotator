@@ -1,9 +1,10 @@
-import {  reactive, computed, onMounted, h  } from '../modules_lib/vue_3.2.31_.esm-browser.prod.min.js';
+import {  reactive, computed, onMounted, h  } from './_VueShadow.mjs.js';
 import BsBadge from './bs/BsBadge.cpnt.mjs.js';
-import gen_SpaCE2022_Task2_ModeSection from './AnnotatingModes/mode_SpaCE2022_Task2.mjs.js';
 import gen_editModeSection from './AnnotatingModes/mode_edit.mjs.js';
 import gen_commentModeSection from './AnnotatingModes/mode_comment.mjs.js';
 import gen_multiSpansModeSection from './AnnotatingModes/mode_multiSpans.mjs.js';
+import gen_SpaCE2022_Task2_ModeSection from './AnnotatingModes/mode_SpaCE2022_Task2.mjs.js';
+import gen_CSpaceBank_ModeSection from './AnnotatingModes/mode_CSpaceBank.mjs.js';
 
 export default {
   props: ["step", "engine", "tokenSelector", "stepCtrl", "tokens", "selection", "alertBox", "modifiedText"],
@@ -61,7 +62,7 @@ export default {
       "text": "text",
       "root": "root",
       "SpaCE2022_Task2": "SpaCE2022_Task2",
-      "SpaCE2022_Task3": "SpaCE2022_Task3",
+      "CSpaceBank": "CSpaceBank",
     };
 
     const tokenSelector = props.tokenSelector;
@@ -80,6 +81,7 @@ export default {
     const isWeb = computed(()=>(props.engine??"").toLowerCase() == "web");
 
     const idxesToText = (idxes)=>{
+      idxes = idxes??[];
       if (!props.tokens?.length) {
         return JSON.stringify(idxes);
       };
@@ -194,12 +196,14 @@ export default {
     const multiSpansModeSection = gen_multiSpansModeSection(__pack);
 
     const theSpaCE2022_Task2_ModeSection = gen_SpaCE2022_Task2_ModeSection(__pack);
+    const theCSpaceBank_ModeSection = gen_CSpaceBank_ModeSection(__pack);
 
     return () => div({ 'class': "row", 'data-mode': mode.value, }, [
       ...(modeMatch("add", "modify", "delete") ? editModeSection() : []),
       ...(modeMatch("choose", "text") ? commentModeSection() : []),
       ...(modeMatch("multiSpans") ? multiSpansModeSection() : []),
       ...(modeMatch("SpaCE2022_Task2") ? theSpaCE2022_Task2_ModeSection() : []),
+      ...(modeMatch("CSpaceBank") ? theCSpaceBank_ModeSection() : []),
 
       // 指导语
       // finalResult 模式

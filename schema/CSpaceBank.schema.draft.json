@@ -2,6 +2,46 @@
 
 
 
+{
+  "_types": {
+    "SpEntity": {
+      "fields": {"fictive": {}, "dummy": {}, "spans": {}}
+    },
+    "Span": {
+      "fields": {"text": {}, "tknIdxes": {}, "role": {}}
+    },
+    "RoleSpan": {
+      "fields": {"text": {}, "tknIdxes": {}, "role": {}}
+    },
+    "Mark": {
+      "fields": {"mark": {}}
+    },
+  },
+
+  "entities": [
+    {"ettidx": 0, "_text": "史婆婆", "_tknIdxes": [], "_type": "", "_coRef": []},
+    {"ettidx": 1, "_text": "我", "_tknIdxes": [], "_type": "", "_coRef": [0]}
+  ],
+  "events": [],
+  "relations": [],
+
+
+  "_completed": false,
+  "_standard": {"name": "CSpaceBank", "version": "22.0515.00"}
+}
+
+
+{"_type": "@Span", "text": "史婆婆", "tknIdxes": []}
+{"_type": "@RoleSpan", "text": "史婆婆", "tknIdxes": [], "role": null}
+{"_type": "@RoleSpan", "text": "在", "tknIdxes": [], "role": "prep"}
+{"_type": "@Mark", "mark": "##"}
+
+
+
+
+
+
+
 
 
 "%谓词%"
@@ -119,27 +159,26 @@
   "%动词%"
 
 
-"%...%"
-"#...#"
-"$...$"
-"##"
-":"
-","
-"[...]"
-"<...>"
-"(...)"
-"."
-"+"
-"~"
-"^"
-"|"
-">"
-"<"
-"@"
-
-
-
-
+{"_type": "@CSB.Mark", "face": "%", "desc": "谓词包裹", "ref": ""}
+{"_type": "@CSB.Mark", "face": "#", "desc": "现实实体包裹", "ref": ""}
+{"_type": "@CSB.Mark", "face": "$", "desc": "虚拟实体包裹", "ref": ""}
+{"_type": "@CSB.Mark", "face": "##", "desc": "词分隔", "ref": ""}
+{"_type": "@CSB.Mark", "face": ":", "desc": "键值对内分隔", "ref": ""}
+{"_type": "@CSB.Mark", "face": ",", "desc": "键值对间分隔", "ref": ""}
+{"_type": "@CSB.Mark", "face": "[", "desc": "列表始", "ref": ""}
+{"_type": "@CSB.Mark", "face": "]", "desc": "列表末", "ref": ""}
+{"_type": "@CSB.Mark", "face": "<", "desc": "路径值节点或介词始", "ref": ""}
+{"_type": "@CSB.Mark", "face": ">", "desc": "路径值节点或介词末", "ref": ""}
+{"_type": "@CSB.Mark", "face": "(", "desc": "函数参数始", "ref": ""}
+{"_type": "@CSB.Mark", "face": ")", "desc": "函数参数末", "ref": ""}
+{"_type": "@CSB.Mark", "face": ".", "desc": "子值", "ref": ""}
+{"_type": "@CSB.Mark", "face": "+", "desc": "拼接", "ref": ""}
+{"_type": "@CSB.Mark", "face": "~", "desc": "非", "ref": ""}
+{"_type": "@CSB.Mark", "face": "^", "desc": "与", "ref": ""}
+{"_type": "@CSB.Mark", "face": "|", "desc": "或", "ref": ""}
+{"_type": "@CSB.Mark", "face": ">", "desc": "大于", "ref": ""}
+{"_type": "@CSB.Mark", "face": "<", "desc": "小于", "ref": ""}
+{"_type": "@CSB.Mark", "face": "@", "desc": "引用符，相当于取别名", "ref": ""}
 
 
 

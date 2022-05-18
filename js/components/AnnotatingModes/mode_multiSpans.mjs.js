@@ -1,5 +1,5 @@
 
-const gen_multiSpansModeSection = (__pack) => {
+const genModeSection = (__pack) => {
 
   let {
     h, div, span,
@@ -83,5 +83,5 @@ const gen_multiSpansModeSection = (__pack) => {
   };
 };
 
-export default gen_multiSpansModeSection;
+export default genModeSection;
 

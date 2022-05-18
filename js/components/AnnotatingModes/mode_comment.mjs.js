@@ -1,5 +1,5 @@
 
-const gen_commentModeSection = (__pack) => {
+const genModeSection = (__pack) => {
 
   let {
     h, div, span,
@@ -97,5 +97,5 @@ const gen_commentModeSection = (__pack) => {
   };
 };
 
-export default gen_commentModeSection;
+export default genModeSection;
 

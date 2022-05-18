@@ -1,5 +1,5 @@
 
-const gen_editModeSection = (__pack) => {
+const genModeSection = (__pack) => {
 
   let {
     h, div, span,
@@ -99,5 +99,5 @@ const gen_editModeSection = (__pack) => {
   };
 };
 
-export default gen_editModeSection;
+export default genModeSection;
 

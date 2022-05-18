@@ -1,5 +1,5 @@
 
-const gen_SpaCE2022_Task2_ModeSection = (__pack) => {
+const genModeSection = (__pack) => {
 
   let {
     div, span, h,
@@ -292,5 +292,5 @@ const gen_SpaCE2022_Task2_ModeSection = (__pack) => {
   };
 };
 
-export default gen_SpaCE2022_Task2_ModeSection;
+export default genModeSection;
 
