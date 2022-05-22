@@ -5,11 +5,93 @@
     "清洗": "220330",
     "第1期": "220421",
     "第2期": "220507v1",
-    "第3期": null,
-    "精标": null
+    "第3期": "",
+    "精标": "220515"
   },
   "using": "第2期",
   "第2期": {
+    "其实是": "精标",
+    "startStep": "start",
+    "endStep": "end",
+    "steps": {
+      "end": {
+        "ref": "end",
+        "name": "标注结果",
+        "mode": "finalResult",
+        "props": {
+          "instruction": "",
+          "canReset": true,
+          "resetBtn": {
+            "text": "清空并重新标注",
+            "go": "start",
+            "style": "outline-danger"
+          },
+          "__cancelBtn": {
+            "text": "增加标注",
+            "go": "start",
+            "style": "outline-primary"
+          },
+          "nextBtn": {
+            "text": "下一条",
+            "style": "outline-primary"
+          }
+        }
+      },
+      "start": {
+        "ref": "start",
+        "name": "处理异常归因",
+        "mode": "CSpaceBank",
+        "props": {
+          "strings": {
+            "instruction": "请按照 CSpaceBank 标注规范进行标注。",
+            "entities": "实体清单",
+            "events": "事件清单",
+            "relations": "空间关系清单",
+            "eddEvent": "添加事件",
+            "eddRelation": "添加空间关系",
+            "entityType": "实体类型",
+            "relationType": "关系类型",
+            "__________": "__________"
+          },
+          "data": {
+            "hidden": true,
+            "items": []
+          },
+          "options": [
+            {
+              "text": "语义冲突",
+              "style": "outline-danger",
+              "actualMode": "doubleSpans",
+              "data": {
+                "parentMode": "CSpaceBank",
+                "actualMode": "doubleSpans",
+                "displayMode": "multiSpans",
+                "label": "ReasonSemanticConflict",
+                "desc": "语义冲突",
+                "tokenarrays": []
+              },
+              "slots": [{"type": "select"}, {"type": "solid-text", "value": "与"}, {"type": "select"}, {"type": "solid-text", "value": "语义冲突"}]
+            }
+          ],
+          "okBtn": {
+            "text": "完成",
+            "go": "end",
+            "style": "outline-success"
+          },
+          "resetBtn": {
+            "text": "重置",
+            "style": "outline-danger"
+          },
+          "__cancelBtn": {
+            "text": "取消",
+            "go": "start",
+            "style": "outline-dark"
+          }
+        }
+      }
+    }
+  },
+  "第2期_真正_现在那个是精标": {
     "startStep": "start",
     "endStep": "end",
     "steps": {

@@ -30,7 +30,6 @@ export default (__pack) => {
     generalButtonsDiv,
 
     __LODASH,
-    CMR,
   } = __pack;
   // ========== ========== ========== ========== ========== ========== ========== ==========
 
@@ -78,131 +77,93 @@ export default (__pack) => {
 
   // ========== ========== ========== ========== ========== ========== ========== ==========
 
-  const TpSpan = "@Sp22Annotator.Span";
-  const TpEntity = "@CSpaceBank.Entity";
-  const TpEvent = "@CSpaceBank.Event";
-  const TpSpRelation = "@CSpaceBank.SpRelation";
-
-  // ========== ========== ========== ========== ========== ========== ========== ==========
-
-  const reactiveCMR = reactive(new CMR);
-
-  const analysis = (posList, typeRefName) => {
-    let tempSpan = {
-      "_type": TpSpan,
-      "text": "",
-      "tknIdxes": [],
+  const analysis = (posList, array) => {
+    let temp = {
+      text: "",
+      tknIdxes: [],
     };
     for (let token of props.tokens??[]) {
       if (!posList.includes(token.pos)) {continue;};
       if (token.seg==null||token.seg=="S") {
-        tempSpan = {
-          "_type": TpSpan,
-          "text": idxesToText([token.idx]),
-          "tknIdxes": [token.idx],
+        temp = {
+          text: idxesToText([token.idx]),
+          tknIdxes: [token.idx],
         };
-        let spanObj = reactiveCMR.makeNewObject(tempSpan);
-        reactiveCMR.makeNewObject({
-          "_type": typeRefName,
-          "_refSpans": [`#${spanObj["_id"]}`],
-        });
-        tempSpan = {
-          "_type": TpSpan,
-          "text": "",
-          "tknIdxes": [],
-        };
+        array.push(temp);
         continue;
       };
       if (token.seg=="B") {
-        tempSpan = {
-          "_type": TpSpan,
-          "text": idxesToText([token.idx]),
-          "tknIdxes": [token.idx],
-        };
+        temp.text = idxesToText([token.idx]);
+        temp.tknIdxes = [token.idx];
         continue;
       };
       if (token.seg=="M") {
-        tempSpan["text"] = `${tempSpan.text}${idxesToText([token.idx])}`;
-        tempSpan["tknIdxes"] = [...tempSpan.tknIdxes, token.idx];
+        temp.text = `${temp.text}${idxesToText([token.idx])}`;
+        temp.tknIdxes = [...temp.tknIdxes, token.idx];
         continue;
       };
       if (token.seg=="E") {
-        tempSpan["text"] = `${tempSpan.text}${idxesToText([token.idx])}`;
-        tempSpan["tknIdxes"] = [...tempSpan.tknIdxes, token.idx];
-        reactiveCMR.makeNewObject(tempSpan);
-        let spanObj = reactiveCMR.makeNewObject(tempSpan);
-        reactiveCMR.makeNewObject({
-          "_type": typeRefName,
-          "_refSpans": [`#${spanObj["_id"]}`],
-        });
-        tempSpan = {
-          "_type": TpSpan,
-          "text": "",
-          "tknIdxes": [],
-        };
+        temp.text = `${temp.text}${idxesToText([token.idx])}`;
+        temp.tknIdxes = [...temp.tknIdxes, token.idx];
+        array.push(temp);
         continue;
       };
     };
+    console.log(array);
   };
 
   const analysisEntities = () => {
-    analysis(["n", "nr", "ns", "r", "s"], TpEntity);
+    analysis(["n", "nr", "ns", "r", "s"], modeData.entities);
   };
 
   const analysisEvents = () => {
-    analysis(["v"], TpEvent);
+    analysis(["v"], modeData.events);
   };
 
-  const spanOfItem = (item) => {
-    if (item["_type"] == TpSpan) {return item};
-    if (_refSpans in item) {
-      return reactiveCMR.get(item._refSpans)};
-    if (_clueSpans in item) {
-      return reactiveCMR.get(item._clueSpans)};
-  };
-
-  const sortObjects = () => {
-    const sortBasis = it => reactiveCMR.get(it?._refSpans)?.["tknIdxes"]?.[0]??-1;
-    reactiveCMR.objects = __LODASH.sortBy(reactiveCMR.objects, ["_type", sortBasis]);
-  };
-
-  const deletObject = (id) => {
-    deleteObject(id);
-  };
-
-  const accountNewObject = (typeRefName) => {
-    if (selection_length) {
-      const tempSpan = {
-        "_type": TpSpan,
-        "text": idxesToText(props.selection?.array),
-        "tknIdxes": props.selection?.array,
+  const reindexEntities = (map) => {
+    for (let entity of modeData.entities) {
+      if (entity.plural) {
+        entity.members = (entity.members??[]).map(idx=>map[idx]).filter(it=>it!=null);
       };
-      let spanObj = reactiveCMR.makeNewObject(tempSpan);
-      reactiveCMR.makeNewObject({
-        "_type": typeRefName,
-        "_refSpans": [`#${spanObj["_id"]}`],
+      entity.corefs = (entity.corefs??[]).map(idx=>map[idx]).filter(it=>it!=null);
+    };
+  };
+
+  const sortEntities = () => {
+    //
+    let ll = modeData.entities.map((entity, idx)=>[idx, entity?.tknIdxes?.[0]]);
+    ll.sort((a, b)=>(a[1]??-1)-(b[1]??-1));
+    let pp = ll.map((pair, newIdx)=>[pair[0], newIdx]);
+    const map = Object.fromEntries(pp);
+    console.log(map);
+    //
+    modeData.entities.sort((a, b)=>(a?.tknIdxes?.[0]??-1)-(b?.tknIdxes?.[0]??-1));
+    reindexEntities(map);
+  };
+
+  const deleteEntity = (idx) => {
+    // 构造新旧 idx 的映射
+    const map = {};
+    let jjd = 0;
+    for (let iid=0; iid<modeData.entities.length; iid++) {
+      if (idx == iid) {continue;};
+      map[iid] = jjd;
+      jjd++;
+    };
+    reindexEntities(map);
+    modeData.entities.splice(idx, 1);
+  };
+
+  const makeNewEntity = () => {
+    if (selection_length) {
+      modeData.entities.push({
+        text: idxesToText(props.selection?.array),
+        tknIdxes: props.selection?.array,
       });
       clearSelector();
       return;
     };
-    reactiveCMR.makeNewObject({
-      "_type": typeRefName,
-      "_refSpans": [],
-    });
-  };
-
-  const getObjectByGid = gid => reactiveCMR.get(gid);
-
-  // ========== ========== ========== ========== ========== ========== ========== ==========
-
-  const makeNewEntity = () => {
-    accountNewObject(TpEntity);
-  };
-  const makeNewEvent = () => {
-    accountNewObject(TpEvent);
-  };
-  const makeNewSpRelation = () => {
-    accountNewObject(TpSpRelation);
+    modeData.entities.push({});
   };
 
   // ========== ========== ========== ========== ========== ========== ========== ==========
@@ -224,7 +185,7 @@ export default (__pack) => {
     return blocks;
   };
 
-  const faceOfSpan = (item) => {
+  const itemMainTextSpan = (item) => {
     const texts = idxesToBlocks(item.tknIdxes).map(block=>idxesToText(block));
     let ll = [];
     let xx = true;
@@ -239,44 +200,10 @@ export default (__pack) => {
     return ll;
   };
 
-  const itemMainTextSpan = (item) => {
-    console.log(item);
-    const refSpanFaces = (item._refSpans??[]).map(refSpanGid => {
-      let spanObj = getObjectByGid(refSpanGid);
-      return faceOfSpan(spanObj);
-    });
-    let ll = [];
-    let xx = true;
-    for (let face of refSpanFaces) {
-      if (xx) {
-        xx = false;
-      } else {
-        ll.push(muted("="));
-      };
-      ll.push(face);
-    };
-    return ll;
-  };
+  const entityByIdx = idx => modeData.entities[idx];
+  const eventByIdx = idx => modeData.events[idx];
 
-  const face = (item) => {
-    const fnDict = {
-      [TpSpan]: (it) => faceOfSpan(it),
-      [TpEntity]: (it) => faceOfEntity(it),
-      [TpEvent]: (it) => faceOfEventCore(it),
-      // TpSpRelation: (it) => {},
-    };
-    if (item._type in fnDict) {
-      return fnDict[item._type](item);
-    };
-    return "[???]"
-  };
-
-  // ========== ========== ========== ========== ========== ========== ========== ==========
-
-
-  // ========== ========== ========== ========== ========== ========== ========== ==========
-
-  const faceOfEntityCore = (entity) => {
+  const entitySpanCore = (entity) => {
     if (entity==null) {
       return "[null]";
     };
@@ -284,7 +211,7 @@ export default (__pack) => {
     return [symbol, itemMainTextSpan(entity), symbol];
   };
 
-  const faceOfEventCore = (event) => {
+  const eventSpanCore = (event) => {
     if (event==null) {
       return "[null]";
     };
@@ -292,83 +219,55 @@ export default (__pack) => {
     return [symbol, itemMainTextSpan(event), symbol];
   };
 
-  const faceOfEntity = (entity) => {
+  const entitySpan = (entity) => {
     if (entity==null) {
       return "[null]";
     };
     const symbol = entity.fictive ? muted("$") : muted("#");
     const corefTail = entity.corefs?.length
-      ? (entity.corefs??[]).map(corefIdx=>[muted("="), faceOfEntityCore(getObjectByGid(corefIdx))])
+      ? (entity.corefs??[]).map(corefIdx=>[muted("="), entitySpanCore(entityByIdx(corefIdx))])
       : null ;
     const pluralTail = entity.plural ? [
       muted("="), muted("<"),
       entity.members?.length
-        ? [(entity.members??[]).map(memberIdx=>getObjectByGid(memberIdx)?.text).join(", "), entity.filled?null:muted("...")]
+        ? [(entity.members??[]).map(memberIdx=>entityByIdx(memberIdx)?.text).join(", "), entity.filled?null:muted("...")]
         : muted("...") ,
       muted(">")
     ] : null;
-    return span({}, [faceOfEntityCore(entity), corefTail, pluralTail]);
+    return span({}, [entitySpanCore(entity), corefTail, pluralTail]);
   };
 
-  const faceOfEntityBase = (entity)=>{
+  const entitySpanBase = (entity)=>{
     if (entity==null) {
       return "[null]";
     };
     const corefTailBase = entity.corefs?.length
-      ? (entity.corefs??[]).map(corefIdx=>[muted("="), faceOfEntityBase(getObjectByGid(corefIdx))])
+      ? (entity.corefs??[]).map(corefIdx=>[muted("="), entitySpanBase(entityByIdx(corefIdx))])
       : null ;
     return [itemMainTextSpan(entity), corefTailBase];
   };
 
   // ========== ========== ========== ========== ========== ========== ========== ==========
 
-  const objectsSection = () => div({'class': "vstack gap-2 my-1"}, [
-    div({'class': "h6 mt-3 mb-1"}, ["所有标注对象"]),
-
-    // 工具
-    div({'class': "btn-toolbar __hstack gap-1"}, [
-      div({'class': "btn-group btn-group-sm"}, [
-        lightBtn(bi("sort-down-alt"), "排序", "按照文本中出现的顺序排序", {
-          'onClick': ()=>{sortObjects();},
-        }),
-        lightBtn(bi("kanban"), "预分析", null, {
-          'onClick': ()=>{
-            analysisEntities();
-            analysisEvents();
-            sortObjects();
-          },
-        }),
-        lightBtn(bi("bug"), "debug", null, {
-          'onClick': ()=>{console.log(reactiveCMR);},
-        }),
-      ]),
-    ]),
-
-    div({'class': "ratio ratio-21x9 border rounded"}, [
-      div({'class': "d-flex flex-wrap gap-1 p-1 overflow-auto"}, [
-        ...reactiveCMR.objects
-          // .filter(ir=>it["_type"]!=TpSpan)
-          .map((obj, idx) => btn({'class': "btn-sm", 'title': JSON.stringify(obj, null, 2)}, [
-            // obj._type,
-            face(obj),
-          ], "light")),
-      ]),
-    ]),
-
-  ]);
-
-  // ========== ========== ========== ========== ========== ========== ========== ==========
-
   // 实体操作区
   const annotatingSectionOfEntities = () => div({'class': "vstack gap-2 my-1"}, [
-    div({'class': "h6 mt-3 mb-1"}, ["实体"]),
+    div({'class': "h5 mt-3 mb-1"}, ["实体"]),
 
-    ...reactiveCMR.typeObjects(TpEntity).map((entity, idx) => divWrap([
+    divWrap([
+      div({'class': "d-flex gap-1 justify-content-around"}, [
+        lightBtn(bi("box"), "实体预分析", null, {
+          'class': "w-100",
+          'onClick': ()=>{analysisEntities()},
+        }),
+      ]),
+    ], null, {'class': {'d-none': modeData.entities?.length}}),
+
+    ...modeData.entities.map((entity, idx) => divWrap([
 
       // 基本展示
       div({'class': "input-group input-group-sm"}, [
         span({'class': "input-group-text text-muted"}, [idx]),
-        div({'class': "form-control d-inline-block text-center"}, faceOfEntity(entity)),
+        div({'class': "form-control d-inline-block text-center"}, entitySpan(entity)),
         !entity.__ctrl_show_more
         ? btn({'title': "更多操作", 'onClick': ()=>{
           entity.__ctrl_show_more=true;}}, [bi("three-dots")], "outline-secondary")
@@ -423,7 +322,7 @@ export default (__pack) => {
               'onRemove': (event)=>{
                 entity.corefs.splice(ixx, 1);
               },
-            }, faceOfEntity(modeData.entities[corefIdx]))
+            }, entitySpan(modeData.entities[corefIdx]))
           )),
         ]),
       ]),
@@ -439,7 +338,7 @@ export default (__pack) => {
             'title': "请选择要操作的实体",
           }, [
             modeData.entities.map((ett, jdx) => (jdx!=idx&&!entity.corefs?.includes?.(+jdx)) ? h(
-              "option", {'key': jdx, 'value': jdx,}, faceOfEntity(ett)
+              "option", {'key': jdx, 'value': jdx,}, entitySpan(ett)
             ) : null),
           ]),
           btn({'title': "加入", 'onClick': ()=>{
@@ -468,7 +367,7 @@ export default (__pack) => {
               'onRemove': (event)=>{
                 entity.members.splice(ixx, 1);
               },
-            }, faceOfEntity(modeData.entities[memberIdx]))
+            }, entitySpan(modeData.entities[memberIdx]))
           )),
         ]),
       ]),
@@ -484,7 +383,7 @@ export default (__pack) => {
             'title': "请选择要操作的实体",
           }, [
             modeData.entities.map((ett, jdx) => (jdx!=idx&&!entity.members?.includes?.(+jdx)) ? h(
-              "option", {'key': jdx, 'value': jdx,}, faceOfEntity(ett)
+              "option", {'key': jdx, 'value': jdx,}, entitySpan(ett)
             ) : null),
           ]),
           btn({'title': "加入", 'onClick': ()=>{
@@ -519,7 +418,7 @@ export default (__pack) => {
             entity.tknIdxes = [...entity.tknIdxes, ...props.selection?.array];
             clearSelector();
           }}),
-        lightBtn(bi("trash3"), "删除", null, {'onClick': ()=>{deletObject(entity._id)}}),
+        lightBtn(bi("trash3"), "删除", null, {'onClick': ()=>{deleteEntity(idx)}}),
       ]),
 
       entity.__ctrl_show_more ? div() : null,
@@ -536,7 +435,7 @@ export default (__pack) => {
         modeData.entities?.length ? lightBtn(bi("sort-down-alt"), "排序", "按照文本中出现的顺序排序", {
           'class': "w-100",
           'onClick': ()=>{
-            sortObjects();
+            sortEntities();
           },
         }) : null,
         // lightBtn(bi("plus-square-dotted"), "新增隐含实体"),
@@ -547,9 +446,33 @@ export default (__pack) => {
 
   // ========== ========== ========== ========== ========== ========== ========== ==========
 
+  const makeNewEvent = () => {
+    if (selection_length) {
+      modeData.events.push({
+        text: idxesToText(props.selection?.array),
+        tknIdxes: props.selection?.array,
+      });
+      clearSelector();
+      return;
+    };
+    modeData.events.push({});
+  };
+
+  const sortEvents = () => {
+    //
+    let ll = modeData.events.map((entity, idx)=>[idx, entity?.tknIdxes?.[0]]);
+    ll.sort((a, b)=>(a[1]??-1)-(b[1]??-1));
+    let pp = ll.map((pair, newIdx)=>[pair[0], newIdx]);
+    const map = Object.fromEntries(pp);
+    console.log(map);
+    //
+    modeData.events.sort((a, b)=>(a?.tknIdxes?.[0]??-1)-(b?.tknIdxes?.[0]??-1));
+    reindexEntities(map);
+  };
+
   // 事件操作区
   const annotatingSectionOfEvents = () => div({'class': "vstack gap-2 my-1"}, [
-    div({'class': "h6 mt-3 mb-1"}, ["事件"]),
+    div({'class': "h5 mt-3 mb-1"}, ["事件"]),
 
     divWrap([
       div({'class': "d-flex gap-1 justify-content-around"}, [
@@ -590,7 +513,7 @@ export default (__pack) => {
 
   // 空间关系操作区
   const annotatingSectionOfRelations = () => div({'class': "vstack gap-2 my-1"}, [
-    div({'class': "h6 mt-3 mb-1"}, ["空间关系"]),
+    div({'class': "h5 mt-3 mb-1"}, ["空间关系"]),
 
     divWrap([
       div({'class': "d-flex gap-1 justify-content-around"}, [
@@ -631,7 +554,6 @@ export default (__pack) => {
 
       // 主体
       div({ 'class': "container", }, [
-        objectsSection(),
         annotatingSectionOfEntities(),
         annotatingSectionOfEvents(),
         annotatingSectionOfRelations(),
@@ -647,7 +569,7 @@ export default (__pack) => {
           lightBtn(bi("recycle"), "加载已标", "重新加载之前标注好的内容"),
           // lightBtn(bi("clock-history"), "加载缓存"),
           lightBtn(bi("bug"), "debug", null, {
-            'onClick': ()=>{console.log(reactiveCMR);},
+            'onClick': ()=>{console.log(modeData);},
           }),
         ]),
       ]),

@@ -159,6 +159,68 @@
   "%动词%"
 
 
+
+
+
+{"时间定位": {
+  "主体": "",
+  "要定位的角色": "起点"
+}}
+
+
+{
+  "_type": "@CMR.Annotator.Span",
+  "_id": "",
+  "_refSpans": [],
+}
+
+
+{
+  "_type": "@CSpaceBank.Entity",
+  "_id": "",
+  "_refSpans": [],
+  "fictive": false,
+  "plural": true,
+  "members": ["#"],
+  "filled": false,
+}
+
+
+{
+  "_type": "@CSpaceBank.SpLocation",
+  "_id": "",
+  "_clueSpans": [],
+  "landmark": "#",
+  "spSelector": "@",
+}
+
+
+{
+  "_type": "@CSpaceBank.Event",
+  "_id": "",
+  "_clueSpans": [],
+}
+
+
+{
+  "_type": "@CSpaceBank.SpRelation",
+  "_id": "",
+  "实体": "#汉堡#",
+  "事件": "%吃%",
+  "角色": "位置",
+  "值": "桌##上",
+  "时间": {
+    "参照": "%吃%",
+    "类型": "开始前",
+  },
+}
+
+
+
+
+
+
+
 {"_type": "@CSB.Mark", "face": "%", "desc": "谓词包裹", "ref": ""}
 {"_type": "@CSB.Mark", "face": "#", "desc": "现实实体包裹", "ref": ""}
 {"_type": "@CSB.Mark", "face": "$", "desc": "虚拟实体包裹", "ref": ""}
@@ -183,6 +245,66 @@
 
 
 
+
+
+{"": "文本片段", "": "Span", "slots": [
+  {"key": "textRef"},
+  {"key": "idxes"},
+]}
+
+
+
+{"": "Condition", "slots": [
+  {"key": "mode", "validation": {"type": "oneInNamedCollection", "collection": [
+    {"name": "selfSlotValue_EQ", "definition": {}},
+    {"name": "selfSlotValue_NE", "definition": {}},
+    {"name": "selfSlotValue_GTE", "definition": {}},
+    {"name": "selfSlotValue_GT", "definition": {}},
+    {"name": "selfSlotValue_LTE", "definition": {}},
+    {"name": "selfSlotValue_LT", "definition": {}},
+    {"name": "selfSlotValue_IN", "definition": {}},
+    {"name": "selfSlotValue_NIN", "definition": {}},
+    {"name": "selfSlot_Exists", "definition": {}},
+    {"name": "selfSlot_Defined", "definition": {}}
+  ]}},
+  {"key": "spec"},
+]}
+
+
+
+{"": "Property", "slots": [
+  {"key": "key"},
+  {"key": "default"},
+  {"key": "isRequired"},
+  {"key": "isComputed"},
+  {"key": "validation"},
+  {"key": "initialValue"},
+  {"key": "existingCondition"},
+  {"key": "requiredCondition"},
+]}
+
+{"": "Collection", "": [
+  {"key": "countable", "validation": {"type": "Boolean"}, "default": true},
+  {"key": "sequential", "validation": {"type": "Boolean"}, "default": true},
+  {"key": "sequential", "validation": {"type": "Boolean"}, "default": true},
+  {}
+]}
+
+
+
+{"": "实体", "": "Entity", "slots": [
+  {"key": "fictive", "validation": {"type": "Boolean"}, "default": false},
+  {"key": "plural", "validation": {"type": "Boolean"}, "default": false},
+  {"key": "members", "validation": {"type": "Collection"},
+    "existingCondition": {
+      "type": "Condition",
+      "mode": "@selfSlotValue_EQ", "key": "plural", "value": true}},
+  {"key": "filled", "validation": {"type": "Boolean"}},
+  {"key": "corefs", "validation": {"type": "Collection", ""}}
+]}
+
+
+{"": "CoRef"}
 
 
 

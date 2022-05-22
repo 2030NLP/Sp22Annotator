@@ -1,4 +1,5 @@
 import {  reactive, computed, onMounted, h  } from './VueShadow.mjs.js';
+import { CMR } from './Shadow.mjs.js';
 import BsBadge from './bs/BsBadge.cpnt.mjs.js';
 import gen_editModeSection from './AnnotatingModes/mode_edit.mjs.js';
 import gen_commentModeSection from './AnnotatingModes/mode_comment.mjs.js';
@@ -187,6 +188,7 @@ export default {
       generalButtonsDiv,
 
       __LODASH: _,
+      CMR,
     };
 
 
