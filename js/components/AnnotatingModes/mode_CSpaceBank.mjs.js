@@ -51,10 +51,10 @@ export default (__pack) => {
   };
   const bi = (name) => {
     return h("i", {'class': ["bi", `bi-${name??'square'}`]});
-  };
+  };  // https://icons.getbootstrap.com/
   const ti = (name) => {
     return h("i", {'class': ["ti", `ti-${name??'square'}`]});
-  };
+  };  // https://tabler-icons.io
   const vr = () => h("div", {'class': "vr"});
   const divWrap = (children, key, attrs) => {
     attrs = attrs ?? {};
@@ -162,7 +162,7 @@ export default (__pack) => {
   };
 
   const sortObjects = () => {
-    const sortBasis = it => reactiveCMR.get(it?._refSpans)?.["tknIdxes"]?.[0]??-1;
+    const sortBasis = it => reactiveCMR.get(it?._refSpans?.[0]??it?._clueSpans?.[0])?.["tknIdxes"]?.[0]??Infinity;
     reactiveCMR.objects = __LODASH.sortBy(reactiveCMR.objects, ["_type", sortBasis]);
   };
 
@@ -240,7 +240,7 @@ export default (__pack) => {
   };
 
   const itemMainTextSpan = (item) => {
-    console.log(item);
+    // console.log(item);
     const refSpanFaces = (item._refSpans??[]).map(refSpanGid => {
       let spanObj = getObjectByGid(refSpanGid);
       return faceOfSpan(spanObj);
@@ -344,16 +344,16 @@ export default (__pack) => {
       ]),
     ]),
 
-    div({'class': "ratio ratio-21x9 border rounded"}, [
-      div({'class': "d-flex flex-wrap gap-1 p-1 overflow-auto"}, [
+    div({'class': "ratio ratio-21x9 border rounded"}, div({'class': "p-1 overflow-auto"}, [
+      div({'class': "d-flex flex-wrap gap-1"}, [
         ...reactiveCMR.objects
-          // .filter(ir=>it["_type"]!=TpSpan)
+          .filter(it=>it["_type"]!=TpSpan)
           .map((obj, idx) => btn({'class': "btn-sm", 'title': JSON.stringify(obj, null, 2)}, [
             // obj._type,
             face(obj),
           ], "light")),
       ]),
-    ]),
+    ])),
 
   ]);
 

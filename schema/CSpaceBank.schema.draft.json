@@ -107,6 +107,163 @@
 
 
 
+
+
+
+
+
+{ "_type": "@Type",
+  "refName": "CSpaceBank.实体虚实性"},
+{ "_type": "@Type",
+  "refName": "CSpaceBank.时间限定符"},
+{ "_type": "@Type",
+  "refName": "CSpaceBank.距离限定符"},
+
+{ "_type": "@Label",
+  "domain": "@CSpaceBank.实体虚实性",
+  "face": "虚"},
+{ "_type": "@Label",
+  "domain": "CSpaceBank.实体虚实性",
+  "face": "实"},
+
+{ "_type": "@Label",
+  "domain": "CSpaceBank.时间限定符",
+  "face": "时间"},
+{ "_type": "@Label",
+  "domain": "CSpaceBank.时间限定符",
+  "face": "开始前"},
+{ "_type": "@Label",
+  "domain": "CSpaceBank.时间限定符",
+  "face": "结束后"},
+
+{ "_type": "@Label",
+  "domain": "CSpaceBank.距离限定符",
+  "face": "远"},
+{ "_type": "@Label",
+  "domain": "CSpaceBank.距离限定符",
+  "face": "近"},
+{ "_type": "@Label",
+  "domain": "CSpaceBank.距离限定符",
+  "face": "缩短"},
+{ "_type": "@Label",
+  "domain": "CSpaceBank.距离限定符",
+  "face": "加长"},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
+  "_type": "@Type",
+  "name": "CSpaceBank.实体",
+  "slots": [
+  ]
+},
+{
+  "_type": "@Type",
+  "name": "CSpaceBank.事件",
+  "slots": [
+  ]
+},
+{
+  "_type": "@Type",
+  "name": "CSpaceBank.方位标",
+  "slots": [
+  ]
+},
+{
+  "_type": "@Type",
+  "name": "CSpaceBank.介词",
+  "slots": [
+  ]
+},
+
+
+
+{
+  "_type": "@Frame",
+  "name": "整体-部分关系",
+  "slots": [
+    {"name": "整体", "require": {"_type": "@CSpaceBank.空间实体"}},
+    {"name": "部分", "require": {"_type": "@CSpaceBank.空间实体"}}
+  ]
+},
+{
+  "_type": "@Frame",
+  "name": "相对于空间实体的位置",
+  "slots": [
+    {"name": "空间实体", "require": {"_type": "@CSpaceBank.空间实体"}}
+  ]
+},
+{
+  "_type": "@Frame",
+  "name": "相对于空间实体和方位标的位置",
+  "slots": [
+    {"name": "空间实体", "require": {"_type": "@CSpaceBank.空间实体"}},
+    {"name": "方位标", "require": {"_type": "@CSpaceBank.方位标"}}
+  ]
+},
+{
+  "_type": "@Frame",
+  "name": "方向1",
+  "slots": [
+    {"name": "介词", "require": {"_type": "@CSpaceBank.介词"}},
+    {"name": "方位标", "require": {"_type": "@CSpaceBank.方位标"}}
+  ]
+},
+{
+  "_type": "@Frame",
+  "name": "方向2",
+  "slots": [
+    {"name": "空间实体", "require": {"_type": "@CSpaceBank.空间实体"}},
+    {"name": "介词", "require": {"_type": "@CSpaceBank.介词"}},
+    {"name": "方位标", "require": {"_type": "@CSpaceBank.方位标"}}
+  ]
+},
+{
+  "_type": "@Frame",
+  "name": "方向3",
+  "slots": [
+    {"name": "空间实体", "require": {"_type": "@CSpaceBank.空间实体"}},
+  ]
+},
+{
+  "_type": "@Frame",
+  "name": "朝向",
+  "slots": [
+    {"name": "空间实体", "require": {"_type": "@CSpaceBank.空间实体"}},
+    {"name": "介词", "require": {"_type": "@CSpaceBank.介词"}},
+    {"name": "方位标", "require": {"_type": "@CSpaceBank.方位标"}}
+  ]
+}
+
+
+
+
+
+
+
+
+
+
 "处所"
 "起点"
 "终点"

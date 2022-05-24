@@ -24,7 +24,7 @@ class CMR {
       [this.symbols["#"]]: (id) => this.objects.find(obj => obj._id==id),
       [this.symbols["$"]]: (id) => this.interface?.[id] ?? null,
     };
-    console.log(gid);
+    // console.log(gid);
     if (gid?.[0] in map) {
       return map[gid?.[0]](gid?.slice?.(1));
     };
