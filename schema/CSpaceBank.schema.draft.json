@@ -118,6 +118,8 @@
   "refName": "CSpaceBank.时间限定符"},
 { "_type": "@Type",
   "refName": "CSpaceBank.距离限定符"},
+{ "_type": "@Type",
+  "refName": "CSpaceBank.语义角色键"},
 
 { "_type": "@Label",
   "domain": "@CSpaceBank.实体虚实性",
@@ -126,29 +128,23 @@
   "domain": "CSpaceBank.实体虚实性",
   "face": "实"},
 
-{ "_type": "@Label",
+{ "_type": "@LabelCollection",
   "domain": "CSpaceBank.时间限定符",
-  "face": "时间"},
-{ "_type": "@Label",
-  "domain": "CSpaceBank.时间限定符",
-  "face": "开始前"},
-{ "_type": "@Label",
-  "domain": "CSpaceBank.时间限定符",
-  "face": "结束后"},
+  "faces": ["时间", "开始前", "结束后"]},
 
-{ "_type": "@Label",
+{ "_type": "@LabelCollection",
   "domain": "CSpaceBank.距离限定符",
-  "face": "远"},
-{ "_type": "@Label",
-  "domain": "CSpaceBank.距离限定符",
-  "face": "近"},
-{ "_type": "@Label",
-  "domain": "CSpaceBank.距离限定符",
-  "face": "缩短"},
-{ "_type": "@Label",
-  "domain": "CSpaceBank.距离限定符",
-  "face": "加长"},
+  "faces": ["远", "近", "缩短", "加长"]},
 
+{ "_type": "@LabelCollection",
+  "domain": "CSpaceBank.语义角色键",
+  "faces": [
+    "施事", "共同施事", "当事", "间接当事",
+    "受事", "系事", "与事", "结果", "对象", "内容",
+    "工具", "材料", "方式", "原因", "目的",
+    "事量", "旧量", "新量", "范围",
+    "起点", "终点", "路径", "方向",
+    "处所", "起始", "结束", "时点", "时段"]},
 
 
 
