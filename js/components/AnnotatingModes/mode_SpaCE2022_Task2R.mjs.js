@@ -40,6 +40,14 @@ const genModeSection = (__pack) => {
         step_props.value.data.items[optIdx]={};
       };
     };
+    const getOptionItem = (optIdx) => {
+      return step_props.value?.data?.items?.[optIdx];
+    };
+    const touchOptionItem = (optIdx) => {
+      ensureOptionItem(optIdx);
+      return getOptionItem(optIdx);
+    };
+
     const ensureSlot = (optIdx, slotIdx) => {
       ensureOptionItem(optIdx);
       if (!('slots' in step_props.value.data.items[optIdx])) {
@@ -49,13 +57,6 @@ const genModeSection = (__pack) => {
         step_props.value.data.items[optIdx].slots[slotIdx]={};
       };
     };
-    const getOptionItem = (optIdx) => {
-      return step_props.value?.data?.items?.[optIdx];
-    };
-    const touchOptionItem = (optIdx) => {
-      ensureOptionItem(optIdx);
-      return getOptionItem(optIdx);
-    };
     const getSlot = (optIdx, slotIdx) => {
       return step_props.value?.data?.items?.[optIdx]?.slots?.[slotIdx];
     };
@@ -63,10 +64,11 @@ const genModeSection = (__pack) => {
       ensureSlot(optIdx, slotIdx);
       return getSlot(optIdx, slotIdx);
     };
-    // const setSlot = (optIdx, slotIdx, data) => {
-    //   ensureSlot(optIdx, slotIdx);
-    //   step_props.value.data.items[optIdx].slots[slotIdx] = data;
-    // };
+    const setSlot = (optIdx, slotIdx, value) => {
+      ensureSlot(optIdx, slotIdx);
+      step_props.value.data.items[optIdx].slots[slotIdx] = value;
+    };
+
     const 已填 = (optIdx, slotIdx) => {
       return null != getSlot(optIdx, slotIdx)?.tokenarray;
     };
@@ -267,6 +269,7 @@ const genModeSection = (__pack) => {
                     'canRemove': true,
                     'onRemove': (event)=>{
                       touchSlot(optIdx, slotIdx).tokenarray = null;
+                      setSlot(optIdx, slotIdx, null);
                     },
                   }, [
                     text, selection_length.value ? h("span", {
