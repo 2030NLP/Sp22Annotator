@@ -712,7 +712,7 @@ const FinalButtonGroup = {
         'class': "btn-sm",
         'onClick': ()=>{ctx.emit('save');},
         'title': "将未完成的标注暂时保存到云端，并记录这条标注处于「未完成」的状态。",
-      }, "保存", "primary"),
+      }, "暂时保存", "primary"),
       btn({
         'class': "btn-sm",
         'onClick': ()=>{ctx.emit('ok');},
