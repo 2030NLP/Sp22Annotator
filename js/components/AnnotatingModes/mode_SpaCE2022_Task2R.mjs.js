@@ -159,7 +159,7 @@ const genModeSection = (__pack) => {
             // 检查没有高亮词或没覆盖key的情况
             for (let tokenIdx of slot.tokenarray) {
               let token = props.tokens[tokenIdx];
-              if (!!token?.to?.word?.length) {
+              if ((!!token?.to?.word?.length)||(!!token?.from?.word?.length)) {
                 hasReplacedToken = true;
               };
               let isAutoSpatial = token?.autoSpatial&&["f", "s", "dv"].includes?.(token?.pos);
