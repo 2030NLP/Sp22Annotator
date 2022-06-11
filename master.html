@@ -496,13 +496,13 @@
           <template
             v-if="MODAL_THEMES[modalBox.data.theme] == MODAL_THEMES['user-tags-editor']"
           >
-            <user-editor
+            <user-tags-editor
               :db="spDB"
               :box="modalBox"
               :user="modalBox.data?.kwargs"
               @check-error-on-save="alertBox.pushAlert('存在错误，请检查！', 'warning')"
               @save="(value)=>{saveUpdatedUser(modalBox.data?.kwargs, value)}"
-            ></user-editor>
+            ></user-tags-editor>
           </template>
 
 

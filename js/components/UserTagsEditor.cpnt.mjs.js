@@ -13,6 +13,7 @@ const UserTagsEditor = {
       newUser: {},
       isInvalid: false,
       isValid: false,
+      userTagsText: "",
     });
     onMounted(()=>{
       let copy = JSON.parse(JSON.stringify(props.user));
@@ -22,14 +23,22 @@ const UserTagsEditor = {
       copy.allTasks = undefined;
       copy.doneTasks = undefined;
       localData.userJson = JSON.stringify(copy, null, 2);
+      localData.userTagsText = (copy?.tags??[]).join("\n");
     });
+    const textToTags = (text) => {
+      const tags = text.split(/[\n\t]+| *[,，;；] */).map(it=>it?.trim?.()).filter(it=>it?.length);
+      return tags;
+    };
     const check = () => {
       try {
         localData.newUser = JSON.parse(localData.userJson);
+        localData.newUser.tags = textToTags(localData.userTagsText);
+        localData.userTagsText = localData.newUser.tags.join("\n");
         localData.isInvalid = false;
         localData.isValid = true;
         return true;
       } catch (error) {
+        console.log(error);
         ctx.emit('check-error', error);
         localData.isInvalid = true;
         localData.isValid = false;
@@ -60,14 +69,17 @@ const UserTagsEditor = {
             [
               h('div', {'class': 'row align-items-center my-2'}, [
                 h('div', {'class': 'col-12 my-1'}, [
+                  h('div', {
+                    'class': ["form-text"],
+                  }, ["每个标签单独一行，或者用逗号分隔。中英文逗号皆可，逗号两侧可以有空格。"]),
                   h('textarea', {
-                      'class': ["form-control form-control-sm vh-60 max-vh-60", {
+                      'class': ["form-control form-control-sm", {
                         'is-invalid': localData.isInvalid,
                         'is-valid': localData.isValid,
                       }],
-                      'value': localData.userJson,
+                      'value': localData.userTagsText,
                       'onInput': event => {
-                        localData.userJson = event?.target?.value;
+                        localData.userTagsText = event?.target?.value;
                         localData.isInvalid = false;
                         localData.isValid = false;
                       },

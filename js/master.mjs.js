@@ -69,6 +69,7 @@ const RootComponent = {
       "user-progress": "user-progress",
       "user-importer": "user-importer",
       "user-editor": "user-editor",
+      "user-tags-editor": "user-tags-editor",
       "user-detail": "user-detail",
       "entry-detail": "entry-detail",
       "task-detail": "task-detail",
