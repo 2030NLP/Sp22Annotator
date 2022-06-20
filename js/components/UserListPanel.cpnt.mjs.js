@@ -116,10 +116,12 @@ const UserListPanel = {
     const 计算筛选部分的审核量 = () => {
       let 所选用户 = userList.value;
 
-      let 审核完美布尔数组 = 所选用户.map(user => theDB.inspectionSum(user, localData.selectedBatchName)?.passRatio >= 0.9);
-      let 初审完美布尔数组 = 所选用户.map(user => theDB.firstInspectionSum(user, localData.selectedBatchName)?.passRatio >= 0.9);
+      let 所选有效用户 = 所选用户.filter(user => theDB.inspectionSum(user, localData.selectedBatchName)?.sum>0);
 
-      let 所选用户的标注 = 所选用户.map(it=>theDB.用户批次标注(it)).flat();
+      let 审核完美布尔数组 = 所选有效用户.map(user => theDB.inspectionSum(user, localData.selectedBatchName)?.passRatio >= 0.9);
+      let 初审完美布尔数组 = 所选有效用户.map(user => theDB.firstInspectionSum(user, localData.selectedBatchName)?.passRatio >= 0.9);
+
+      let 所选用户的标注 = 所选有效用户.map(it=>theDB.用户批次标注(it)).flat();
 
       let allReviewedAnnos = 所选用户的标注?.filter?.(it=>it?.content?.review) ?? [];
       let currAnnos = 所选用户的标注?.filter?.(it=>it?.batchName==localData.selectedBatchName) ?? [];
@@ -136,7 +138,7 @@ const UserListPanel = {
       筛选后的统计.审核完美率文本 = `${审核完美量} / ${审核完美布尔数组.length} = ${审核完美率.toFixed(2)}`;
       筛选后的统计.初审完美率文本 = `${初审完美量} / ${初审完美布尔数组.length} = ${初审完美率.toFixed(2)}`;
 
-      const 参与用户 = 所选用户.filter(user => theDB?.userProgress?.(user, localData.selectedBatchName)?.cDueLen);
+      const 参与用户 = 所选有效用户.filter(user => theDB?.userProgress?.(user, localData.selectedBatchName)?.cDueLen);
       const 完成用户 = 参与用户.filter(user => 已完工筛选函数(user));
       const 已完成率 = (完成用户.length??0) / (参与用户.length??0);
       const 未完成率 = ((参与用户.length??0)-(完成用户.length??0)) / (参与用户.length??0);
