@@ -138,7 +138,7 @@ const UserListPanel = {
       筛选后的统计.审核完美率文本 = `${审核完美量} / ${审核完美布尔数组.length} = ${审核完美率.toFixed(2)}`;
       筛选后的统计.初审完美率文本 = `${初审完美量} / ${初审完美布尔数组.length} = ${初审完美率.toFixed(2)}`;
 
-      const 参与用户 = 所选有效用户.filter(user => theDB?.userProgress?.(user, localData.selectedBatchName)?.cDueLen);
+      const 参与用户 = 所选用户.filter(user => theDB?.userProgress?.(user, localData.selectedBatchName)?.cDueLen);
       const 完成用户 = 参与用户.filter(user => 已完工筛选函数(user));
       const 已完成率 = (完成用户.length??0) / (参与用户.length??0);
       const 未完成率 = ((参与用户.length??0)-(完成用户.length??0)) / (参与用户.length??0);
