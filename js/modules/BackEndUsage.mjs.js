@@ -224,7 +224,11 @@ class BackEndUsage {
     let lastEID = this?.data?.newThings?.lastEID ?? null;
     // 【寻找首条】
     // 参考 【队列排序】
-    let btn = this.data.tasks.find(btn => btn.rejectedTP==3&&!btn.checked) ?? this.data.tasks.find(btn => !btn.done) ?? this.data.tasks.find(btn => btn.rejectedTP==3);
+    let btn =
+      this.data.tasks.find(btn => btn.commented&&!btn.checked)  // 首条尚未处理的有批示的
+      ?? this.data.tasks.find(btn => btn.rejectedTP==3&&!btn.checked)  // 首条尚未处理的未通过的
+      ?? this.data.tasks.find(btn => !btn.done)
+      ?? this.data.tasks.find(btn => btn.rejectedTP==3);
     if (btn) {
       await this.goIdx(btn.idx);
       return;
