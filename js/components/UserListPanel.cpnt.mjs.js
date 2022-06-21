@@ -277,6 +277,30 @@ const UserListPanel = {
       计算审核量();计算筛选部分的审核量();
     });
 
+    const 导出用户信息 = ()=>{
+      const user_main_infos = theDB.users.map(it=>[
+        it.id,
+        it.name,
+        theDB.userDict[it.manager]?.name,
+        it.quitted?true:false,
+        it.role?.join?.("|"),
+        it.tags?.join?.("|"),
+      ]);
+
+      let lines = user_main_infos.map(
+        ln=>ln.map(
+          it=> ((typeof it)=="string") ? JSON.stringify(it) : JSON.stringify(JSON.stringify(it))
+        ).join(",")
+      );
+      lines.unshift(`"id","name","组长","是否已退出","角色","标签"`);
+
+      const txt = lines.join("\n");
+
+      console.log(txt);
+
+      app.theSaver.saveText(txt, `人员信息(${JSON.parse(JSON.stringify(new Date()))}).csv`);
+    };
+
     return () => [
       h("div", {
           'class': ["container", props.show ? null : "d-none"],
@@ -340,6 +364,12 @@ const UserListPanel = {
                 'title': "新增用户",
                 'onClick': (event)=>{ctx.emit('click-add-user-btn', event)},
               }, ["新增用户"]),
+              h("button", {
+                'type': "button",
+                'class': "btn btn-sm btn-outline-dark my-1 me-2",
+                'title': "导出用户信息",
+                'onClick': ()=>{导出用户信息()},
+              }, ["导出用户信息"]),
             ] : null,
           }),
 
