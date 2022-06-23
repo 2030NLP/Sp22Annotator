@@ -129,7 +129,7 @@ const faceFn单个不连续原文片段无引号 = (boy) => {
 };
 
 const faceFn多个不连续原文片段 = (boy) => {
-  console.log(boy);
+  // console.log(boy);
   const spans = boy?.value??[];
   const spanSpans = spans.map(it=>faceFn单个不连续原文片段无引号({value: it}));
   const sss = spansJoin(spanSpans, muted("^"));
@@ -321,11 +321,22 @@ const objectTypeFaceFnMap = {
   // '特征命题': (boy, reactiveCMR)=>faceFnObj特征命题(boy, reactiveCMR),
 };
 
+const defaultObjectFace = (object, reactiveCMR) => {
+  let frags = [];
+  const slots = reactiveCMR?.typeDict?.[object?.type]?.slots??[];
+  for (let slot of slots) {
+    if (slot.name in object && object?.[slot.name].value!=null) {
+      frags.push(labelSpan([muted(slot.name), dataFace(object[slot.name], reactiveCMR)]));
+    };
+  };
+  return text(frags);
+};
+
 const objectFace = (object, reactiveCMR) => {
   if (object?.type in objectTypeFaceFnMap) {
     return objectTypeFaceFnMap[object.type](object, reactiveCMR);
   };
-  return JSON.stringify(object?.data??object);
+  return defaultObjectFace(object, reactiveCMR);
 };
 
 
@@ -1015,7 +1026,7 @@ const EditorMultiBrokenSpan = {
           // console.log("confirm");
         },
         'title': "确定",
-      }, bi("check2"), "primary"),
+      }, bi("check2"), "danger"),
       btn({
         onClick: ()=>{
           ctx.emit("cancel");
@@ -1080,6 +1091,7 @@ const PropertyItem = {
   },
   setup(props, ctx) {
     const reactiveCMR = inject('reactiveCMR', ()=>({}));
+    const clipboard = inject('clipboard', ()=>({}));
     const stages = {
       '①呈现数据内容': "①呈现数据内容",
       '②选择操作方式': "②选择操作方式",
@@ -1116,7 +1128,7 @@ const PropertyItem = {
       ctx.emit('delete-property');
     };
     const onConfirm = (value) => {
-      let key = props['slot']?.['name']??"未知字段";
+      let key = props['slot']?.['name']??props['slot']?.['nameFace']??"未知字段";
       newDataWrap['data'] = value;
       localData.currentStage = stages['①呈现数据内容'];
       ctx.emit('set-property', {[key]: newDataWrap['data']});
@@ -1129,6 +1141,13 @@ const PropertyItem = {
     };
     const onNew = (type) => {
       ctx.emit("new", type);
+    };
+    const onCopy = () => {
+      ctx.emit("copy", newDataWrap['data']);
+    };
+    const onPaste = () => {
+      ctx.emit("paste", clipboard);
+      console.log(["paste", clipboard]);
     };
 
 
@@ -1148,17 +1167,27 @@ const PropertyItem = {
           "text-muted",
         ],
       }, [
-        span(null, `${props['slot']?.name??"无名字段"}`),
+        span(null, `${props['slot']?.nameFace??props['slot']?.name??"无名字段"}`),
       ]),
 
       //
       localData.currentStage == stages['①呈现数据内容']
       ? [
         div({'class': "input-group input-group-sm"}, [
+          btn({
+            onClick: ()=>{onCopy()},
+            'disabled': false,
+            'title': "复制"
+          }, "拷", "outline-secondary"),
+          btn({
+            onClick: ()=>{onPaste()},
+            'disabled': false,
+            'title': "粘贴"
+          }, "贴", "outline-secondary"),
           div({'class': "form-control d-inline-block text-center "}, [
             span({'class': "align-middle"}, dataFace(newDataWrap['data'], reactiveCMR)),
           ]),
-          true ? btn({
+          props['slot']?.deletable ? btn({
             onClick: ()=>{onDelete()},
             'title': "删除"
           }, bi("trash3"), "outline-secondary") : null,
@@ -1214,7 +1243,7 @@ const PropertyItem = {
 // 单个对象的编辑窗口
 const ObjectPanel = {
   props: ['data', 'typeDef'],
-  emits: ['new', 'save-object', 'clone-object', 'reset-object', 'delete-object', 'close-object', 'clear-selector'],
+  emits: ['new', 'copy-property', 'save-object', 'clone-object', 'reset-object', 'delete-object', 'close-object', 'clear-selector'],
   component: {
     PropertyItem,
   },
@@ -1305,7 +1334,7 @@ const ObjectPanel = {
           'title': JSON.stringify(props.typeDef, null, 2),
         }, [
           props?.typeDef?.['icon-bi'] ? bi(props?.typeDef?.['icon-bi']) : null,
-          span({'class': "--user-select-none"}, `${props?.typeDef?.name??"未知类型"}`),
+          span({'class': "--user-select-none"}, `${props?.typeDef?.nameFace??props?.typeDef?.name??"未知类型"}`),
         ]),
 
         // 关闭按钮
@@ -1328,6 +1357,10 @@ const ObjectPanel = {
       ]);
     };
 
+    const onCopyProperty = (data) => {
+      ctx.emit("copy-property", data);
+    };
+
     const 字段列表 = () => {
       return div({
         'class': "vstack gap-1 px-2 py-1"
@@ -1342,6 +1375,7 @@ const ObjectPanel = {
           'onDeleteProperty': ()=>{onDeleteProperty(field?.name??"");},
           'onClearSelector': ()=>{onClearSelector();},
           'onNew': (type)=>{onNew(type);},
+          'onCopy': (data)=>{onCopyProperty(data);},
         })),
 
         // 添加字段
@@ -1473,7 +1507,7 @@ const ObjectPanelList = {
     return () => div({
       'class': ["vstack gap-3", {"d-none": !v(shouldShow)}],
     }, [
-      div({'class': "h6 mt-3 mb-1"}, ["正在标注的对象"]),
+      div({'class': "h6 mt-3 mb-1"}, ["正在标注"]),
       props['objectWraps'].map((objWrap, idx) => objWrap?.['show'] ? h(ObjectPanel, {
         'key': objWrap?.data?._id??objWrap?.data?.id,
         'data': objWrap['data'],
@@ -1508,7 +1542,7 @@ const ObjectPanelList = {
 // 🔯🔯🔯🔯🔯🔯
 // 所有对象陈列盒子
 const AllObjectsPanel = {
-  props: ['objectWraps', 'typeNames'],
+  props: ['objectWraps', 'types'],
   emits: ['sort-objects', 'sort-objects-by-id', 'sort-objects-by-type', 'analyze-objects', 'add-object', 'do-debug', 'show-object-wrap', 'hide-object-wrap'],
   component: {},
   setup(props, ctx) {
@@ -1518,14 +1552,14 @@ const AllObjectsPanel = {
       'showAddObjectControl': false,
     });
     return () => div({'class': "vstack gap-2 my-1"}, [
-      div({'class': "h6 mt-3 mb-1"}, ["所有标注对象"]),
+      div({'class': "h6 mt-3 mb-1"}, ["全部"]),
 
       // 陈列盒子
       div({
         'class': "__ratio __ratio-21x9 border rounded overflow-auto",
         'style': "min-height: 1.5em; max-height: 20em;"
       }, div({'class': "p-1"}, [
-        div({'class': "d-flex flex-wrap gap-1"}, [
+        div({'class': "d-flex flex-wrap gap-1"}, props['objectWraps']?.length ? [
           ...(props['objectWraps']??[])
             .map((objWrap, idx) => btn({
               'key': objWrap?.data?._id??objWrap?.data?.id,
@@ -1543,49 +1577,52 @@ const AllObjectsPanel = {
               ] : null,
               objectFace(objWrap.data, reactiveCMR),
             ], objWrap['show']?"outline-primary":"light")),
-        ]),
+        ] : [span({class:"px-2"}, muted("暂无内容"))]),
       ])),
 
       // 工具
-      div({'class': "btn-toolbar __hstack gap-1 justify-content-end"}, [
-        div({'class': "btn-group btn-group-sm"}, [
-          lightBtn(bi("sort-down-alt"), "按原文排序", "按照文本中出现的顺序排序", {
-            onClick: ()=>{
-              ctx.emit("sort-objects");
-            },
-          }),
-          lightBtn(bi("sort-numeric-down"), "按创建顺序排序", "按创建顺序排序", {
-            onClick: ()=>{
-              ctx.emit("sort-objects-by-id");
-            },
-          }),
-          lightBtn(bi("sort-alpha-down"), "按类型排序", "按照类型排序", {
-            onClick: ()=>{
-              ctx.emit("sort-objects-by-type");
-            },
-          }),
-          // lightBtn(bi("bar-chart-steps"), "预分析", null, {
-          //   onClick: ()=>{
-          //     ctx.emit("analyze-objects");
-          //   },
-          // }),
-          lightBtn(bi("plus-circle"), "新增", null, {
-            onClick: ()=>{
-              localData.showAddObjectControl = !localData.showAddObjectControl;
-            },
-          }),
-          // lightBtn(bi("bug"), "debug", null, {
-          //   onClick: ()=>{
-          //     ctx.emit("do-debug");
-          //     console.log(props['objectWraps']);
-          //   },
-          // }),
-        ]),
-      ]),
+      // div({'class': "btn-toolbar __hstack gap-1 justify-content-end"}, [
+      //   div({'class': "btn-group btn-group-sm"}, [
+      //     lightBtn(bi("sort-down-alt"), "按原文排序", "按照文本中出现的顺序排序", {
+      //       onClick: ()=>{
+      //         ctx.emit("sort-objects");
+      //       },
+      //     }),
+      //     lightBtn(bi("sort-numeric-down"), "按创建顺序排序", "按创建顺序排序", {
+      //       onClick: ()=>{
+      //         ctx.emit("sort-objects-by-id");
+      //       },
+      //     }),
+      //     lightBtn(bi("sort-alpha-down"), "按类型排序", "按照类型排序", {
+      //       onClick: ()=>{
+      //         ctx.emit("sort-objects-by-type");
+      //       },
+      //     }),
+      //     // lightBtn(bi("bar-chart-steps"), "预分析", null, {
+      //     //   onClick: ()=>{
+      //     //     ctx.emit("analyze-objects");
+      //     //   },
+      //     // }),
+      //     // lightBtn(bi("plus-circle"), "新增", null, {
+      //     //   onClick: ()=>{
+      //     //     localData.showAddObjectControl = !localData.showAddObjectControl;
+      //     //   },
+      //     // }),
+      //     // lightBtn(bi("bug"), "debug", null, {
+      //     //   onClick: ()=>{
+      //     //     ctx.emit("do-debug");
+      //     //     console.log(props['objectWraps']);
+      //     //   },
+      //     // }),
+      //   ]),
+      // ]),
 
       // 新增操作区
-      div({'class': ["hstack gap-1", {"d-none": !localData.showAddObjectControl}]}, [
+      div({'class': ["hstack gap-1", {
+        // "d-none": !localData.showAddObjectControl
+      }]}, [
         div({'class': "input-group input-group-sm"}, [
+          h("label", {'class': "input-group-text"}, "新增"),
           h("select", {
             'class': "form-select text-center",
             onChange: (event)=>{
@@ -1593,9 +1630,9 @@ const AllObjectsPanel = {
             },
             'value': localData.typeNameToAdd,
           }, [
-            ...(props?.typeNames??[]).map(typeName=>h("option", {
-              'value': typeName,
-            }, [typeName])),
+            ...(props?.types??[]).map(type=>h("option", {
+              'value': type.name,
+            }, [type.nameFace??type.name])),
           ]),
           btn({
             onClick: ()=>{
@@ -1860,10 +1897,6 @@ export default {
       return nodes??null;
     });
 
-    const typeNames = computed(()=>{
-      return reactiveCMR.types.map(it=>it.name);
-    });
-
     onMounted(()=>{
       // console.log(props);
       init();
@@ -1955,7 +1988,7 @@ export default {
 
     const 所有对象面板 = () => h(AllObjectsPanel, {
       'objectWraps': v(objectWraps),
-      'typeNames': v(typeNames),
+      'types': reactiveCMR.types,
       'onSortObjectsById': ()=>{
         reactiveCMR.sortObjectsById();
       },
