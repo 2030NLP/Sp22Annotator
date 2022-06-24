@@ -46,7 +46,7 @@
 
             "label_sets": [
               ["实体虚实性", ["虚", "实"]],
-              ["时间限定符", ["时间", "开始前", "结束后"]],
+              ["时间限定符", ["说话时", "E开始前", "E结束后", "E时间", "长时"]],
               ["距离限定符", ["远", "近", "缩短", "加长"]]
             ],
 
@@ -55,37 +55,38 @@
               {
                 "name": "propSet_Sp",
                 "nameFace": "一般空间信息(S-T-E-P)",
-                "--icon-bi": "chat-left-quote",
+                "icon-bi": "diagram-3",
                 "slots": [
-                  {"name": "S", "nameFace": "实体 S", "ctrls": ["多个不连续原文片段"], "required": true},
+                  {"name": "S", "nameFace": "实体 S", "ctrls": ["MB_SPANS"], "required": true},
 
-                  {"name": "T", "nameFace": "时间 T", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "T_Rg", "nameFace": "时间区间 T.Rg", "ctrls": [{"type": "单个标签", "config": {"set": "时间限定符"}}], "required": true},
+                  {"name": "T", "nameFace": "时间文本 T", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "T_Rg", "nameFace": "时间类型 T.Rg", "ctrls": [{"type": "单个标签", "config": {"set": "时间限定符"}}], "required": true},
 
-                  {"name": "E", "nameFace": "事件 E", "ctrls": ["多个不连续原文片段"], "required": true},
+                  {"name": "E", "nameFace": "事件 E", "ctrls": ["MB_SPANS"], "required": true},
 
-                  {"name": "Pl", "nameFace": "处所 Pl", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "Be", "nameFace": "起点 Be", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "Ed", "nameFace": "终点 Ed", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "Dr", "nameFace": "方向 Dr", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "Or", "nameFace": "朝向 Or", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "Pt", "nameFace": "路径 Pt", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "Pt_Fr", "nameFace": "路径形状 Pt.Fr", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "Fr", "nameFace": "形状 Fr", "ctrls": ["多个不连续原文片段"], "required": true}
+                  {"name": "Pl", "nameFace": "处所 P.Pl", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "Be", "nameFace": "起点 P.Be", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "Ed", "nameFace": "终点 P.Ed", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "Dr", "nameFace": "方向 P.Dr", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "Or", "nameFace": "朝向 P.Or", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "Pt", "nameFace": "路径 P.Pt", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "Pt_Fr", "nameFace": "路径形状 P.Pt.Fr", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "Fr", "nameFace": "形状 P.Fr", "ctrls": ["MB_SPANS"], "required": true}
                 ]
               },
 
               {
                 "name": "propSet_Ds",
                 "nameFace": "距离空间信息(Ds)",
-                "--icon-bi": "chat-left-quote",
+                "icon-bi": "distribute-horizontal",
                 "slots": [
-                  {"name": "Ds_S1", "nameFace": "参照物 S1", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "Ds_S2", "nameFace": "目标物 S2", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "T", "nameFace": "时间 T", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "E", "nameFace": "事件 E", "ctrls": ["多个不连续原文片段"], "required": true},
+                  {"name": "Ds_S1", "nameFace": "参照物 S1", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "Ds_S2", "nameFace": "目标物 S2", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "T", "nameFace": "时间文本 T", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "T_Rg", "nameFace": "时间类型 T.Rg", "ctrls": [{"type": "单个标签", "config": {"set": "时间限定符"}}], "required": true},
+                  {"name": "E", "nameFace": "事件 E", "ctrls": ["MB_SPANS"], "required": true},
 
-                  {"name": "Ds_Vl", "nameFace": "量值 Ds.Vl", "ctrls": ["多个不连续原文片段"], "required": true},
+                  {"name": "Ds_Vl", "nameFace": "量值 Ds.Vl", "ctrls": ["MB_SPANS"], "required": true},
                   {"name": "Ds_Dc", "nameFace": "描述 Ds.Dc", "ctrls": [{"type": "单个标签", "config": {"set": "距离限定符"}}], "required": true}
                 ]
               },
@@ -93,25 +94,25 @@
               {
                 "name": "propSet_E",
                 "nameFace": "事件信息(E)",
-                "--icon-bi": "chat-left-quote",
+                "icon-bi": "disc",
                 "slots": [
-                  {"name": "E", "nameFace": "事件谓词 E", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "arg0", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "arg1", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "arg2", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "arg3", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "argM", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "argS", "ctrls": ["多个不连续原文片段"], "required": true},
-                  {"name": "argT", "ctrls": ["多个不连续原文片段"], "required": true}
+                  {"name": "E", "nameFace": "事件谓词 E", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "arg0", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "arg1", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "arg2", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "arg3", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "argM", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "argS", "ctrls": ["MB_SPANS"], "required": true},
+                  {"name": "argT", "ctrls": ["MB_SPANS"], "required": true}
                 ]
               },
 
               {
                 "name": "propSet_S",
                 "nameFace": "空间实体(S)的跨小句共指关系",
-                "--icon-bi": "chat-left-quote",
+                "icon-bi": "box",
                 "slots": [
-                  {"name": "S", "nameFace": "实体 S", "ctrls": ["多个不连续原文片段"], "required": true}
+                  {"name": "S", "nameFace": "实体 S", "ctrls": ["MB_SPANS"], "required": true}
                 ]
               }
 
@@ -183,7 +184,7 @@
               ]},
 
               {"name": "多文本", "icon-bi": "chat-left-quote", "slots": [
-                {"name": "内容", "ctrls": ["多个不连续原文片段"], "required": true}
+                {"name": "内容", "ctrls": ["MB_SPANS"], "required": true}
               ]},
 
               {"__name": "空间实体", "icon-bi": "box", "slots": [

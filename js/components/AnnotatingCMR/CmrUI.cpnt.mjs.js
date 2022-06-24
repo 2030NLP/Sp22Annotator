@@ -51,7 +51,7 @@ const textDark = text => span({'class': "text-dark"}, text);
 
 const labelSpan = (children, attr) => {
   if (attr==null) {attr={};};
-  attr.class = [attr.class, "d-inline-flex border rounded px-1 py-0 flex-wrap gap-1 align-items-center justify-content-evenly"];
+  attr.class = ["d-inline-flex border rounded px-1 py-0 flex-wrap gap-1 align-items-center", attr.class];
   return div(attr, children);
 };
 
@@ -109,7 +109,7 @@ const 设计 = `
 const faceFn单个原文片段 = (boy) => {
   const text = boy?.value?.text ?? "";
   const idxes = boy?.value?.idxes ?? [];
-  return text.length ? [textNone("“"), opacity75(text), textNone("”")] : idxes.length ? opacity75(JSON.stringify(idxes)) : opacity75(textDanger("<???>"));
+  return text.length ? [textNone("“"), opacity75(text), textNone("”")] : idxes.length ? opacity75(JSON.stringify(idxes)) : opacity75(textDanger("<null>"));
 };
 const faceFn单个不连续原文片段 = (boy) => {
   const texts = boy?.value?.texts??[];
@@ -117,7 +117,7 @@ const faceFn单个不连续原文片段 = (boy) => {
   const sss = spansJoin(textSpans, muted("+"));
 
   const idxeses = boy?.value?.idxeses ?? [];
-  return texts.length ? span({}, [textNone("“"), sss, textNone("”")]) : idxeses.length ? opacity75(JSON.stringify(idxeses)) : opacity75(textDanger("<???>"));
+  return texts.length ? span({}, [textNone("“"), sss, textNone("”")]) : idxeses.length ? opacity75(JSON.stringify(idxeses)) : opacity75(textDanger("<null>"));
 };
 const faceFn单个不连续原文片段无引号 = (boy) => {
   const texts = boy?.value?.texts??[];
@@ -125,7 +125,7 @@ const faceFn单个不连续原文片段无引号 = (boy) => {
   const sss = spansJoin(textSpans, muted("+"));
 
   const idxeses = boy?.value?.idxeses ?? [];
-  return texts.length ? sss : idxeses.length ? opacity75(JSON.stringify(idxeses)) : opacity75(textDanger("<???>"));
+  return texts.length ? sss : idxeses.length ? opacity75(JSON.stringify(idxeses)) : opacity75(textDanger("<null>"));
 };
 
 const faceFn多个不连续原文片段 = (boy) => {
@@ -133,7 +133,7 @@ const faceFn多个不连续原文片段 = (boy) => {
   const spans = boy?.value??[];
   const spanSpans = spans.map(it=>faceFn单个不连续原文片段无引号({value: it}));
   const sss = spansJoin(spanSpans, muted("^"));
-  return spans?.length ? sss : opacity75(textDanger("<???>"));
+  return spans?.length ? sss : opacity75(textDanger("<null>"));
 };
 
 const faceFn单个标签 = (boy) => {
@@ -171,6 +171,7 @@ const ctrlTypeFaceFnMap = {
   '不连续原文片段': (boy)=>faceFn单个不连续原文片段(boy),
   '单个不连续原文片段': (boy)=>faceFn单个不连续原文片段(boy),
   '多个不连续原文片段': (boy)=>faceFn多个不连续原文片段(boy),
+  'MB_SPANS': (boy)=>faceFn多个不连续原文片段(boy),
   '单个标签': (boy)=>faceFn单个标签(boy),
   '单个对象': (boy, reactiveCMR)=>faceFn单个对象(boy?.value, reactiveCMR),
   '多个原文片段': (boy)=>text(JSON.stringify(boy)),
@@ -326,10 +327,12 @@ const defaultObjectFace = (object, reactiveCMR) => {
   const slots = reactiveCMR?.typeDict?.[object?.type]?.slots??[];
   for (let slot of slots) {
     if (slot.name in object && object?.[slot.name].value!=null) {
-      frags.push(labelSpan([muted(slot.name), dataFace(object[slot.name], reactiveCMR)]));
+      frags.push(labelSpan([muted(slot.name), dataFace(object[slot.name], reactiveCMR)], {
+        'class': "border-0",
+      }));
     };
   };
-  return text(frags);
+  return labelSpan(frags, {'class': "gap-2 border-0"});
 };
 
 const objectFace = (object, reactiveCMR) => {
@@ -413,6 +416,7 @@ const ctrlComponent = (ctrl) => {
     '不连续原文片段': EditorSingleBrokenSpan,
     '单个不连续原文片段': EditorSingleBrokenSpan,
     '多个不连续原文片段': EditorMultiBrokenSpan,
+    'MB_SPANS': EditorMultiBrokenSpan,
     '单个标签': EditorSingleLabelSelector,
     '单个对象': EditorSingleObjectSelector,
     '多个原文片段': EditorDefault,
@@ -1002,7 +1006,7 @@ const EditorMultiBrokenSpan = {
                   localData?.['spans']?.['value'].splice(spanIdx, 1);
                 },
               }, [muted(bi("x-circle"))],)
-            ], {'key': `${spanIdx}-${span?.texts?.[0]}`}))
+            ], {'key': `${spanIdx}-${span?.texts?.[0]}`, 'class': "justify-content-evenly"}))
             : !selection?.array?.length ? textDanger("【请在文中选取】") : null,
           btn({
             'class': [
@@ -1148,6 +1152,8 @@ const PropertyItem = {
     const onPaste = () => {
       ctx.emit("paste", clipboard);
       console.log(["paste", clipboard]);
+      if (newDataWrap['data']?.type!=clipboard['data']?.type) {return;};
+      onConfirm(clipboard['data']);
     };
 
 
@@ -1501,6 +1507,9 @@ const ObjectPanelList = {
       ctx.emit("clear-selector");
     };
 
+    const clipboard = reactive({data: {}});
+    provide('clipboard', clipboard);
+
     const shouldShow = computed(()=>{
       return props?.['objectWraps']?.filter?.(it=>it?.show)?.length;
     });
@@ -1532,6 +1541,11 @@ const ObjectPanelList = {
         },
         'onClearSelector': ()=>{
           onClearSelector();
+        },
+        'onCopyProperty': (data)=>{
+          if (data==null) {return;};
+          clipboard.data = data;
+          //
         },
       }) : null),
     ]);
@@ -2007,6 +2021,7 @@ export default {
         show(objWrap['_id']);
       },
       'onAddObject': (typeName)=>{
+        if (!typeName?.length) {return;};
         const newObject = reactiveCMR.makeNewObjectWithType(typeName);
         自动填入(newObject);
         show(newObject._id);
@@ -2049,7 +2064,7 @@ export default {
       所有对象面板(),
       单个对象面板列表(),
       最终按钮区(),
-      结果预览面板(),
+      // 结果预览面板(),
       重置确认框(),
       清空确认框(),
 
