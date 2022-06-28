@@ -23,7 +23,7 @@ export default {
   setup(props, ctx) {
 
     const 主体 = () => div({'class': ""}, [
-      "参考内容",
+      // "参考内容",
     ])
 
     return () => div({'class': "--border --p-2 my-1 vstack gap-2"}, [
