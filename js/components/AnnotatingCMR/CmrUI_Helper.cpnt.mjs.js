@@ -53,7 +53,9 @@ export default {
       console.log(blocks);
     };
 
-    const 主体 = () => div({'class': ""}, [
+    const 主体 = () => div({
+      'class': [{'d-none': !props['spes']?.length}],
+    }, [
       h("p", {'class': "mt-2 text-muted"}, "来自 task2 的 S-P-E 标注参考："),
       (props['spes']??[]).map((it, idx)=>div({
         'class': "my-2 hstack gap-4 align-items-center",
