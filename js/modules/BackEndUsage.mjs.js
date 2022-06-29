@@ -174,6 +174,8 @@ class BackEndUsage {
           anno_id: thing?.anno?.id,
         };
 
+        content._spes = await this.getSPE(thing?.entry?.originId);
+
         this.ewp.example = {};
         this.ewp.example = foolCopy(content);
 
