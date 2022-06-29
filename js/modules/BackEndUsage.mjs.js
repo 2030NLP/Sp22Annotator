@@ -236,6 +236,19 @@ class BackEndUsage {
     await this.goIdx(0);
   }
 
+  async getSPE(originId) {
+    try {
+      // console.log(this);
+      let resp = await this.backEnd.getSPE(originId);
+      if (errorHappened(resp?.data?.err)) {
+        return [];
+      };
+      return resp?.data?.data?.SPEs;
+    } catch (error) {
+      return [];
+    };
+  }
+
   async connect() {
     // this.pushAlert("connect 开始", 'secondary');
     // console.log(this);
