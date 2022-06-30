@@ -16,7 +16,7 @@ Array.prototype.last = function() {return this[this.length-1]};
 // 🔯🔯🔯🔯🔯🔯
 // 整个组件
 export default {
-  props: ['spes', 'tokens'],
+  props: ['spes', 'tokens', 'tokenSelector'],
   emits: ['save', 'reset'],
   component: {
   },
@@ -49,8 +49,31 @@ export default {
       return idxesToBlocks(idxeses).map(block=>idxesToText(block)).join("+");
     };
 
-    const onCopy = (blocks) => {
-      console.log(blocks);
+    const onHappy = (data) => {
+      // console.log(data);
+
+      if (props['tokenSelector']!=null) {
+        let dog = props['tokenSelector'];
+        // console.log(dog);
+        dog?.onMouseDown?.(props?.['tokens']?.[data?.[0]], {buttons: 1}, props?.['tokens']);
+        dog?.onMouseUp?.(props?.['tokens']?.[data?.[0]], props?.['tokens']);
+        dog?.onMouseDown?.(props?.['tokens']?.[data?.[data?.length-1]], {buttons: 1}, props?.['tokens']);
+        dog?.onMouseUp?.(props?.['tokens']?.[data?.[data?.length-1]], props?.['tokens']);
+      };
+
+      ctx.emit("copy-span", data);
+    };
+
+    const 孩子 = (东西, 名字) => {
+      const 结果 = 东西 ? span({}, [
+        span({'class': "text-muted me-1 align-middle"}, 名字),
+        idxesToBlocks(东西).map(idxes => btn({
+          'class': "py-0 px-1 mx-1",
+          onClick: ()=>{onHappy(idxes);},
+          'title': `${JSON.stringify(idxes)}`,
+        }, idxesToText(idxes), "light")),
+      ]) : null;
+      return 结果;
     };
 
     const 主体 = () => div({
@@ -62,30 +85,9 @@ export default {
         'key': idx,
       }, [
         // JSON.stringify(it),
-        it?.SPE?.S ? span({}, [
-          span({'class': "text-muted me-1 align-middle"}, "S"),
-          btn({
-            'class': "py-0 px-1 mx-1",
-            onClick: ()=>{onCopy(idxesToBlocks(it?.SPE?.S));},
-            'title': `${JSON.stringify(idxesToBlocks(it?.SPE?.S))}`,
-          }, idxesesToText(it?.SPE?.S), "light"),
-        ]) : null,
-        it?.SPE?.P ? span({}, [
-          span({'class': "text-muted me-1 align-middle"}, "P"),
-          btn({
-            'class': "py-0 px-1 mx-1",
-            onClick: ()=>{onCopy(idxesToBlocks(it?.SPE?.P));},
-            'title': `${JSON.stringify(idxesToBlocks(it?.SPE?.P))}`,
-          }, idxesesToText(it?.SPE?.P), "light"),
-        ]) : null,
-        it?.SPE?.E ? span({}, [
-          span({'class': "text-muted me-1 align-middle"}, "E"),
-          btn({
-            'class': "py-0 px-1 mx-1",
-            onClick: ()=>{onCopy(idxesToBlocks(it?.SPE?.E));},
-            'title': `${JSON.stringify(idxesToBlocks(it?.SPE?.E))}`,
-          }, idxesesToText(it?.SPE?.E), "light"),
-        ]) : null,
+        孩子(it?.SPE?.S, "S"),
+        孩子(it?.SPE?.P, "P"),
+        孩子(it?.SPE?.E, "E"),
       ])),
       h("p", {'class': "mt-2 text-muted small"}, "以上信息仅供参考"),
     ])
