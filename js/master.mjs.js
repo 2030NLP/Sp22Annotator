@@ -1170,7 +1170,15 @@ const RootComponent = {
 
 
 
-
+    const 输出所有人的工作量信息 = async () => {
+      let big_list = [];
+      for (let user of spDB.users) {
+        console.log([user.id, user.name]);
+        let list = (await getWorkloadOfAllOf(user.id))??[];
+        big_list = [...big_list, ...list];
+      };
+      return big_list;
+    };
 
 
 
@@ -1294,6 +1302,7 @@ const RootComponent = {
       getWorkloadOfAllOf,
       getWorkloadOf,
       getWorkloadOfReviewerOf,
+      输出所有人的工作量信息,
       //
     };
   },
