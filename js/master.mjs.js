@@ -1071,7 +1071,7 @@ const RootComponent = {
             anno?.content?.review?.accept===false ? "否决" :
             anno?.content?.review==null ? "未审核" : "奇怪";
           apple.审核后修改情况 =
-            anno?.content?.review?.checked===true ? "有修改" : "未修改或未记录";
+            anno?.content?.review?.checked===true ? "有修改" : "未修改";
             // anno?.content?.review?.checked===false ? "未修改" :
             // anno?.content?.review==null ? "未审核" : "不知是否修改";
           apples.push(apple);
@@ -1080,7 +1080,7 @@ const RootComponent = {
         let dict = {};
 
         for (let apple of apples) {
-          let clue = `${apple.审核次数文本}${apple.审核情况}${apple.审核后修改情况}`;
+          let clue = `${apple.审核次数文本}|${apple.审核情况}|${apple.审核后修改情况}`;
           if (dict["总体情况"]==null) {dict["总体情况"]={detail: {}}};
           dict.总体情况.detail[clue] = (dict.总体情况.detail[clue]??0)+1;
           dict.总体情况["level"] = 0;
