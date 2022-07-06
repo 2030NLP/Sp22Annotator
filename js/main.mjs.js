@@ -158,6 +158,8 @@ const RootComponent = {
         targetIdx: 0,
         showOrigin: false,
         //
+        developing: DEVELOPING,
+        //
       },
       play: {
         playMode: false,
