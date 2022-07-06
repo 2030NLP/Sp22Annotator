@@ -1012,7 +1012,7 @@ const RootComponent = {
 
 
 
-    const getWorkloadOfAllof = async (userId) => {
+    const getWorkloadOfAllOf = async (userId) => {
       let 审核包 = (await getWorkloadOfReviewerOf(userId)) ?? {list:[], name:""};
       let 审核情况 = 审核包.list;
       let name = 审核包.name
@@ -1291,7 +1291,7 @@ const RootComponent = {
       userAnnos,
       sortUserAnnos,
       //
-      getWorkloadOfAllof,
+      getWorkloadOfAllOf,
       getWorkloadOf,
       getWorkloadOfReviewerOf,
       //
