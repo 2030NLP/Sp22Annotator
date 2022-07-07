@@ -1040,7 +1040,7 @@ const RootComponent = {
           return null;
         };
 
-        // console.log(resp?.data?.data);
+        console.log(resp?.data?.data);
 
         const 求标签不连续出现次数 = (labels, label) => {
           let num = 0;
@@ -1117,7 +1117,7 @@ const RootComponent = {
           return null;
         };
 
-        // console.log(resp?.data?.data);
+        console.log(resp?.data?.data);
         let data = resp?.data?.data;
 
         let reviewed_annos = data.reviewed_annos;
