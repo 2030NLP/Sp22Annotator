@@ -110,7 +110,7 @@
 
               {
                 "name": "propSet_E",
-                "addDisabled": true,
+                "__addDisabled": true,
                 "nameFace": "事件角色信息标注",
                 "icon-bi": "film",
                 "slots": [
