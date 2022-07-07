@@ -110,6 +110,7 @@ export default {
     onMounted(()=>{
       init();
       localData.annotated_idxes = v(allIdxes);
+      onSortObjectsByType();
     });
     watch(()=>props?.annotation, ()=>{
       init();
