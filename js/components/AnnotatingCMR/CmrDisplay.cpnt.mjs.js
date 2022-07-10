@@ -231,11 +231,15 @@ export default {
       },
     };
     onMounted(()=>{
-      // console.log("执行 onMounted init");
       _life_methods.init();
     });
     watch(()=>props?.annotation, ()=>{
-      // console.log("执行 watch props?.annotation init");
+      _life_methods.init();
+    });
+    watch(()=>props?.tokens, ()=>{
+      _life_methods.init();
+    });
+    watch(()=>props?.definition, ()=>{
       _life_methods.init();
     });
     // 通用 生命周期 结束
