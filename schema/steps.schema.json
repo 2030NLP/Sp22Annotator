@@ -186,7 +186,7 @@
               },
 
               {
-                "__name": "special_Situation",
+                "name": "special_Situation",
                 "nameFace": "特殊情况标注",
                 "icon-bi": "exclamation-circle",
                 "slots": [
