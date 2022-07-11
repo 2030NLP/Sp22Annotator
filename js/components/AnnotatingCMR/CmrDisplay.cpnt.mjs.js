@@ -264,6 +264,7 @@ export default {
       'Pt',
       'Ds_Vl',
       'E',
+      'argS', 'argT', 'argM',
     ];
     const _checker_data = reactive({
       '错误清单': [],
@@ -278,7 +279,7 @@ export default {
           };
         };
         if (漏掉的idxes.length) {
-          const those = 漏掉的idxes.map(idx=>_methods.idxesToText([idx])).join(" ");
+          const those = 漏掉的idxes.map(idx=>`${_methods.idxesToText([idx])}(${idx})`).join(" ");
           const it = {
             'style': "info",
             'text': `存在未标注的高亮片段：${those}`,
@@ -303,7 +304,16 @@ export default {
           const 结果 = list.find(it => ["着", "了", "过"].includes(it?.texts?.at?.(-1)?.at?.(-1)));
           if (结果) {
             _checker_methods.记录错误("warning",
-              `[${idx_txt}]: “${slot_face}”以“${结果?.texts?.at?.(-1)?.at?.(-1)}”结尾，可能有误`
+              `[${idx_txt}].${slot_face}: 以“${结果?.texts?.at?.(-1)?.at?.(-1)}”结尾，可能有误`
+            );
+          };
+        };
+        // 检查以的字结尾
+        if (list?.length && 要排除的字结尾的字段.includes(ky)) {
+          const 结果 = list.find(it => ["的"].includes(it?.texts?.at?.(-1)?.at?.(-1)));
+          if (结果) {
+            _checker_methods.记录错误("warning",
+              `[${idx_txt}].${slot_face}: 以“${结果?.texts?.at?.(-1)?.at?.(-1)}”结尾，可能有误`
             );
           };
         };
@@ -319,31 +329,34 @@ export default {
             const arg = obj[ky];
             const list = arg.value ?? [];
 
+            // 检查参照事件 附近字符
+            if (list?.length && ["T_Rf"].includes(ky)) {
+              const 那些尾部idxes = list.map(it=>it?.idxeses?.at?.(-1)?.at?.(-1));
+              const 要检查的idxes = 那些尾部idxes.map(idx => [idx+1, idx+2]).flat();
+              const 要检查的文本 = 要检查的idxes.map(idx => _methods.idxesToText([idx])??"");
+              const 结果 = 要检查的文本.find(it=>(it?.search?.(/前|后|时/)??-1)>=0);
+              if (结果) {
+                _checker_methods.记录错误("warning",
+                  `[${idx_txt}].${slot_face}: 后方有“${结果}”，可能是原文时间`
+                );
+              };
+            };
             // 检查事件特例
             if (list?.length && ["E"].includes(ky)) {
               const 结果 = list.find(it => it?.texts?.find?.(text=>(text?.search?.(/直行|转弯/)??-1)>=0));
               if (结果) {
                 _checker_methods.记录错误("warning",
-                  `[${idx_txt}]: “${slot_face}”包含排除词，可能有误`
+                  `[${idx_txt}].${slot_face}: 包含排除词，可能有误`
                 );
               };
             };
-            // 检查的字结尾
-            if (list?.length && 要排除的字结尾的字段.includes(ky)) {
-              const 结果 = list.find(it => ["的"].includes(it?.texts?.at?.(-1)?.at?.(-1)));
-              if (结果) {
-                _checker_methods.记录错误("warning",
-                  `[${idx_txt}]: “${slot_face}”以“${结果?.texts?.at?.(-1)?.at?.(-1)}”结尾，可能有误`
-                );
-              };
-            };
-            // 检查首位介词
+            // 检查首位是字典中的介词
             if (ky in 首词报警介词字典 && list?.length) {
               const 检查列表 = 首词报警介词字典[ky].split("、");
               const 结果 = list.find(it => 检查列表.includes(it?.texts?.[0]?.[0]));
               if (结果) {
                 _checker_methods.记录错误("warning",
-                  `[${idx_txt}]: “${slot_face}”以“${结果?.texts?.[0]?.[0]}”开头，可能有误`
+                  `[${idx_txt}].${slot_face}: 以“${结果?.texts?.[0]?.[0]}”开头，可能有误`
                 );
               };
             };
@@ -358,7 +371,20 @@ export default {
           const slot_face = slot.nameFace??slot.name??"无名字段";
           if (ky in obj && obj?.[ky]?.value!=null && ["MB_SPANS"].includes(obj?.[ky]?.type)) {
             _checker_methods.检查任意字段(obj, slot, ky);
+            const arg = obj[ky];
+            const list = arg.value ?? [];
+            if (ky!="argS" && list.length > 1) {
+              _checker_methods.记录错误("warning",
+                `[${idx_txt}].${slot_face}: 含有并置成分`
+              );
+            };
           };
+        };
+        // 检查 arg0, arg1, arg2 同时为空
+        if (!obj?.['arg0']?.value?.length && !obj?.['arg1']?.value?.length && !obj?.['arg2']?.value?.length) {
+          _checker_methods.记录错误("danger",
+            `[${idx_txt}]: arg0, arg1, arg2 同时为空`
+          );
         };
       },
       检查单条错误_同指: (obj) => {
@@ -369,6 +395,18 @@ export default {
           const slot_face = slot.nameFace??slot.name??"无名字段";
           if (ky in obj && obj?.[ky]?.value!=null && ["MB_SPANS"].includes(obj?.[ky]?.type)) {
             _checker_methods.检查任意字段(obj, slot, ky);
+          };
+          const arg = obj[ky];
+          const list = arg?.value ?? [];
+
+          // 检查同指为不连续文本的情形
+          if (list?.length && ["R"].includes(ky)) {
+            const 结果 = list.find(it => (it?.texts?.length??0) > 1);
+            if (结果) {
+              _checker_methods.记录错误("pink",
+                `[${idx_txt}]: “${结果?.texts?.join?.(" ")}”为不连续文本`
+              );
+            };
           };
         };
       },
