@@ -423,6 +423,14 @@ export default {
       'Shp',
       'Pt',
     ];
+    const 要选取文本片段的空间信息字段 = [
+      'Pl', 'Be', 'Ed', 'Dr', 'Or',
+      'PPl', 'Pa',
+      'Shp',
+      'Pt',
+      'Ds_Vl',
+    ];
+    const 小句分隔符正则 = /[，。；：！？…,\.;:!\?]/;
     const _checker_data = reactive({
       '错误清单': [],
     });
@@ -613,13 +621,18 @@ export default {
         };
 
         // 逐个字段检查
+        let 可用的空间信息字段 = [];
         const slots = reactiveCMR?.typeDict?.[obj?.type]?.slots??[];
         for (let slot of slots) {
           const ky = slot.name;
           const slot_face = slot.nameFace??slot.name??"无名字段";
 
           if (ky in obj && obj?.[ky]?.value!=null && ["MB_SPANS"].includes(obj?.[ky]?.type)) {
+
+            if (要选取文本片段的空间信息字段.includes(ky)) {可用的空间信息字段.push(ky);};
+
             _checker_methods.检查任意字段(obj, slot, ky);
+
             const arg = obj[ky];
             const list = arg.value ?? [];
 
@@ -696,6 +709,52 @@ export default {
                 );
               };
             };
+          };
+        };
+
+        // 检查 严重跨标点句
+        // S的开头id 和 P的结尾id之间包含逗号或句号 +
+        // P的开头id 和 E的结尾id之间包含逗号或句号 +
+        // S的开头id 和 E的结尾id之间包含逗号或句号
+        if (
+          obj?.["S"]?.value?.length &&
+          obj?.["E"]?.value?.length &&
+          可用的空间信息字段.length>0
+        ) {
+          const s_idxes = (obj?.["S"]?.value??[]).map( it=>(it.idxeses??[]) ).flat(Infinity);
+          const s_max = Math.max(...s_idxes);
+          const s_min = Math.min(...s_idxes);
+
+          const e_idxes = (obj?.["E"]?.value??[]).map( it=>(it.idxeses??[]) ).flat(Infinity);
+          const e_max = Math.max(...e_idxes);
+          const e_min = Math.min(...e_idxes);
+
+          const p_idxes = 可用的空间信息字段.map(
+            ky => (
+              (obj?.[ky]?.value??[]).map( it=>(it.idxeses??[]) )
+            )
+          ).flat(Infinity);
+          const p_max = Math.max(...p_idxes);
+          const p_min = Math.min(...p_idxes);
+
+          const fn = (aa_max, aa_min, bb_max, bb_min) => {
+            const max = Math.max(aa_max, bb_max);
+            const min = Math.min(aa_min, bb_min);
+            // 下一行的做法不是很精确，把两端的字符也加进来了，
+            // 但是因为这两端字符也不应该是标点符号，所以这种不精确的方法也就够用了。
+            const text = _methods.获取两个idx之间的文本(min, max);
+            // console.log(text);
+
+            return text.search(小句分隔符正则)>=0;
+          };
+
+          const test_S_P = fn(s_max, s_min, p_max, p_min);
+          const test_S_E = fn(s_max, s_min, e_max, e_min);
+          const test_P_E = fn(e_max, e_min, p_max, p_min);
+          if (test_S_P&&test_S_E&&test_P_E) {
+            _checker_methods.记录错误("warning",
+              `[${idx_txt}]: SPE三者之间都有断句标点 严重跨标点句`
+            );
           };
         };
       },
