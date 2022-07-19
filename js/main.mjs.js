@@ -167,6 +167,16 @@ const RootComponent = {
         playTask: "t2",
         playTitle: "task2",
       },
+      inspecting: {
+        inspectingMode: false,
+        inspectingToken: "",
+        inspectingTask: "t3",
+        inspectingTitle: "task3",
+        inspectingUser: {
+          name: "",
+          id: "",
+        },
+      },
       newThings: {
         theUser: {},
         begun: false,
@@ -236,6 +246,35 @@ const RootComponent = {
         bEU.begin();
         appData.newThings.begun=true;
       };
+    };
+
+    const getUserToken = (user_id) => {
+      return "062ebcce-953c-4cab-afd6-c465a9231790";
+    };
+
+    const startInspector = (student_id, task_key) => {
+      const userToken = getUserToken(student_id) ?? "";
+      const titleMap = {
+        't1': "task1",
+        't2': "task2",
+        't2r': "task2",
+        't3': "task3",
+      };
+      appData.inspecting = {
+        inspectingMode: true,
+        inspectingToken: userToken,
+        inspectingTask: task_key,
+        inspectingTitle: titleMap[task_key]??"task3",
+        inspectingUser: {
+          name: appData?.newThings?.theUser?.name,
+          id: appData?.newThings?.theUser?.id,
+        },
+      };
+      bEU.inspectingMode = true;
+      theBackEnd.inspectingMode = true;
+      theBackEnd.token = appData.inspecting.inspectingToken;
+      bEU.begin();
+      appData.newThings.begun=true;
     };
 
     // 启动时 加载缓存的 应用信息 及 用户信息
@@ -507,6 +546,7 @@ const RootComponent = {
       reactive,
       //
       startPlay,
+      startInspector,
       //
     };
   },
