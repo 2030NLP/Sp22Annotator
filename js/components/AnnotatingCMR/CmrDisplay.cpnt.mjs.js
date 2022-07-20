@@ -150,7 +150,7 @@ export default {
         const list = ["快速", "迅速", "急速", "缓慢", "慢速", "低速", "快快", "慢慢", "缓缓", "到处", "处处", "四处", "随处", "一起", "一齐", "单独", "独自", "健步", "缓步", "大步", "小步", "单向", "双向", "当场", "就近", "当面", "正面", "中途", "顺路", "向", "到", "往", "自", "朝", "在", "距", "经", "从", "由", "沿", "沿着", "朝着", "向着", "对着", "顺着", "通过"];
         if (token.在临时词表中) {return true;};
         let word = token?.to?.word ?? token?.whole ?? token?.word;
-        if (word.length==1 && token.seg) {
+        if (word?.length==1 && token.seg) {
           return list.includes(word) && token.seg=="S";
         };
         return list.includes(word);
@@ -524,7 +524,7 @@ export default {
           结果 = wordses.find(wordL => {
             if (wordL.length>1) {return false;};
             const word = wordL[0];
-            return word.pos=="p" || 介词清单.split("、").includes(word.text);
+            return word?.pos=="p" || 介词清单.split("、").includes(word?.text);
           });
           if (结果) {
             _checker_methods.记录错误("warning",
@@ -970,7 +970,7 @@ export default {
             if (words.length==1 && ["v", "dv", "d", "p"].includes(words[0]?.pos)) {
               const word = words[0];
               _checker_methods.记录错误("warning",
-                `[${idx_txt}].${slot_face}: 含词性为 ${word.pos} 的词“${word.text}”`
+                `[${idx_txt}].${slot_face}: 含词性为 ${word?.pos} 的词“${word?.text}”`
               );
             };
 
