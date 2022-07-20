@@ -471,6 +471,9 @@ const RootComponent = {
 
 
     const isChecker = () => (appData?.newThings?.theUser?.role??[]).includes('checker')
+    ||(appData?.newThings?.theUser?.role??[]).includes('inspector')
+    ||(appData?.newThings?.theUser?.role??[]).includes('super-inspector')
+    ||(appData?.newThings?.theUser?.role??[]).includes('superInspector')
     ||(appData?.newThings?.theUser?.role??[]).includes('manager')
     ||(appData?.newThings?.theUser?.role??[]).includes('admin');
 

@@ -166,6 +166,7 @@ const AnnoCard = {
           showIndex: true,
           showTitleDetail: true,
           showTips: true,
+          showHistory: true,
           limitHeight: true,
           wrap: true,
           canClose: false,

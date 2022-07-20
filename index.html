@@ -65,6 +65,7 @@
               <a class="nav-link" v-if="!play.playMode" _href="#" @click="()=>{}"><small>{{tag}}</small></a>
             </template>
             <!-- <a class="nav-link" v-show="play.playMode">{{play?.playTitle}}</a> -->
+            <a class="nav-link" v-show="isChecker()" @click="()=>{ctrl.currentPage='chooseStudent';}">审核</a>
             <a class="nav-link" href="./menu" target="_blank" v-show="!play.playMode">文档</a>
             <a class="nav-link" href="./menu" target="_blank" v-show="play.playMode">标注文档</a>
             <a class="nav-link" href="https://2030nlp.github.io/SpaCE2022/" target="_blank" v-show="play.playMode">评测网站</a>
@@ -201,6 +202,18 @@
               @click="()=>{bEU.updateTarget()}"
               title="所有任务完成后，可为自己设置新的标注目标，增加总任务量"
             >更新目标</button> -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 选择要审核的学生 chooseStudent -->
+    <div class="container page my-4" id="page-chooseStudent" v-show="ctrl.currentPage=='chooseStudent'">
+      <div class="container py-2">
+        <div class="row align-items-center">
+          <div class="col col-12 my-2">
+            <p>请选择要审核的标注员</p>
           </div>
         </div>
       </div>

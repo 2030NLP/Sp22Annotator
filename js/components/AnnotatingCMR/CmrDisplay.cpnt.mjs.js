@@ -83,7 +83,7 @@ const average = list => list.length ? (list.reduce(((aa, bb)=>aa+bb), 0) / list.
 
 
 export default {
-  props: ['annotation', 'tokens', 'definition', 'showTips', 'limitHeight'],
+  props: ['annotation', 'tokens', 'definition', 'showTips', 'showHistory', 'limitHeight'],
   emits: [],
   component: {},
   setup(props, ctx) {
@@ -1099,6 +1099,60 @@ export default {
       }, [it.text])));
     });
 
+    // render
+    const 修改记录区 = (() => {
+      // console.log("更新 错误提示区");
+      const history = props?.annotation?.data?.history??[];
+      console.log(history);
+
+      const 修改清单 = history.map(it=>{
+        const 修改量文本 = Object.entries(it.ops??{}).filter(ix=>ix[1].length).map(ix=>`${ix[0]}${ix[1].length}`).join(" ");
+        const 修改者文本 = `${it?.user?.id!=null ? ("#" + it?.user?.id + " ") : ""}${it?.user?.name??"<无名氏>"}`;
+        const 修改类型文本 = it?.user?.opRole ?? "编辑";
+        return {
+          修改者文本,
+          修改类型文本,
+          修改量文本,
+          detail: JSON.stringify(it.ops),
+          time: (new Date(it.time)).toLocaleString()};
+      }).filter(it=>it.修改量文本?.length).map(it=>span({
+        'class': [
+          "py-0 px-1 --my-1",
+          "border rounded",
+          "bg-opacity-25",
+          `bg-light border-light`,
+          "text-muted",
+          "small",
+        ],
+        'title': [it.detail, it.time, it.修改类型文本],
+      }, [[it.修改者文本, it.修改量文本].join(" ")]));
+
+      return div({
+        'class': [
+          "--border rounded --my-1 py-0 --px-2",
+          {"d-none": !修改清单?.length},
+        ],
+      }, [
+        div({
+          'class': [
+            "d-inline-flex gap-1",
+            "my-1 me-2",
+            "text-muted",
+            "fw-bold",
+            "small",
+          ],
+        }, "修改记录："),
+        修改清单.map((it, idx)=>div({
+          'key': idx,
+          'class': [
+            "d-inline-flex gap-1",
+            // "d-flex gap-1",
+            "my-1 me-2",
+          ],
+        }, [it]))
+      ]);
+    });
+
 
     // render
     const 完成状态文本 = (()=>{
@@ -1255,6 +1309,9 @@ export default {
         ]),
         props?.showTips ? div({'class': ["my-1"]}, [
           错误提示区(),
+        ]) : null,
+        props?.showHistory ? div({'class': ["my-1"]}, [
+          修改记录区(),
         ]) : null,
       ]);
       // console.log("渲染函数 即将 return");

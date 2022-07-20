@@ -214,6 +214,17 @@ class BackEndUsage {
     };
   }
 
+  async beginInspection() {
+    try {
+      await this.connect();
+      await this.updateSchema();
+    } catch (error) {
+      this.pushAlert(`发生错误，请联系管理员处理（${error}）`, "danger", 60000*60*24, error);
+      return;
+    };
+    this.data.ctrl.currentPage = 'chooseStudent';
+  }
+
   async begin() {
     try {
       await this.connect();
