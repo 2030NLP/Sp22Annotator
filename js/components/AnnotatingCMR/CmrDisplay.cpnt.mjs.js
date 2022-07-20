@@ -1103,16 +1103,17 @@ export default {
     const 修改记录区 = (() => {
       // console.log("更新 错误提示区");
       const history = props?.annotation?.data?.history??[];
-      console.log(history);
+      // console.log(history);
 
       const 修改清单 = history.map(it=>{
         const 修改量文本 = Object.entries(it.ops??{}).filter(ix=>ix[1].length).map(ix=>`${ix[0]}${ix[1].length}`).join(" ");
-        const 修改者文本 = `${it?.user?.id!=null ? ("#" + it?.user?.id + " ") : ""}${it?.user?.name??"<无名氏>"}`;
+        const 修改者文本 = `${it?.user?.name??"<无名氏>"}`;
         const 修改类型文本 = it?.user?.opRole ?? "编辑";
         return {
           修改者文本,
           修改类型文本,
           修改量文本,
+          uid: it?.user?.id,
           detail: JSON.stringify(it.ops),
           time: (new Date(it.time)).toLocaleString()};
       }).filter(it=>it.修改量文本?.length).map(it=>span({
@@ -1124,7 +1125,7 @@ export default {
           "text-muted",
           "small",
         ],
-        'title': [it.detail, it.time, it.修改类型文本],
+        'title': [it.uid, it.time, it.修改类型文本, it.detail],
       }, [[it.修改者文本, it.修改量文本].join(" ")]));
 
       return div({
@@ -1300,6 +1301,9 @@ export default {
         props?.showTips ? div({'class': ["mb-2"]}, [
           完成状态文本(),
         ]) : null,
+        props?.showHistory ? div({'class': ["my-1"]}, [
+          修改记录区(),
+        ]) : null,
         div({'class': ["mb-2"]}, [
           文本区(),
         ]),
@@ -1309,9 +1313,6 @@ export default {
         ]),
         props?.showTips ? div({'class': ["my-1"]}, [
           错误提示区(),
-        ]) : null,
-        props?.showHistory ? div({'class': ["my-1"]}, [
-          修改记录区(),
         ]) : null,
       ]);
       // console.log("渲染函数 即将 return");

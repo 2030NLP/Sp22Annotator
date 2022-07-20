@@ -155,7 +155,7 @@ const RootComponent = {
         donePct: "10%",
         //
         currentIdx: 0,
-        targetIdx: 0,
+        targetIdx: 1,
         showOrigin: false,
         //
         developing: DEVELOPING,
@@ -176,6 +176,7 @@ const RootComponent = {
           name: "",
           id: "",
         },
+        allUsers: [],
       },
       newThings: {
         theUser: {},
@@ -248,26 +249,29 @@ const RootComponent = {
       };
     };
 
-    const getUserToken = (user_id) => {
-      return "062ebcce-953c-4cab-afd6-c465a9231790";
+    const prepareInspection = async () => {
+      appData.ctrl.currentPage='chooseStudent';
+      appData.inspecting.allUsers = await bEU.getAllUsersList();
     };
 
-    const startInspector = (student_id, task_key) => {
-      const userToken = getUserToken(student_id) ?? "";
+    const startInspector = (student) => {
+      const studentToken = student.token ?? "";
       const titleMap = {
         't1': "task1",
         't2': "task2",
         't2r': "task2",
         't3': "task3",
+        't4': "task3",
       };
       appData.inspecting = {
         inspectingMode: true,
-        inspectingToken: userToken,
-        inspectingTask: task_key,
-        inspectingTitle: titleMap[task_key]??"task3",
+        inspectingToken: studentToken,
+        inspectingTask: student?.currTask,
+        inspectingTitle: titleMap[student?.currTask],
         inspectingUser: {
           name: appData?.newThings?.theUser?.name,
           id: appData?.newThings?.theUser?.id,
+          opRole: "修订",
         },
       };
       bEU.inspectingMode = true;
@@ -276,6 +280,35 @@ const RootComponent = {
       bEU.begin();
       appData.newThings.begun=true;
     };
+
+
+
+
+    const saveReview = (reviewItem) => {
+      if (!appData.inspecting?.inspectingMode) {
+        alertBox_pushAlert(`当前不是审核模式，无法保存审核意见`, "danger");
+        return;
+      };
+      reviewItem.reviewer = appData.inspecting?.inspectingUser;
+
+      exampleWrap.example.review = reviewItem;
+
+      bEU.saveForReview();
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // 启动时 加载缓存的 应用信息 及 用户信息
     onMounted(() => {
@@ -294,7 +327,9 @@ const RootComponent = {
       appData.ctrl.currentWorkerTarget = stored?.target;
       appData.ctrl.currentWorkerTaskType = stored?.taskType;
       appData.ctrl.currentWorkerTaskCount = stored?.taskCount;
+
       if (appData.play.playMode) {return};
+      if (appData.inspecting.inspectingMode) {return};
       appData.newThings.lastEID = store.get(`${APP_NAME}:lastEID`);
       appData.newThings.theUser = store.get(`${APP_NAME}:theUser`);
     });
@@ -327,6 +362,12 @@ const RootComponent = {
     watch(()=>appData.play, () => {
       if (appData.play?.playMode) {
         theBackEnd.token = appData.play?.playToken;
+      };
+    });
+
+    watch(()=>appData.inspecting, () => {
+      if (appData.inspecting?.inspectingMode) {
+        theBackEnd.token = appData.inspecting?.inspectingToken;
       };
     });
 
@@ -550,6 +591,8 @@ const RootComponent = {
       //
       startPlay,
       startInspector,
+      prepareInspection,
+      saveReview,
       //
     };
   },
@@ -567,6 +610,9 @@ the_app.component('functional-area', FunctionalArea);
 
 import TheAnnotator from './components/TheAnnotator.cpnt.mjs.js';
 the_app.component('annotator', TheAnnotator);
+
+import AnnoReview from './components/AnnoReview.cpnt.mjs.js';
+the_app.component('anno-review', AnnoReview);
 
 import ResultsDisplay from './components/Annotator/ResultsDisplay.cpnt.mjs.js';
 the_app.component('results-display', ResultsDisplay);
