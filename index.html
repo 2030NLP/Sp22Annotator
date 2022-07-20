@@ -67,7 +67,7 @@
               <a class="nav-link" v-if="!play.playMode" _href="#" @click="()=>{}"><small>{{tag}}</small></a>
             </template>
             <!-- <a class="nav-link" v-show="play.playMode">{{play?.playTitle}}</a> -->
-            <a class="nav-link" v-show="isChecker()" @click="async()=>{await prepareInspection();}">审核与修订</a>
+            <a class="nav-link" v-show="isChecker()&&!inspecting.inspectingMode" @click="async()=>{await prepareInspection();}">审核与修订</a>
             <a class="nav-link" href="./menu" target="_blank" v-show="!play.playMode">文档</a>
             <a class="nav-link" href="./menu" target="_blank" v-show="play.playMode">标注文档</a>
             <a class="nav-link" href="https://2030nlp.github.io/SpaCE2022/" target="_blank" v-show="play.playMode">评测网站</a>
