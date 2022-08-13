@@ -397,7 +397,7 @@
               :show-index="false"
               :show-title-detail="false"
               :show-tips="play?.playMode?false:true"
-              :can-close="true"
+              :can-close="false"
               :wrap="true"
               @close="(annot)=>{win.console.log(annot);example.annotations.splice(annot._idx_to_delete,1);alertBox.pushAlert('别忘了保存', 'warning');}"
             ></results-display>
